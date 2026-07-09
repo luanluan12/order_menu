@@ -1,218 +1,135 @@
-import { Check, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 import QuantitySelector from "./QuantitySelector";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function FoodCard({
-
     food,
     type,
     disabled,
     quantity,
     checked,
     onQuantityChange,
-    onSelect
-
+    onSelect,
 }) {
-
     const selected =
-
         type === "main"
-
             ? quantity > 0
-
             : checked;
 
     const handleClick = () => {
-
         if (disabled) return;
-
         if (type === "main") return;
 
         onSelect(food);
-
     };
-
     return (
+    <div
+        onClick={type !== "main" ? handleClick : undefined}
+        className={`
+            relative
+            w-[170px]
+            rounded-[22px]
+            border-2
+            bg-white
+            overflow-hidden
+            transition-all
+            duration-300
+            cursor-pointer
 
-        <div
-
-            onClick={
-
-                type !== "main"
-
-                    ? handleClick
-
-                    : undefined
-
+            ${
+                selected
+                    ? "border-orange-500 shadow-lg"
+                    : "border-gray-200 hover:border-orange-300 hover:shadow-md"
             }
 
-            className={`
-                flex
-        items-center
-        justify-between
+            ${
+                disabled
+                    ? "opacity-50 pointer-events-none"
+                    : ""
+            }
+        `}
+    >
+        {/* Tick */}
 
-        w-full
-        max-w-[500px]
+        {selected && (
+            <div className="absolute top-2 right-2 z-20 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-orange-500 shadow-md">
+                <Check size={20} className="text-white" />
+            </div>
+        )}
 
-        rounded-3xl
-        border
-        bg-white
+        {/* Image */}
 
-        px-6
-        py-4
-
-        transition
-        duration-200
-
-                ${
-                    disabled
-
-                        ? "cursor-not-allowed opacity-50"
-
-                        : "hover:shadow-lg"
+        <div className="p-2 pb-0">
+            <img
+                src={
+                    food.image
+                        ? API_URL + food.image
+                        : "https://placehold.co/600"
                 }
+                alt={food.name}
+                className="
+                    h-[155px]
+                    w-full
+                    rounded-[18px]
+                    object-cover
+                "
+            />
+        </div>
 
-                ${
-                    selected && type !== "main"
+        {/* Body */}
 
-                        ? "border-violet-500 bg-violet-50"
+        <div className="px-3 pt-3 pb-4">
 
-                        : "border-gray-200"
-                }
-            `}
-        >
+            <h3 className="text-center text-[20px] font-medium text-gray-800 leading-6 min-h-[48px] flex items-center justify-center">
+                {food.name}
+            </h3>
 
-            {/* LEFT */}
+            <div className="mt-3">
 
-            <div className="flex items-center gap-4">
+                {type === "main" ? (
 
-                <img
+                    <QuantitySelector
+                        quantity={quantity}
+                        disabled={disabled}
+                        onChange={(value) =>
+                            onQuantityChange(food, value)
+                        }
+                    />
 
-                    src={
+                ) : (
 
-                        food.image
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleClick();
+                        }}
+                        className={`
+                            h-11
+                            w-full
+                            rounded-full
+                            font-semibold
+                            text-[17px]
+                            transition
 
-                            ? API_URL + food.image
+                            ${
+                                selected
+                                    ? "bg-orange-100 text-green-600"
+                                    : "border border-gray-300 bg-white text-gray-600 hover:bg-orange-100"
+                            }
+                        `}
+                    >
+                        {selected ? "✓ Đã chọn" : "Chọn món"}
+                    </button>
 
-                            : "https://placehold.co/120"
-
-                    }
-
-                    alt={food.name}
-
-                    className="
-                        h-16
-                        w-16
-                        rounded-full
-                        object-cover
-                        border
-                        border-gray-200
-                        shrink-0
-                    "
-
-                />
-
-                <div>
-
-                    <h3 className="text-lg font-semibold text-gray-900">
-
-                        {food.name}
-
-                    </h3>
-
-                </div>
+                )}
 
             </div>
 
-            {/* RIGHT */}
-
-            {
-
-                type === "main"
-
-                    ?
-
-                    (
-
-                        <QuantitySelector
-
-                            quantity={quantity}
-
-                            disabled={disabled}
-
-                            onChange={(value)=>
-
-                                onQuantityChange(
-
-                                    food,
-
-                                    value
-
-                                )
-
-                            }
-
-                        />
-
-                    )
-
-                    :
-
-                    (
-
-                        <button
-
-                            disabled={disabled}
-
-                            onClick={(e)=>{
-
-                                e.stopPropagation();
-
-                                handleClick();
-
-                            }}
-
-                            className={`
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-full
-                                transition
-
-                                ${
-                                    selected
-
-                                        ? "bg-violet-600 text-white"
-
-                                        : "border border-gray-300 bg-white hover:border-violet-500 hover:bg-violet-50"
-                                }
-                            `}
-
-                        >
-
-                            {
-
-                                selected
-
-                                    ? <Check size={18} />
-
-                                    : <Plus size={18} />
-
-                            }
-
-                        </button>
-
-                    )
-
-            }
-
         </div>
 
-    );
-
+    </div>
+);
 }
 
 export default FoodCard;

@@ -258,7 +258,7 @@ function DayMenuEditor({
 
             <SingleDishSection
 
-                title="🥤 Món nước"
+                title="Món nước"
 
                 dish={day.drink}
 
@@ -272,7 +272,7 @@ function DayMenuEditor({
 
             <SingleDishSection
 
-                title="🥣 Món súp"
+                title="Món súp"
 
                 dish={day.soup}
 

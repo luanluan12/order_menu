@@ -10,6 +10,8 @@ import {
 
 import { NavLink, useNavigate } from "react-router-dom";
 
+import logo from "../assets/logo.png";
+
 function Sidebar() {
 
     const navigate = useNavigate();
@@ -63,22 +65,15 @@ function Sidebar() {
 
 <aside className="flex h-screen w-[250px] flex-col border-r border-[#ECECF3] bg-white">
             {/* Logo */}
+            <div className="flex justify-center py-8">
 
-           <div className="flex justify-center pt-10 pb-8">
+    <img
+        src={logo}
+        alt="Logo"
+        className="h-30 w-auto object-contain"
+    />
 
-    <h1 className="text-[28px] font-bold tracking-tight">
-
-        Food
-
-        <span className="text-[#5B39F5]">
-
-            Admin
-
-        </span>
-
-    </h1>
-
-</div >
+</div>
 
             <nav className="mt-2 flex-1 px-2">
 
@@ -103,8 +98,8 @@ function Sidebar() {
 
             ${
                 isActive
-                    ? "bg-[#5B39F5] text-white shadow-md"
-                    : "text-[#9197B3] hover:bg-[#F8F7FF]"
+                    ? "bg-orange-500 text-white shadow-md"
+                    : "text-[#9197B3] hover:bg-orange-50"
             }`}
         >
 
@@ -159,7 +154,7 @@ function Sidebar() {
 
                 <div className="flex items-center gap-3">
 
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-lg font-bold text-violet-600">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-lg font-bold text-orange-600">
 
                         {user?.name?.charAt(0).toUpperCase() || "A"}
 

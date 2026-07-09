@@ -829,32 +829,6 @@ exports.publishMenu = async (req, res) => {
         for (const user of users) {
 
             try {
-
-                const token = createOrderToken(
-
-                    user._id,
-
-                    menu._id
-
-                );
-
-                // await sendMail({
-
-                //     to: user.email,
-
-                //     subject: `🍱 Thực đơn tuần ${menu.week}`,
-
-                //     html: orderMailTemplate(
-
-                //         user,
-
-                //         menu,
-
-                //         `${process.env.FRONTEND_URL}/home?token=${token}`
-
-                //     )
-
-                // });
                 await sendMail({
     to: user.email,
     subject: `🍱 Thực đơn tuần ${menu.week}`,

@@ -1,184 +1,114 @@
-import { CalendarDays, Check } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
-function DayTabs({
-
-    days,
-    currentDay,
-    onChange
-
-}) {
-
+function DayTabs({ days, currentDay, onChange }) {
     const getLabel = (date) => {
-
         const d = new Date(date);
 
         return {
+            weekday: d
+                .toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                })
+                .replace("Thứ ", "THỨ ")
+                .replace("thứ ", "THỨ ")
+                .toUpperCase(),
 
-            weekday: d.toLocaleDateString("vi-VN", {
-
-                weekday: "long"
-
-            }),
-
-            day: d.toLocaleDateString("vi-VN", {
-
-                day: "2-digit",
-                month: "2-digit"
-
-            })
-
+            day: `${d.getDate()}/${d.getMonth() + 1}`,
         };
-
     };
 
     return (
+        <div className="space-y-6">
 
-        <div className="flex flex-col gap-4">
+            <h2 className="font-bold text-slate-800">
+                Chọn ngày đặt món
+            </h2>
 
-            {
-
-                days.map((day, index) => {
-
+            <div className="flex flex-wrap gap-6">
+                {days.map((day, index) => {
                     const label = getLabel(day.date);
-
                     const active = currentDay === index;
 
                     return (
-
                         <button
-
                             key={index}
-
                             onClick={() => onChange(index)}
-
                             className={`
                                 relative
                                 flex
+                                h-[110px]
+                                w-[110px]
+                                flex-col
                                 items-center
-                                w-60
-                                h-24
-                                rounded-3xl
+                                justify-center
+                                rounded-[24px]
                                 border
-                                px-5
-                                text-left
                                 transition-all
-                                duration-200
-                                shadow-sm
+                                duration-300
 
                                 ${
                                     active
-                                        ? "border-violet-500 bg-violet-50 shadow-md"
-                                        : "border-gray-200 bg-white hover:border-violet-300 hover:shadow"
+                                        ? "border-orange-500 bg-orange-500 shadow-lg"
+                                        : "border-gray-200 bg-white shadow-sm hover:-translate-y-1 hover:border-orange-300 hover:shadow-md"
                                 }
                             `}
-
                         >
-
                             {/* Icon */}
 
                             <div
-
-                                className={`
-                                    flex
-                                    h-11
-                                    w-11
-                                    items-center
-                                    justify-center
-                                    rounded-2xl
-                                    mr-4
-
-                                    ${
-                                        active
-                                            ? "bg-violet-100 text-violet-600"
-                                            : "bg-gray-100 text-gray-500"
-                                    }
-                                `}
-
-                            >
-
-                                <CalendarDays size={20} />
-
-                            </div>
-
-                            {/* Text */}
-
-                            <div>
-
-                                <div
-
-                                    className={`
-                                        text-lg
-                                        font-bold
-                                        capitalize
-
-                                        ${
-                                            active
-                                                ? "text-violet-700"
-                                                : "text-gray-900"
-                                        }
-                                    `}
-
-                                >
-
-                                    {label.weekday}
-
-                                </div>
-
-                                <div className="text-gray-500 mt-1">
-
-                                    {label.day}
-
-                                </div>
-
-                            </div>
-
-                            {/* Check */}
-
-                            <div
-
                                 className={`
                                     absolute
-                                    right-5
+                                    -top-4
+                                    left-1/2
                                     flex
-                                    h-8
-                                    w-8
+                                    h-10
+                                    w-10
+                                    -translate-x-1/2
                                     items-center
                                     justify-center
                                     rounded-full
-                                    bg-violet-600
-                                    transition
+                                    border-4
+                                    border-white
 
                                     ${
                                         active
-                                            ? "opacity-100"
-                                            : "opacity-0"
+                                            ? "bg-white text-orange-500"
+                                            : "bg-orange-100 text-orange-500"
                                     }
                                 `}
-
                             >
-
-                                <Check
-
-                                    size={16}
-
-                                    className="text-white"
-
-                                />
-
+                                <CalendarDays size={18} />
                             </div>
 
+                            {/* Weekday */}
+
+                            <div
+                                className={`text-xs font-bold tracking-wide ${
+                                    active
+                                        ? "text-white"
+                                        : "text-gray-800"
+                                }`}
+                            >
+                                {label.weekday}
+                            </div>
+
+                            {/* Date */}
+
+                            <div
+                                className={`mt-1 text-[14px] font-semibold ${
+                                    active
+                                        ? "text-white"
+                                        : "text-slate-500"
+                                }`}
+                            >
+                                {label.day}
+                            </div>
                         </button>
-
                     );
-
-                })
-
-            }
-
+                })}
+            </div>
         </div>
-
     );
-
 }
 
 export default DayTabs;

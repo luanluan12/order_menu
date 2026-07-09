@@ -3,13 +3,13 @@ import {
     CupSoda,
     Soup,
     CakeSlice,
-    ChefHat
+    ChefHat,
 } from "lucide-react";
 
 import FoodCard from "./FoodCard";
+import DrinkCard from "./DrinkCard";
 
 function FoodGroup({
-
     title,
     subtitle,
     foods,
@@ -18,201 +18,188 @@ function FoodGroup({
     quantityOf,
     selected,
     onQuantityChange,
-    onSelect
-
+    onSelect,
+    selectedText,
 }) {
-
     const getIcon = () => {
-
         switch (type) {
-
             case "main":
-                return <UtensilsCrossed size={22} />;
+                return <UtensilsCrossed size={20} />;
 
             case "drink":
-                return <CupSoda size={22} />;
+                return <CupSoda size={20} />;
 
             case "soup":
-                return <Soup size={22} />;
+                return <Soup size={20} />;
 
             case "dessert":
-                return <CakeSlice size={22} />;
+                return <CakeSlice size={20} />;
 
             default:
-                return <ChefHat size={22} />;
-
+                return <ChefHat size={20} />;
         }
-
     };
 
+    const getHeaderColor = () => {
+        switch (type) {
+            case "main":
+                return {
+                    bg: "bg-orange-100",
+                    text: "text-orange-500",
+                    selected: "text-orange-500",
+                };
+
+            case "drink":
+                return {
+                    bg: "bg-orange-100",
+                    text: "text-orange-500",
+                    selected: "text-orange-500",
+                };
+
+            case "soup":
+                return {
+                    bg: "bg-orange-100",
+                    text: "text-orange-500",
+                    selected: "text-orange-500",
+                };
+
+            default:
+                return {
+                    bg: "bg-orange-100",
+                    text: "text-orange-500",
+                    selected: "text-orange-500",
+                };
+        }
+    };
+
+    const color = getHeaderColor();
+
+    const useDrinkCard =
+        type === "drink" || type === "soup";
+
     return (
-
-        <div className="flex flex-col items-center gap-6">
-
+        <section className="w-full">
             {/* Header */}
 
-            <div className="flex w-full max-w-[500px] items-center gap-4">
+            <div className="mb-6 flex items-center justify-between">
 
-                <div
-                    className="
-                        flex
-                        h-12
-                        w-12
-                        items-center
-                        justify-center
-                        rounded-2xl
-                        bg-violet-100
-                        text-violet-600
-                        shrink-0
-                    "
-                >
+                <div className="flex items-center gap-4">
 
-                    {getIcon()}
+                    <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-full ${color.bg} ${color.text}`}
+                    >
+                        {getIcon()}
+                    </div>
 
-                </div>
+                    <div className="flex items-center gap-3">
 
-                <div>
+                        <h2 className="text-[18px] font-bold uppercase tracking-wide text-slate-800">
+                            {title}
+                        </h2>
 
-                    <h2 className="text-3xl font-bold">
+                        {subtitle && (
+                            <span className="text-[15px] text-slate-500">
+                                ({subtitle})
+                            </span>
+                        )}
 
-                        {title}
-
-                    </h2>
-
-                    {
-
-                        subtitle && (
-
-                            <p className="mt-1 text-gray-500">
-
-                                {subtitle}
-
-                            </p>
-
-                        )
-
-                    }
+                    </div>
 
                 </div>
+
+                {selectedText && (
+                    <div className="text-base font-semibold">
+                        <span className={color.selected}>
+                            Đã chọn:
+                        </span>
+
+                        <span className="text-slate-700">
+                            {" "}
+                            {selectedText}
+                        </span>
+                    </div>
+                )}
 
             </div>
 
-            {
+            {/* Empty */}
 
-                foods.length === 0 ?
+            {foods.length === 0 ? (
 
-                (
+                <div className="flex h-52 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50">
 
-                    <div
-                        className="
-                            flex
-                            h-48
-                            w-full
-                            max-w-[500px]
-                            flex-col
-                            items-center
-                            justify-center
-                            rounded-3xl
-                            border-2
-                            border-dashed
-                            border-gray-200
-                            bg-gray-50
-                        "
-                    >
+                    <ChefHat
+                        size={46}
+                        className="mb-4 text-orange-300"
+                    />
 
-                        <ChefHat
-                            size={46}
-                            className="mb-4 text-violet-300"
+                    <h3 className="text-xl font-semibold text-gray-700">
+                        Chưa có món
+                    </h3>
+
+                    <p className="mt-2 text-sm text-gray-400">
+                        Vui lòng chờ quản trị viên cập nhật.
+                    </p>
+
+                </div>
+
+            ) : useDrinkCard ? (
+
+                <div className="flex flex-wrap gap-5">
+
+                    {foods.map((food) => (
+                        <DrinkCard
+                            key={food._id}
+                            food={food}
+                            checked={selected?.(food._id)}
+                            disabled={disabled}
+                            onSelect={onSelect}
                         />
+                    ))}
 
-                        <h3 className="text-2xl font-semibold text-gray-700">
+                </div>
 
-                            Chưa có món
+            ) : (
 
-                        </h3>
+                <div
+                    className="
+                        grid
+                        grid-cols-1
+                        gap-4
+                        sm:grid-cols-2
+                        md:grid-cols-3
+                        lg:grid-cols-4
+                        xl:grid-cols-5
+                    "
+                >
 
-                        <p className="mt-2 text-gray-400">
+                    {foods.map((food) => (
+                        <FoodCard
+                            key={food._id}
+                            food={food}
+                            type={type}
+                            disabled={disabled}
+                            quantity={
+                                type === "main"
+                                    ? quantityOf(food._id)
+                                    : 0
+                            }
+                            checked={
+                                type === "dessert" && selected
+                                    ? selected(food._id)
+                                    : false
+                            }
+                            onQuantityChange={onQuantityChange}
+                            onSelect={onSelect}
+                        />
+                    ))}
 
-                            Vui lòng chờ quản trị viên cập nhật.
+                </div>
 
-                        </p>
+            )}
 
-                    </div>
-
-                )
-
-                :
-
-                (
-
-                    <div className="flex w-full max-w-[500px] flex-col gap-4">
-
-                        {
-
-                            foods.map((food) => (
-
-                                <FoodCard
-
-                                    key={food._id}
-
-                                    food={food}
-
-                                    type={type}
-
-                                    disabled={disabled}
-
-                                    quantity={
-
-                                        type === "main"
-
-                                            ? quantityOf(food._id)
-
-                                            : 0
-
-                                    }
-
-                                    checked={
-
-                                        type === "drink"
-
-                                            ? selected(food._id)
-
-                                            : type === "soup"
-
-                                                ? selected(food._id)
-
-                                                : false
-
-                                    }
-
-                                    onQuantityChange={
-
-                                        onQuantityChange
-
-                                    }
-
-                                    onSelect={
-
-                                        onSelect
-
-                                    }
-
-                                />
-
-                            ))
-
-                        }
-
-                    </div>
-
-                )
-
-            }
-
-        </div>
-
+        </section>
     );
-
 }
 
 export default FoodGroup;

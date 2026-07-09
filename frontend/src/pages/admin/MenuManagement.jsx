@@ -201,7 +201,7 @@ function MenuManagement() {
 
                 <button
     onClick={() => navigate("/admin/menu/create")}
-    className="flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:bg-violet-700 hover:shadow-lg"
+    className="flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:bg-orange-700 hover:shadow-lg"
 >
     <span className="text-lg">+</span>
 

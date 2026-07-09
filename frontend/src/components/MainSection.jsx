@@ -1,101 +1,112 @@
+import { Plus } from "lucide-react";
 import DishCard from "./DishCard";
 
 function MainSection({
-
     mains,
-
     onSelect,
-
-    onAdd
-
+    onAdd,
 }) {
-
     return (
-
-        <div>
+        <section className="space-y-6">
 
             {/* Header */}
 
-            <div className="mb-6">
+            <div className="flex items-center justify-between">
 
-                <h2 className="text-2xl font-bold">
+                <div>
 
-                    Món chính
+                    <h2 className="text-[26px] font-bold text-slate-800">
+                        Món chính
+                    </h2>
+                </div>
 
-                </h2>
-
-                <p className="mt-2 text-gray-500">
-
-                    Tối đa 5 món
-
-                </p>
+                <div className="rounded-full bg-orange-50 px-5 py-2 text-sm font-semibold text-orange-600">
+                    {mains.length}/5 món
+                </div>
 
             </div>
 
             {/* Cards */}
 
-            <div className="flex flex-wrap gap-6">
+            <div
+    className="
+        grid
+        grid-cols-5
+        gap-8
+        justify-items-center
+        items-start
+    "
+>
 
-                {
+                {mains.map((dish, index) => (
 
-                    mains.map((dish, index) => (
+                    <DishCard
+                        key={index}
+                        dish={dish}
+                        onClick={() => onSelect(index)}
+                    />
 
-                        <DishCard
+                ))}
 
-                            key={index}
+                {mains.length < 5 && (
 
-                            dish={dish}
+                    <button
+                        type="button"
+                        onClick={onAdd}
+                        className="
+                            group
+                            flex
+                            h-[197px]
+                            w-[145px]
+                            flex-col
+                            items-center
+                            justify-center
+                            rounded-[24px]
+                            border-2
+                            border-dashed
+                            border-orange-300
+                            bg-orange-50
+                            transition-all
+                            duration-300
+                            hover:-translate-y-1
+                            hover:border-orange-500
+                            hover:bg-orange-100
+                            hover:shadow-lg
+                        "
+                    >
 
-                            onClick={() =>
-
-                                onSelect(index)
-
-                            }
-
-                        />
-
-                    ))
-
-                }
-
-                {
-
-                    mains.length < 5 && (
-
-                        <button
-
-                            type="button"
-
-                            onClick={onAdd}
-
-                            className="flex h-[210px] w-[180px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-violet-500 hover:bg-violet-50"
-
+                        <div
+                            className="
+                                flex
+                                h-16
+                                w-16
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-white
+                                shadow
+                                transition
+                                group-hover:scale-110
+                            "
                         >
+                            <Plus
+                                size={30}
+                                className="text-orange-500"
+                            />
+                        </div>
 
-                            <div className="text-5xl text-violet-600">
+                        <p className="mt-5 text-lg font-bold text-orange-600">
+                            Thêm món
+                        </p>
 
-                                +
+                    </button>
 
-                            </div>
-
-                            <p className="mt-4 text-lg font-semibold text-gray-600">
-
-                                Thêm món
-
-                            </p>
-
-                        </button>
-
-                    )
-
-                }
+                )}
 
             </div>
 
-        </div>
-
+        </section>
     );
-
 }
 
 export default MainSection;
