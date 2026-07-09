@@ -6,6 +6,8 @@ const auth = require("../middleware/auth");
 
 const admin = require("../middleware/admin");
 
+const authorize = require("../middleware/authorize");
+
 const reportController = require("../controllers/reportController");
 
 router.get(
@@ -63,4 +65,23 @@ router.get(
     reportController.exportExcel
 );
 
+router.get(
+
+    "/floor/daily",
+
+    auth,
+
+    reportController.floorDailyReport
+
+);
+
+router.get(
+
+    "/floor/monthly",
+
+    auth,
+
+    reportController.floorMonthlyReport
+
+);
 module.exports = router;

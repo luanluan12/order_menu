@@ -18,27 +18,53 @@ const transporter = nodemailer.createTransport({
 
 });
 
-const sendMail = async ({
+// const sendMail = async ({
 
-    to,
+//     to,
 
-    subject,
+//     subject,
 
-    html
+//     html
 
-}) => {
+// }) => {
 
-    return transporter.sendMail({
+//     return transporter.sendMail({
 
-        from: process.env.MAIL_FROM,
+//         from: process.env.MAIL_FROM,
 
-        to,
+//         to,
 
-        subject,
+//         subject,
 
-        html
+//         html
 
-    });
+//     });
+
+// };
+
+const sendMail = async ({ to, subject, html }) => {
+    console.log("sendMail called");
+
+    try {
+
+        const info = await transporter.sendMail({
+            from: process.env.MAIL_FROM,
+            to,
+            subject,
+            html
+        });
+
+        console.log("Mail sent:", info.messageId);
+
+        return info;
+
+    } catch (err) {
+
+        console.error("Send mail error:", err);
+
+        throw err;
+
+    }
 
 };
 

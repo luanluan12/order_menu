@@ -60,3 +60,99 @@ exports.login = async (req, res) => {
     }
 
 };
+
+exports.changePassword = async (req, res) => {
+
+    try {
+
+        const userId = req.user.id;
+
+        const {
+
+            oldPassword,
+
+            newPassword
+
+        } = req.body;
+
+        if (!oldPassword || !newPassword) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Vui lòng nhập đầy đủ."
+
+            });
+
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Không tìm thấy tài khoản."
+
+            });
+
+        }
+
+        const match = await bcrypt.compare(
+
+            oldPassword,
+
+            user.password
+
+        );
+
+        if (!match) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Mật khẩu cũ không đúng."
+
+            });
+
+        }
+
+        user.password = await bcrypt.hash(
+
+            newPassword,
+
+            10
+
+        );
+
+        await user.save();
+
+        res.json({
+
+            success: true,
+
+            message: "Đổi mật khẩu thành công."
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.log(err);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};

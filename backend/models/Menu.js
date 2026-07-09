@@ -164,7 +164,18 @@ const menuSchema = new mongoose.Schema({
 
         }
 
-    }
+    },
+    openTime: {
+    type: Date,
+    required: true
+},
+    deadline: {
+
+    type: Date,
+
+    required: true
+
+},
 
 
 }, {

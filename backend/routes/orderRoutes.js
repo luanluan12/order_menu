@@ -6,48 +6,6 @@ const auth = require("../middleware/auth");
 
 const orderController = require("../controllers/orderController");
 
-// router.post(
-//     "/",
-//     auth,
-//     orderController.createOrder
-// );
-
-// router.get(
-//     "/history",
-//     auth,
-//     orderController.getHistory
-// );
-
-// router.put(
-//     "/:id",
-//     auth,
-//     orderController.updateOrder
-// );
-
-// router.delete(
-//     "/:id",
-//     auth,
-//     orderController.cancelOrder
-// );
-
-// router.post(
-
-//     "/verify",
-
-//     orderController.verifyInvite
-
-// );
-
-// router.post(
-
-//     "/invite",
-
-//     orderController.createOrderFromInvite
-
-// );
-
-// module.exports = router;
-
 router.post(
     "/",
     auth,
@@ -82,4 +40,11 @@ router.post(
     orderController.createOrderFromInvite
 );
 
+router.get(
+    "/",
+    auth,
+    orderController.getAllOrders
+);
+
 module.exports = router;
+

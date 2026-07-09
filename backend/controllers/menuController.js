@@ -200,7 +200,7 @@ exports.createMenu = async (req, res) => {
 
     try {
 
-        const { week, year } = req.body;
+        const { week, year, openTime, deadline } = req.body;
 
         if (!week) {
 
@@ -368,6 +368,10 @@ exports.createMenu = async (req, res) => {
 
             status: "draft",
 
+            openTime,
+
+            deadline,
+
             days: resultDays
 
         });
@@ -446,36 +450,33 @@ exports.getMenus = async (req, res) => {
 /**
  * Lấy Menu tuần
  */
+exports.getWeekMenu = async (req,res)=>{
 
-exports.getWeekMenu = async (req, res) => {
+    try{
 
-    try {
-
-        const week = req.query.week ||
-
-            `${moment()
-                .tz("Asia/Ho_Chi_Minh")
-                .year()}-W${String(
-                    moment()
-                        .tz("Asia/Ho_Chi_Minh")
-                        .isoWeek()
-                ).padStart(2, "0")}`;
+        const now = new Date();
 
         const menu = await Menu.findOne({
 
-            week,
+            status:"published",
 
-            status: "published"
+            openTime:{
+                $lte:now
+            },
+
+            deadline:{
+                $gte:now
+            }
 
         }).lean();
 
-        if (!menu) {
+        if(!menu){
 
             return res.status(404).json({
 
-                success: false,
+                success:false,
 
-                message: "Không tìm thấy thực đơn."
+                message:"Hiện chưa đến thời gian đặt món."
 
             });
 
@@ -483,23 +484,21 @@ exports.getWeekMenu = async (req, res) => {
 
         res.json({
 
-            success: true,
+            success:true,
 
-            data: menu
+            data:menu
 
         });
 
     }
 
-    catch (err) {
-
-        console.error(err);
+    catch(err){
 
         res.status(500).json({
 
-            success: false,
+            success:false,
 
-            message: err.message
+            message:err.message
 
         });
 
@@ -851,7 +850,7 @@ exports.publishMenu = async (req, res) => {
 
                         menu,
 
-                        `${process.env.FRONTEND_URL}/invite/${token}`
+                        `${process.env.FRONTEND_URL}/home?token=${token}`
 
                     )
 

@@ -15,7 +15,10 @@ exports.exportExcel = async (req, res) => {
         const orders = await Order.find({
             status: "ordered"
         })
-            .populate("user")
+            .populate(
+    "user",
+    "floor"
+)
             .populate("menu");
 
         const workbook = new ExcelJS.Workbook();
@@ -361,86 +364,126 @@ exports.monthlyReport = async (req, res) => {
 /**
  * Báo cáo theo tầng
  */
+
+
 exports.floorReport = async (req, res) => {
 
     try {
 
-        const report = await Order.aggregate([
+        const { type, date, month } = req.query;
 
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "user"
-                }
-            },
+        const filter = {
 
-            {
-                $unwind: "$user"
-            },
+            status: "ordered"
 
-            {
-                $group: {
+        };
 
-                    _id: "$user.floor",
+        const orders = await Order.find(filter)
 
-                    totalOrders: {
-                        $sum: 1
-                    },
+            .populate(
 
-                    normal: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainNormal"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    },
+                "user",
 
-                    vegetarian: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainVegetarian"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    }
+                "department"
 
-                }
+            )
 
-            },
+            .lean();
 
-            {
-                $sort: {
-                    _id: 1
-                }
+        const result = {};
+
+        orders.forEach(order => {
+
+            const floor =
+    order.user?.floor != null
+        ? ` ${order.user.floor}`
+        : "Khác";
+            if (!result[floor]) {
+
+                result[floor] = 0;
+
             }
 
-        ]);
+            order.days.forEach(day => {
 
-        res.json({
-            success: true,
-            data: report
+                // Có đặt món trong ngày -> tính 1 suất
+
+                const ordered =
+
+                    day.mains.length > 0 ||
+
+                    day.drink ||
+
+                    day.soup;
+
+                if (!ordered) return;
+
+                // Theo ngày
+
+                if (type === "daily" && date) {
+
+                    const d = new Date(day.date)
+
+                        .toISOString()
+
+                        .slice(0, 10);
+
+                    if (d !== date) return;
+
+                }
+
+                // Theo tháng
+
+                if (type === "monthly" && month) {
+
+                    const m = new Date(day.date)
+
+                        .toISOString()
+
+                        .slice(0, 7);
+
+                    if (m !== month) return;
+
+                }
+
+                result[floor]++;
+
+            });
+
         });
 
-    } catch (err) {
+        const data = Object.keys(result)
+
+            .sort()
+
+            .map(floor => ({
+
+                floor,
+
+                total: result[floor]
+
+            }));
+
+        res.json({
+
+            success: true,
+
+            data
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
 
         res.status(500).json({
+
             success: false,
+
             message: err.message
+
         });
 
     }
@@ -554,6 +597,238 @@ exports.totalMenus = async (req, res) => {
     }
 
     catch (err) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// =======================================
+// Báo cáo theo tầng - Theo ngày
+// =======================================
+
+exports.floorDailyReport = async (req, res) => {
+
+    try {
+
+        const { date } = req.query;
+
+        if (!date) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu ngày."
+
+            });
+
+        }
+
+        const orders = await Order.find({
+
+            status: "ordered"
+
+        })
+
+        .populate(
+
+            "user",
+
+            "floor"
+
+        )
+
+        .lean();
+        console.log(JSON.stringify(orders[0], null, 2));
+
+        const floors = {};
+
+        orders.forEach(order => {
+
+    const floor =
+        order.user?.floor != null
+            ? `Tầng ${order.user.floor}`
+            : "Khác";
+
+    if (!floors[floor]) {
+
+        floors[floor] = 0;
+
+    }
+
+    order.days.forEach(day => {
+
+        const dayString = moment(day.date)
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM-DD");
+
+        if (dayString !== date) return;
+
+        const ordered =
+            day.mains.length > 0 ||
+            day.drink ||
+            day.soup;
+
+        if (ordered) {
+
+            floors[floor]++;
+
+        }
+
+    });
+
+});
+
+        const data = Object.keys(floors)
+
+            .sort()
+
+            .map(floor => ({
+
+                floor,
+
+                total: floors[floor]
+
+            }));
+
+        res.json({
+
+            success: true,
+
+            data
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// =======================================
+// Báo cáo theo tầng - Theo tháng
+// =======================================
+
+exports.floorMonthlyReport = async (req, res) => {
+
+    try {
+
+        const { month } = req.query;
+
+        if (!month) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu tháng."
+
+            });
+
+        }
+
+        const orders = await Order.find({
+
+            status: "ordered"
+
+        })
+
+        .populate(
+
+            "user",
+
+            "floor"
+
+        )
+
+        .lean();
+
+        const floors = {};
+
+        orders.forEach(order => {
+
+            const floor =
+    order.user?.floor != null
+        ? `${order.user.floor}`
+        : "Khác";
+
+            if (!floors[floor]) {
+
+                floors[floor] = 0;
+
+            }
+
+            order.days.forEach(day => {
+
+                const monthString = moment(day.date)
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM");
+
+                if (monthString !== month) return;
+
+                const ordered =
+
+                    day.mains.length > 0 ||
+
+                    day.drink ||
+
+                    day.soup;
+
+                if (ordered) {
+
+                    floors[floor]++;
+
+                }
+
+            });
+
+        });
+
+        const data = Object.keys(floors)
+
+            .sort()
+
+            .map(floor => ({
+
+                floor,
+
+                total: floors[floor]
+
+            }));
+
+        res.json({
+
+            success: true,
+
+            data
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
 
         res.status(500).json({
 
