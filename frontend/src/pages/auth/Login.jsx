@@ -87,7 +87,7 @@ function Login() {
 
     return (
 
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-violet-50 to-blue-100 px-4">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-orange-50 to-blue-100 px-4">
 
             <div className="w-full max-w-md rounded-[32px] bg-white px-10 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
 
@@ -148,7 +148,7 @@ function Login() {
 
                             placeholder="example@gmail.com"
 
-                            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-lg outline-none transition-all duration-200 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100"
+                            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-lg outline-none transition-all duration-200 focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
 
                             required
 
@@ -194,7 +194,7 @@ function Login() {
 
                                 placeholder="********"
 
-                                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 pr-14 text-lg outline-none transition-all duration-200 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100"
+                                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 pr-14 text-lg outline-none transition-all duration-200 focus:border-orange-500 focus:bg-white focus:ring-4 focus:ring-orange-100"
 
                                 required
 
@@ -214,7 +214,7 @@ function Login() {
 
                                 }
 
-                                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-violet-600"
+                                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-orange-600"
 
                             >
 
@@ -246,7 +246,7 @@ function Login() {
 
                         disabled={loading}
 
-                        className="mt-2 w-full rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-2 w-full rounded-2xl bg-gradient-to-r from-orange-600 to-fuchsia-600 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
 
                     >
 
