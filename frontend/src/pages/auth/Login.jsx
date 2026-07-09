@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 import { login as loginApi } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
-import { Eye, EyeOff } from "lucide-react";
+
+import logo from "../../assets/logo.png";
 
 function Login() {
 
@@ -65,9 +67,7 @@ function Login() {
 
             }
 
-        }
-
-        catch (err) {
+        } catch (err) {
 
             alert(
 
@@ -77,9 +77,7 @@ function Login() {
 
             );
 
-        }
-
-        finally {
+        } finally {
 
             setLoading(false);
 
@@ -89,29 +87,26 @@ function Login() {
 
     return (
 
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-100 via-white to-blue-100">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-violet-50 to-blue-100 px-4">
 
-            <div className="w-full max-w-md rounded-3xl bg-white p-10 shadow-2xl">
+            <div className="w-full max-w-md rounded-[32px] bg-white px-10 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
 
                 {/* Logo */}
 
-                <div className="mb-10 text-center">
+                <div className="mb-8 flex flex-col items-center">
 
-                    <div className="text-6xl">
+                    <img
 
-                        🍱
+                        src={logo}
 
-                    </div>
+                        alt="EOC"
 
-                    <h1 className="mt-4 text-3xl font-bold">
+                        className="h-24 object-contain"
 
-                        Order Menu
+                    />
+                    <p className="mt-2 text-center text-gray-500">
 
-                    </h1>
-
-                    <p className="mt-2 text-gray-500">
-
-                        Hệ thống đặt suất ăn công ty
+                        Đăng nhập để đặt suất ăn hôm nay
 
                     </p>
 
@@ -121,7 +116,7 @@ function Login() {
 
                     onSubmit={handleLogin}
 
-                    className="space-y-6"
+                    className="space-y-5"
 
                 >
 
@@ -129,7 +124,7 @@ function Login() {
 
                     <div>
 
-                        <label className="mb-2 block font-semibold">
+                        <label className="mb-2 block text-sm font-semibold text-gray-700">
 
                             Email
 
@@ -153,7 +148,7 @@ function Login() {
 
                             placeholder="example@gmail.com"
 
-                            className="w-full rounded-xl border border-gray-300 p-4 outline-none transition focus:border-violet-500"
+                            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-lg outline-none transition-all duration-200 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100"
 
                             required
 
@@ -165,83 +160,83 @@ function Login() {
 
                     <div>
 
-    <label className="mb-2 block font-semibold">
+                        <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-        Mật khẩu
+                            Mật khẩu
 
-    </label>
+                        </label>
 
-    <div className="relative">
+                        <div className="relative">
 
-        <input
+                            <input
 
-            type={
+                                type={
 
-                showPassword
+                                    showPassword
 
-                    ? "text"
+                                        ? "text"
 
-                    : "password"
+                                        : "password"
 
-            }
+                                }
 
-            value={password}
+                                value={password}
 
-            onChange={(e) =>
+                                onChange={(e) =>
 
-                setPassword(
+                                    setPassword(
 
-                    e.target.value
+                                        e.target.value
 
-                )
+                                    )
 
-            }
+                                }
 
-            placeholder="********"
+                                placeholder="********"
 
-            className="w-full rounded-xl border border-gray-300 p-4 pr-12 outline-none transition focus:border-violet-500"
+                                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 pr-14 text-lg outline-none transition-all duration-200 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100"
 
-            required
+                                required
 
-        />
+                            />
 
-        <button
+                            <button
 
-            type="button"
+                                type="button"
 
-            onClick={() =>
+                                onClick={() =>
 
-                setShowPassword(
+                                    setShowPassword(
 
-                    !showPassword
+                                        !showPassword
 
-                )
+                                    )
 
-            }
+                                }
 
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-violet-600"
+                                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-violet-600"
 
-        >
+                            >
 
-            {
+                                {
 
-                showPassword
+                                    showPassword
 
-                    ?
+                                        ?
 
-                    <EyeOff size={22} />
+                                        <EyeOff size={22} />
 
-                    :
+                                        :
 
-                    <Eye size={22} />
+                                        <Eye size={22} />
 
-            }
+                                }
 
-        </button>
+                            </button>
 
-    </div>
+                        </div>
 
-</div>
+                    </div>
 
                     {/* Button */}
 
@@ -251,7 +246,7 @@ function Login() {
 
                         disabled={loading}
 
-                        className="w-full rounded-xl bg-violet-600 py-4 text-lg font-bold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300"
+                        className="mt-2 w-full rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
 
                     >
 
