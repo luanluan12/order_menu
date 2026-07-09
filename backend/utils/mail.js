@@ -47,10 +47,6 @@
 
 // module.exports = sendMail;
 
-const SibApiV3Sdk = require("@getbrevo/brevo");
-
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
 const sendMail = async ({ to, subject, html }) => {
     try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
