@@ -838,23 +838,32 @@ exports.publishMenu = async (req, res) => {
 
                 );
 
+                // await sendMail({
+
+                //     to: user.email,
+
+                //     subject: `🍱 Thực đơn tuần ${menu.week}`,
+
+                //     html: orderMailTemplate(
+
+                //         user,
+
+                //         menu,
+
+                //         `${process.env.FRONTEND_URL}/home?token=${token}`
+
+                //     )
+
+                // });
                 await sendMail({
-
-                    to: user.email,
-
-                    subject: `🍱 Thực đơn tuần ${menu.week}`,
-
-                    html: orderMailTemplate(
-
-                        user,
-
-                        menu,
-
-                        `${process.env.FRONTEND_URL}/home?token=${token}`
-
-                    )
-
-                });
+    to: user.email,
+    subject: `🍱 Thực đơn tuần ${menu.week}`,
+    html: orderMailTemplate(
+        user,
+        menu,
+        process.env.FRONTEND_URL
+    )
+});
 
                 sent++;
 
