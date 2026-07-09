@@ -1,36 +1,79 @@
+import {
+    UtensilsCrossed,
+    CupSoda,
+    Soup,
+    CakeSlice,
+    ChefHat
+} from "lucide-react";
+
 import FoodCard from "./FoodCard";
 
 function FoodGroup({
 
     title,
-
     subtitle,
-
     foods,
-
     type,
-
     disabled,
-
     quantityOf,
-
     selected,
-
     onQuantityChange,
-
     onSelect
 
 }) {
 
+    const getIcon = () => {
+
+        switch (type) {
+
+            case "main":
+                return <UtensilsCrossed size={22} />;
+
+            case "drink":
+                return <CupSoda size={22} />;
+
+            case "soup":
+                return <Soup size={22} />;
+
+            case "dessert":
+                return <CakeSlice size={22} />;
+
+            default:
+                return <ChefHat size={22} />;
+
+        }
+
+    };
+
     return (
 
-        <div>
+        <div className="flex flex-col items-center gap-6">
 
-            <div className="mb-5 flex items-end justify-between">
+            {/* Header */}
+
+            <div className="flex w-full max-w-[500px] items-center gap-4">
+
+                <div
+                    className="
+                        flex
+                        h-12
+                        w-12
+                        items-center
+                        justify-center
+                        rounded-2xl
+                        bg-violet-100
+                        text-violet-600
+                        shrink-0
+                    "
+                >
+
+                    {getIcon()}
+
+                </div>
 
                 <div>
 
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-3xl font-bold">
 
                         {title}
 
@@ -40,7 +83,7 @@ function FoodGroup({
 
                         subtitle && (
 
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-gray-500">
 
                                 {subtitle}
 
@@ -58,105 +101,111 @@ function FoodGroup({
 
                 foods.length === 0 ?
 
-                    (
+                (
 
-                        <div className="rounded-xl border border-dashed border-gray-300 py-8 text-center text-gray-400">
+                    <div
+                        className="
+                            flex
+                            h-48
+                            w-full
+                            max-w-[500px]
+                            flex-col
+                            items-center
+                            justify-center
+                            rounded-3xl
+                            border-2
+                            border-dashed
+                            border-gray-200
+                            bg-gray-50
+                        "
+                    >
 
-                            Chưa có món.
+                        <ChefHat
+                            size={46}
+                            className="mb-4 text-violet-300"
+                        />
 
-                        </div>
+                        <h3 className="text-2xl font-semibold text-gray-700">
 
-                    )
+                            Chưa có món
 
-                    :
+                        </h3>
 
-                    (
+                        <p className="mt-2 text-gray-400">
 
-                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                            Vui lòng chờ quản trị viên cập nhật.
 
-                            {
+                        </p>
 
-                                foods.map(food => (
+                    </div>
 
-                                    <FoodCard
+                )
 
-                                        key={food._id}
+                :
 
-                                        food={food}
+                (
 
-                                        type={type}
+                    <div className="flex w-full max-w-[500px] flex-col gap-4">
 
-                                        disabled={disabled}
+                        {
 
-                                        quantity={
+                            foods.map((food) => (
 
-                                            type === "main"
+                                <FoodCard
 
-                                                ?
+                                    key={food._id}
 
-                                                quantityOf(
+                                    food={food}
 
-                                                    food._id
+                                    type={type}
 
-                                                )
+                                    disabled={disabled}
 
-                                                :
+                                    quantity={
 
-                                                0
+                                        type === "main"
 
-                                        }
+                                            ? quantityOf(food._id)
 
-                                        checked={
+                                            : 0
 
-                                            type === "drink"
+                                    }
 
-                                                ?
+                                    checked={
 
-                                                selected(
+                                        type === "drink"
 
-                                                    food._id
+                                            ? selected(food._id)
 
-                                                )
+                                            : type === "soup"
 
-                                                :
+                                                ? selected(food._id)
 
-                                                type === "soup"
+                                                : false
 
-                                                    ?
+                                    }
 
-                                                    selected(
+                                    onQuantityChange={
 
-                                                        food._id
+                                        onQuantityChange
 
-                                                    )
+                                    }
 
-                                                    :
+                                    onSelect={
 
-                                                    false
+                                        onSelect
 
-                                        }
+                                    }
 
-                                        onQuantityChange={
+                                />
 
-                                            onQuantityChange
+                            ))
 
-                                        }
+                        }
 
-                                        onSelect={
+                    </div>
 
-                                            onSelect
-
-                                        }
-
-                                    />
-
-                                ))
-
-                            }
-
-                        </div>
-
-                    )
+                )
 
             }
 

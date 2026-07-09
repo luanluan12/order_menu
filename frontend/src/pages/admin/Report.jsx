@@ -1,130 +1,72 @@
 import { useEffect, useState } from "react";
-
-import DashboardCard from "../../components/HistoryCard";
-
-import { FaFileExcel } from "react-icons/fa";
 import {
-    getDashboard,
-    getWeeklyReport,
-    exportExcel
+    getFloorDailyReport,
+    getFloorMonthlyReport
 } from "../../api/reportApi";
 
 import { toast } from "react-toastify";
 
 function Report() {
 
-    const [dashboard, setDashboard] = useState({
+    const [type, setType] = useState("daily");
 
-        totalUsers: 0,
+    const [date, setDate] = useState("");
 
-        todayOrders: 0,
+    const [month, setMonth] = useState("");
 
-        normal: 0,
+    const [loading, setLoading] = useState(false);
 
-        vegetarian: 0,
+    const [data, setData] = useState([]);
 
-        cancelled: 0
-
-    });
-
-    const [week, setWeek] = useState("");
-
-    const [orders, setOrders] = useState([]);
-
-    const [loading, setLoading] = useState(true);
-
-    const loadReport = async () => {
+    const loadData = async () => {
 
         try {
 
-            const res = await getWeeklyReport(week);
+            setLoading(true);
 
-            const data = res.data.data ?? res.data;
+            let res;
 
-            setOrders(data);
+            if (type === "daily") {
 
-        }
+                if (!date) {
 
-        catch (err) {
+                    toast.warning("Vui lòng chọn ngày");
 
-            console.log(err);
+                    return;
 
-        }
-
-    };
-
-    useEffect(() => {
-
-        if (week !== "") {
-
-            loadReport();
-
-        }
-
-    }, [week]);
-
-    const handleExport = async () => {
-
-        if (!week) {
-
-            toast.warning("Vui lòng chọn tuần");
-
-            return;
-
-        }
-
-        try {
-
-            const res = await exportExcel(week);
-
-            const blob = new Blob(
-                [res.data],
-                {
-                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 }
-            );
 
-            const url = window.URL.createObjectURL(blob);
+                res = await getFloorDailyReport(date);
 
-            const link = document.createElement("a");
+            }
 
-            link.href = url;
+            else {
 
-            link.download = `Report_${week}.xlsx`;
+                if (!month) {
 
-            document.body.appendChild(link);
+                    toast.warning("Vui lòng chọn tháng");
 
-            link.click();
+                    return;
 
-            link.remove();
+                }
 
-            window.URL.revokeObjectURL(url);
+                res = await getFloorMonthlyReport(month);
 
-            toast.success("Xuất Excel thành công");
+            }
 
-        } catch (err) {
-
-            toast.error("Không thể xuất Excel");
-
-        }
-
-    };
-
-    const loadDashboard = async () => {
-
-        try {
-
-            const res = await getDashboard();
-
-            const data = res.data.data ?? res.data;
-
-            setDashboard(data);
+            setData(res.data.data);
 
         }
 
         catch (err) {
 
-            console.log(err);
+            toast.error(
+
+                err.response?.data?.message ||
+
+                "Không tải được dữ liệu."
+
+            );
 
         }
 
@@ -138,174 +80,269 @@ function Report() {
 
     useEffect(() => {
 
-        loadDashboard();
+        if (type === "daily" && date) {
 
-    }, []);
+            loadData();
 
-    if (loading) {
+        }
 
-        return (
+    }, [date]);
 
-            <div className="text-center text-xl mt-20">
+    useEffect(() => {
 
-                Loading...
+        if (type === "monthly" && month) {
 
-            </div>
+            loadData();
 
-        );
+        }
 
-    }
+    }, [month]);
+
+    const totalMeals = data.reduce(
+
+        (sum, item) => sum + item.total,
+
+        0
+
+    );
+
+    const maxFloor =
+
+        data.length > 0
+
+            ?
+
+            data.reduce(
+
+                (a, b) =>
+
+                    a.total > b.total
+
+                        ? a
+
+                        : b
+
+            )
+
+            :
+
+            null;
 
     return (
 
-        <div>
+        <div className="mx-auto max-w-6xl p-8">
 
-            <div className="flex items-center justify-between mb-8">
+            {/* Filter */}
 
-                <div className="flex items-center gap-4">
+            <div className="mb-8 flex flex-wrap items-center gap-4 rounded-2xl bg-white p-6 shadow">
 
-                    <label>
+                <select
 
-                        Week
+                    value={type}
 
-                    </label>
+                    onChange={(e)=>
 
-                    <input
+                        setType(
 
-                        type="week"
+                            e.target.value
 
-                        value={week}
+                        )
 
-                        onChange={(e) => setWeek(e.target.value)}
+                    }
 
-                        className="border rounded-lg px-4 py-2"
-
-                    />
-
-                </div>
-
-                <button
-
-                    onClick={handleExport}
-
-                    className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-white hover:bg-green-700"
+                    className="rounded-xl border px-4 py-3"
 
                 >
 
-                    <FaFileExcel />
+                    <option value="daily">
 
-                    Export Excel
+                        Theo ngày
+
+                    </option>
+
+                    <option value="monthly">
+
+                        Theo tháng
+
+                    </option>
+
+                </select>
+
+                {
+
+                    type === "daily"
+
+                    ?
+
+                    (
+
+                        <input
+
+                            type="date"
+
+                            value={date}
+
+                            onChange={(e)=>
+
+                                setDate(
+
+                                    e.target.value
+
+                                )
+
+                            }
+
+                            className="rounded-xl border px-4 py-3"
+
+                        />
+
+                    )
+
+                    :
+
+                    (
+
+                        <input
+
+                            type="month"
+
+                            value={month}
+
+                            onChange={(e)=>
+
+                                setMonth(
+
+                                    e.target.value
+
+                                )
+
+                            }
+
+                            className="rounded-xl border px-4 py-3"
+
+                        />
+
+                    )
+
+                }
+
+                <button
+
+                    onClick={loadData}
+
+                    className="rounded-xl bg-violet-600 px-8 py-3 font-bold text-white hover:bg-violet-700"
+
+                >
+
+                    Thống kê
 
                 </button>
 
             </div>
 
-            <h1 className="text-3xl font-bold mb-8">
+            {/* Summary */}
 
-                Report Dashboard
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
 
-            </h1>
+                <div className="rounded-2xl bg-white p-6 shadow">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
+                    <div className="text-gray-500">
 
-                <DashboardCard
+                        Tổng tầng
 
-                    title="Total Users"
+                    </div>
 
-                    value={dashboard.totalUsers}
+                    <div className="mt-3 text-4xl font-bold text-violet-600">
 
-                    color="text-blue-600"
+                        {data.length}
 
-                />
+                    </div>
 
-                <DashboardCard
+                </div>
 
-                    title="Today's Orders"
+                <div className="rounded-2xl bg-white p-6 shadow">
 
-                    value={dashboard.todayOrders}
+                    <div className="text-gray-500">
 
-                    color="text-green-600"
+                        Tổng suất
 
-                />
+                    </div>
 
-                <DashboardCard
+                    <div className="mt-3 text-4xl font-bold text-green-600">
 
-                    title="Normal Meal"
+                        {totalMeals}
 
-                    value={dashboard.normal}
+                    </div>
 
-                    color="text-orange-500"
+                </div>
 
-                />
+                <div className="rounded-2xl bg-white p-6 shadow">
 
-                <DashboardCard
+                    <div className="text-gray-500">
 
-                    title="Vegetarian"
+                        Tầng nhiều nhất
 
-                    value={dashboard.vegetarian}
+                    </div>
 
-                    color="text-emerald-600"
+                    <div className="mt-3 text-2xl font-bold text-orange-500">
 
-                />
+                        {
 
-                <DashboardCard
+                            maxFloor
 
-                    title="Cancelled"
+                            ?
 
-                    value={dashboard.cancelled}
+                            `Tầng ${maxFloor.floor}`
 
-                    color="text-red-600"
+                            :
 
-                />
+                            "-"
+
+                        }
+
+                    </div>
+
+                    <div className="text-gray-500">
+
+                        {
+
+                            maxFloor
+
+                            ?
+
+                            `${maxFloor.total} suất`
+
+                            :
+
+                            ""
+
+                        }
+
+                    </div>
+
+                </div>
 
             </div>
-            <div className="mt-10 rounded-xl bg-white shadow">
 
-                <table className="min-w-full">
+            {/* Table */}
 
-                    <thead className="bg-gray-100">
+            <div className="overflow-hidden rounded-2xl bg-white shadow">
+
+                <table className="w-full">
+
+                    <thead className="bg-violet-50">
 
                         <tr>
 
-                            <th className="px-4 py-3">
+                            <th className="p-5 text-left">
 
-                                Employee
-
-                            </th>
-
-                            <th className="px-4 py-3">
-
-                                Name
+                                Tầng
 
                             </th>
 
-                            <th className="px-4 py-3">
+                            <th className="p-5 text-center">
 
-                                Main
-
-                            </th>
-
-                            <th className="px-4 py-3">
-
-                                Drink
-
-                            </th>
-
-                            <th className="px-4 py-3">
-
-                                Soup
-
-                            </th>
-
-                            <th className="px-4 py-3">
-
-                                Dessert
-
-                            </th>
-
-                            <th className="px-4 py-3">
-
-                                Status
+                                Số suất ăn
 
                             </th>
 
@@ -317,101 +354,83 @@ function Report() {
 
                         {
 
-                            orders.length === 0 ?
+                            loading
 
-                                (
+                            ?
 
-                                    <tr>
+                            (
 
-                                        <td
+                                <tr>
 
-                                            colSpan={7}
+                                    <td
 
-                                            className="py-10 text-center"
+                                        colSpan={2}
 
-                                        >
-
-                                            No Data
-
-                                        </td>
-
-                                    </tr>
-
-                                )
-
-                                :
-
-                                orders.map(order => (
-
-                                    <tr
-
-                                        key={order._id}
-
-                                        className="border-t"
+                                        className="py-20 text-center"
 
                                     >
 
-                                        <td className="px-4 py-3">
+                                        Đang tải...
 
-                                            {order.user.employeeId}
+                                    </td>
 
-                                        </td>
+                                </tr>
 
-                                        <td className="px-4 py-3">
+                            )
 
-                                            {order.user.name}
+                            :
 
-                                        </td>
+                            data.length === 0
 
-                                        <td className="px-4 py-3">
+                            ?
 
-                                            {
+                            (
 
-                                                order.selectedMain === "mainNormal"
+                                <tr>
 
-                                                    ?
+                                    <td
 
-                                                    order.menu.mainNormal
+                                        colSpan={2}
 
-                                                    :
+                                        className="py-20 text-center text-gray-400"
 
-                                                    order.menu.mainVegetarian
+                                    >
 
-                                            }
+                                        Không có dữ liệu.
 
-                                        </td>
+                                    </td>
 
-                                        <td className="px-4 py-3">
+                                </tr>
 
-                                            {order.menu.drink}
+                            )
 
-                                        </td>
+                            :
 
-                                        <td className="px-4 py-3">
+                            data.map(item => (
 
-                                            {order.menu.soup}
+                                <tr
 
-                                        </td>
+                                    key={item.floor}
 
-                                        <td className="px-4 py-3">
+                                    className="border-t transition hover:bg-violet-50"
 
-                                            {order.menu.dessert}
+                                >
 
-                                        </td>
+                                    <td className="p-5 text-lg font-semibold">
 
-                                        <td className="px-4 py-3">
+                                        Tầng {item.floor}
 
-                                            <span className="bg-blue-100 px-3 py-1 rounded">
+                                    </td>
 
-                                                {order.status}
+                                    <td className="p-5 text-center text-2xl font-bold text-violet-600">
 
-                                            </span>
+                                        {item.total}
 
-                                        </td>
+                                    </td>
 
-                                    </tr>
+                                </tr>
 
-                                ))
+                            ))
 
                         }
 
@@ -422,8 +441,6 @@ function Report() {
             </div>
 
         </div>
-
-
 
     );
 

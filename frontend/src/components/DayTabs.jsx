@@ -1,9 +1,9 @@
+import { CalendarDays, Check } from "lucide-react";
+
 function DayTabs({
 
     days,
-
     currentDay,
-
     onChange
 
 }) {
@@ -12,37 +12,20 @@ function DayTabs({
 
         const d = new Date(date);
 
-        const weekday = d.toLocaleDateString(
+        return {
 
-            "vi-VN",
-
-            {
+            weekday: d.toLocaleDateString("vi-VN", {
 
                 weekday: "long"
 
-            }
+            }),
 
-        );
-
-        const day = d.toLocaleDateString(
-
-            "vi-VN",
-
-            {
+            day: d.toLocaleDateString("vi-VN", {
 
                 day: "2-digit",
-
                 month: "2-digit"
 
-            }
-
-        );
-
-        return {
-
-            weekday,
-
-            day
+            })
 
         };
 
@@ -50,91 +33,145 @@ function DayTabs({
 
     return (
 
-        <div className="mb-8 flex gap-3 overflow-x-auto pb-2">
+        <div className="flex flex-col gap-4">
 
             {
 
-                days.map(
+                days.map((day, index) => {
 
-                    (
+                    const label = getLabel(day.date);
 
-                        day,
+                    const active = currentDay === index;
 
-                        index
+                    return (
 
-                    ) => {
+                        <button
 
-                        const label = getLabel(
+                            key={index}
 
-                            day.date
+                            onClick={() => onChange(index)}
 
-                        );
+                            className={`
+                                relative
+                                flex
+                                items-center
+                                w-60
+                                h-24
+                                rounded-3xl
+                                border
+                                px-5
+                                text-left
+                                transition-all
+                                duration-200
+                                shadow-sm
 
-                        const active =
-
-                            currentDay ===
-
-                            index;
-
-                        return (
-
-                            <button
-
-                                key={index}
-
-                                onClick={() =>
-
-                                    onChange(
-
-                                        index
-
-                                    )
-
+                                ${
+                                    active
+                                        ? "border-violet-500 bg-violet-50 shadow-md"
+                                        : "border-gray-200 bg-white hover:border-violet-300 hover:shadow"
                                 }
+                            `}
 
-                                className={`min-w-[130px] rounded-xl border p-4 transition
+                        >
 
-                                ${active
+                            {/* Icon */}
 
-                                        ?
+                            <div
 
-                                        "border-blue-600 bg-blue-600 text-white shadow-lg"
+                                className={`
+                                    flex
+                                    h-11
+                                    w-11
+                                    items-center
+                                    justify-center
+                                    rounded-2xl
+                                    mr-4
 
-                                        :
-
-                                        "border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50"
-
-                                    }`}
+                                    ${
+                                        active
+                                            ? "bg-violet-100 text-violet-600"
+                                            : "bg-gray-100 text-gray-500"
+                                    }
+                                `}
 
                             >
 
-                                <div className="text-base font-bold capitalize">
+                                <CalendarDays size={20} />
 
-                                    {
+                            </div>
 
-                                        label.weekday
+                            {/* Text */}
 
-                                    }
+                            <div>
+
+                                <div
+
+                                    className={`
+                                        text-lg
+                                        font-bold
+                                        capitalize
+
+                                        ${
+                                            active
+                                                ? "text-violet-700"
+                                                : "text-gray-900"
+                                        }
+                                    `}
+
+                                >
+
+                                    {label.weekday}
 
                                 </div>
 
-                                <div className="mt-2 text-sm">
+                                <div className="text-gray-500 mt-1">
 
-                                    {
-
-                                        label.day
-
-                                    }
+                                    {label.day}
 
                                 </div>
 
-                            </button>
+                            </div>
 
-                        );
+                            {/* Check */}
 
-                    }
+                            <div
 
-                )
+                                className={`
+                                    absolute
+                                    right-5
+                                    flex
+                                    h-8
+                                    w-8
+                                    items-center
+                                    justify-center
+                                    rounded-full
+                                    bg-violet-600
+                                    transition
+
+                                    ${
+                                        active
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                    }
+                                `}
+
+                            >
+
+                                <Check
+
+                                    size={16}
+
+                                    className="text-white"
+
+                                />
+
+                            </div>
+
+                        </button>
+
+                    );
+
+                })
 
             }
 

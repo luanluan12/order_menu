@@ -1,179 +1,174 @@
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
-import {
+// import {
 
-    verifyInvite,
+//     verifyInvite,
 
-    createOrderFromInvite
+//     createOrderFromInvite
 
-} from "../../api/orderApi";
+// } from "../../api/orderApi";
 
-import WeekMenuContent from "../../components/WeekMenuContent";
+// import WeekMenuContent from "../../components/WeekMenuContent";
 
-function InviteOrder() {
+// function InviteOrder() {
 
-    const { token } = useParams();
+//     const { token } = useParams();
 
-    const [loading, setLoading] = useState(true);
+//     const [loading, setLoading] = useState(true);
 
-    const [user, setUser] = useState(null);
+//     const [user, setUser] = useState(null);
 
-    const [menu, setMenu] = useState(null);
+//     const [menu, setMenu] = useState(null);
 
-    useEffect(() => {
+//     useEffect(() => {
 
-        loadInvite();
+//         loadInvite();
 
-    }, []);
+//     }, []);
 
-    const loadInvite = async () => {
+//     const loadInvite = async () => {
 
-        try {
+//         try {
 
-            const res = await verifyInvite(token);
+//             const res = await verifyInvite(token);
+//             console.log("MENU:", res.data.data.menu);
 
-            setUser(
+//             setUser(
 
-                res.data.data.user
+//                 res.data.data.user
 
-            );
+//             );
 
-            setMenu(
+//             setMenu(
 
-                res.data.data.menu
+//                 res.data.data.menu
 
-            );
+//             );
 
-        }
+//         }
 
-        catch (err) {
+//         catch (err) {
 
-            toast.error(
+//             toast.error(
 
-                err.response?.data?.message ||
+//                 err.response?.data?.message ||
 
-                "Link không hợp lệ."
+//                 "Link không hợp lệ."
 
-            );
+//             );
 
-        }
+//         }
 
-        finally {
+//         finally {
 
-            setLoading(false);
+//             setLoading(false);
 
-        }
+//         }
 
-    };
+//     };
 
-    const submit = async (days) => {
+//     const submit = async (days) => {
 
-        try {
+//         try {
 
-            const res = await createOrderFromInvite({
+//             const res = await createOrderFromInvite({
 
-                token,
+//                 token,
 
-                days
+//                 days
 
-            });
+//             });
 
-            toast.success(
+//             toast.success(
 
-                res.data.message
+//                 res.data.message
 
-            );
+//             );
 
-        }
+//         }
 
-        catch (err) {
+//         catch (err) {
 
-            toast.error(
+//             toast.error(
 
-                err.response?.data?.message ||
+//                 err.response?.data?.message ||
 
-                "Đặt món thất bại."
+//                 "Đặt món thất bại."
 
-            );
+//             );
 
-        }
+//         }
 
-    };
+//     };
 
-    if (loading) {
+//     if (loading) {
 
-        return (
+//         return (
 
-            <div className="flex h-screen items-center justify-center">
+//             <div className="flex h-screen items-center justify-center">
 
-                Đang tải...
+//                 Đang tải...
 
-            </div>
+//             </div>
 
-        );
+//         );
 
-    }
+//     }
 
-    if (!menu) {
+//     if (!menu) {
 
-        return (
+//         return (
 
-            <div className="flex h-screen items-center justify-center">
+//             <div className="flex h-screen items-center justify-center">
 
-                Link không hợp lệ.
+//                 Link không hợp lệ.
 
-            </div>
+//             </div>
 
-        );
+//         );
 
-    }
+//     }
 
-    return (
+//     return (
 
-        <div className="mx-auto max-w-7xl p-6">
+//         <div className="mx-auto max-w-7xl p-6">
 
-            <div className="mb-8">
+//             <div className="mb-8">
 
-                <h1 className="text-3xl font-bold">
+//                 <p className="mt-2 text-gray-500">
 
-                    Đặt món theo lời mời
+//                     Xin chào {user.name}
 
-                </h1>
+//                 </p>
 
-                <p className="mt-2 text-gray-500">
+//                 <p className="text-gray-500">
 
-                    Xin chào {user.name}
+//                     {user.email}
 
-                </p>
+//                 </p>
 
-                <p className="text-gray-500">
+//             </div>
 
-                    {user.email}
+//             <WeekMenuContent
 
-                </p>
+//                 menu={menu}
 
-            </div>
+//                 initialOrder={null}
 
-            <WeekMenuContent
+//                 submitText="ĐẶT MÓN"
 
-                menu={menu}
+//                 onSubmit={submit}
 
-                initialOrder={null}
+//             />
 
-                submitText="ĐẶT MÓN"
+//         </div>
 
-                onSubmit={submit}
+//     );
 
-            />
+// }
 
-        </div>
-
-    );
-
-}
-
-export default InviteOrder;
+// export default InviteOrder;

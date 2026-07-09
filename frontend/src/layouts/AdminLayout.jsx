@@ -4,23 +4,45 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 
 function AdminLayout() {
-    return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Sidebar */}
-            <Sidebar />
 
-            {/* Content */}
+    return (
+
+        <div className="flex h-screen bg-[#F7F8FC]">
+
+            {/* Sidebar */}
+
+            <aside className="w-[280px] shrink-0 border-r border-gray-200 bg-white">
+
+                <Sidebar />
+
+            </aside>
+
+            {/* Main */}
+
             <div className="flex flex-1 flex-col overflow-hidden">
+
                 {/* Header */}
+
                 <Header />
 
-                {/* Main */}
-                <main className="flex-1 overflow-y-auto p-6">
-                    <Outlet />
+                {/* Content */}
+
+                <main className="flex-1 overflow-y-auto p-8">
+
+                    <div className="mx-auto max-w-[1500px]">
+
+                        <Outlet />
+
+                    </div>
+
                 </main>
+
             </div>
+
         </div>
+
     );
+
 }
 
 export default AdminLayout;

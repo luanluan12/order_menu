@@ -1,28 +1,22 @@
 import WeekMenu from "./WeekMenu";
-
+import Header from "./components/Header";
 function Home() {
 
     return (
 
-        <div style={{
+    <>
 
-            width: "90%",
+        <Header />
 
-            margin: "30px auto"
-
-        }}>
-
-            <h1>
-
-                Food Ordering
-
-            </h1>
+        <div className="mx-auto max-w-7xl p-6">
 
             <WeekMenu />
 
         </div>
 
-    );
+    </>
+
+);
 
 }
 

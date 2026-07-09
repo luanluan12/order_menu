@@ -95,3 +95,14 @@ export const createOrderFromInvite = (data) => {
     );
 
 };
+
+export const getOrders = (params = {}) => {
+
+    return axios.get(
+        "/order",
+        {
+            params
+        }
+    );
+
+};

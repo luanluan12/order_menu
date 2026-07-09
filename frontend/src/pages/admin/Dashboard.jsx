@@ -44,67 +44,31 @@ function Dashboard() {
             </div>
         );
     }
-
     return (
-        <div>
+    <div className="space-y-8">
 
-            <h1 className="mb-8 text-3xl font-bold text-gray-700">
-                Dashboard
-            </h1>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
 
-                {/* Users */}
-                <div className="rounded-xl bg-white p-6 shadow">
+                <div className="flex items-center justify-between">
 
-                    <div className="flex items-center justify-between">
+                    <div>
 
-                        <div>
+                        <p className="text-sm text-gray-400">
+                            Total Users
+                        </p>
 
-                            <p className="text-gray-500">
-                                Total Users
-                            </p>
-
-                            <h2 className="mt-2 text-4xl font-bold">
-
-                                {dashboard.totalUsers}
-
-                            </h2>
-
-                        </div>
-
-                        <FaUsers
-                            size={45}
-                            className="text-blue-600"
-                        />
+                        <h2 className="mt-3 text-4xl font-bold">
+                            {dashboard.totalUsers}
+                        </h2>
 
                     </div>
 
-                </div>
+                    <div className="rounded-full bg-green-100 p-5">
 
-                {/* Menu */}
-                <div className="rounded-xl bg-white p-6 shadow">
-
-                    <div className="flex items-center justify-between">
-
-                        <div>
-
-                            <p className="text-gray-500">
-
-                                Total Menus
-
-                            </p>
-
-                            <h2 className="mt-2 text-4xl font-bold">
-
-                                {dashboard.totalMenus}
-
-                            </h2>
-
-                        </div>
-
-                        <FaUtensils
-                            size={45}
+                        <FaUsers
+                            size={28}
                             className="text-green-600"
                         />
 
@@ -112,29 +76,28 @@ function Dashboard() {
 
                 </div>
 
-                {/* Orders */}
-                <div className="rounded-xl bg-white p-6 shadow">
+            </div>
 
-                    <div className="flex items-center justify-between">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
 
-                        <div>
+                <div className="flex items-center justify-between">
 
-                            <p className="text-gray-500">
+                    <div>
 
-                                Today's Orders
+                        <p className="text-sm text-gray-400">
+                            Total Menus
+                        </p>
 
-                            </p>
+                        <h2 className="mt-3 text-4xl font-bold">
+                            {dashboard.totalMenus}
+                        </h2>
 
-                            <h2 className="mt-2 text-4xl font-bold">
+                    </div>
 
-                                {dashboard.todayOrders}
+                    <div className="rounded-full bg-orange-100 p-5">
 
-                            </h2>
-
-                        </div>
-
-                        <FaClipboardList
-                            size={45}
+                        <FaUtensils
+                            size={28}
                             className="text-orange-500"
                         />
 
@@ -142,29 +105,57 @@ function Dashboard() {
 
                 </div>
 
-                {/* Vegetarian */}
-                <div className="rounded-xl bg-white p-6 shadow">
+            </div>
 
-                    <div className="flex items-center justify-between">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
 
-                        <div>
+                <div className="flex items-center justify-between">
 
-                            <p className="text-gray-500">
+                    <div>
 
-                                Vegetarian
+                        <p className="text-sm text-gray-400">
+                            Orders Today
+                        </p>
 
-                            </p>
+                        <h2 className="mt-3 text-4xl font-bold">
+                            {dashboard.todayOrders}
+                        </h2>
 
-                            <h2 className="mt-2 text-4xl font-bold">
+                    </div>
 
-                                {dashboard.vegetarian}
+                    <div className="rounded-full bg-blue-100 p-5">
 
-                            </h2>
+                        <FaClipboardList
+                            size={28}
+                            className="text-blue-600"
+                        />
 
-                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
+
+                <div className="flex items-center justify-between">
+
+                    <div>
+
+                        <p className="text-sm text-gray-400">
+                            Vegetarian
+                        </p>
+
+                        <h2 className="mt-3 text-4xl font-bold">
+                            {dashboard.vegetarian}
+                        </h2>
+
+                    </div>
+
+                    <div className="rounded-full bg-emerald-100 p-5">
 
                         <FaLeaf
-                            size={45}
+                            size={28}
                             className="text-emerald-600"
                         />
 
@@ -174,72 +165,53 @@ function Dashboard() {
 
             </div>
 
-            {/* Statistics */}
+        </div>
 
-            <div className="mt-10 rounded-xl bg-white p-8 shadow">
+        {/* Main Content */}
 
-                <h2 className="mb-5 text-xl font-bold">
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
 
-                    Statistics
+            <div className="mb-8 flex items-center justify-between">
 
-                </h2>
+                <div>
 
-                <div className="grid grid-cols-3 gap-8">
+                    <h2 className="text-2xl font-bold">
+                        Dashboard Content
+                    </h2>
 
-                    <div>
+                    <p className="mt-2 text-gray-500">
+                        Content sẽ bổ sung sau.
+                    </p>
 
-                        <h3 className="text-gray-500">
+                </div>
 
-                            Normal Meal
+                <div className="flex gap-3">
 
-                        </h3>
+                    <input
+                        placeholder="Search..."
+                        className="rounded-xl border border-gray-200 px-4 py-2 outline-none"
+                    />
 
-                        <p className="mt-3 text-3xl font-bold text-blue-600">
-
-                            {dashboard.normal}
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <h3 className="text-gray-500">
-
-                            Vegetarian
-
-                        </h3>
-
-                        <p className="mt-3 text-3xl font-bold text-green-600">
-
-                            {dashboard.vegetarian}
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <h3 className="text-gray-500">
-
-                            Cancelled
-
-                        </h3>
-
-                        <p className="mt-3 text-3xl font-bold text-red-600">
-
-                            {dashboard.cancelled}
-
-                        </p>
-
-                    </div>
+                    <button className="rounded-xl border border-gray-200 px-5">
+                        Filter
+                    </button>
 
                 </div>
 
             </div>
 
+            <div className="flex h-[500px] items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50">
+
+                <span className="text-lg text-gray-400">
+                    Dashboard Content Placeholder
+                </span>
+
+            </div>
+
         </div>
-    );
+
+    </div>
+);
 }
 
 export default Dashboard;

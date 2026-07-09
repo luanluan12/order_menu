@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 
 import Home from "../pages/user/Home";
-import InviteOrder from "../pages/user/InviteOrder";
+import ChangePassword from "../pages/user/ChangePassword";
 
 import Dashboard from "../pages/admin/Dashboard";
 import MenuManagement from "../pages/admin/MenuManagement";
@@ -30,11 +30,6 @@ function AppRoutes() {
                 element={<Login />}
             />
 
-            <Route
-                path="/invite/:token"
-                element={<InviteOrder />}
-            />
-
             {/* User */}
             <Route
                 path="/home"
@@ -44,6 +39,13 @@ function AppRoutes() {
                     </PrivateRoute>
                 }
             />
+            <Route
+
+    path="/change-password"
+
+    element={<ChangePassword />}
+
+/>
             <Route
 
                 path="/history"

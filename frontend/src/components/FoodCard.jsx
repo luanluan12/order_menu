@@ -1,21 +1,16 @@
+import { Check, Plus } from "lucide-react";
 import QuantitySelector from "./QuantitySelector";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5001";
 
 function FoodCard({
 
     food,
-
     type,
-
     disabled,
-
     quantity,
-
     checked,
-
     onQuantityChange,
-
     onSelect
 
 }) {
@@ -42,173 +37,177 @@ function FoodCard({
 
         <div
 
-            onClick={handleClick}
+            onClick={
 
-            className={`relative overflow-hidden rounded-2xl border bg-white transition-all
+                type !== "main"
 
-            ${disabled
+                    ? handleClick
 
-                    ?
-
-                    "cursor-not-allowed opacity-40"
-
-                    :
-
-                    "cursor-pointer hover:-translate-y-1 hover:shadow-xl"
-
-                }
-
-            ${selected
-
-                    ?
-
-                    "border-blue-600 ring-2 ring-blue-500"
-
-                    :
-
-                    "border-gray-200"
-
-                }`}
-
-        >
-
-            {/* Tick */}
-
-            {
-
-                selected && (
-
-                    <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white shadow">
-
-                        ✓
-
-                    </div>
-
-                )
+                    : undefined
 
             }
 
-            {/* Image */}
+            className={`
+                flex
+        items-center
+        justify-between
 
-            <img
+        w-full
+        max-w-[500px]
 
-                src={
+        rounded-3xl
+        border
+        bg-white
 
-                    food.image
+        px-6
+        py-4
 
-                        ?
+        transition
+        duration-200
 
-                        API_URL + food.image
+                ${
+                    disabled
 
-                        :
+                        ? "cursor-not-allowed opacity-50"
 
-                        "https://placehold.co/600x400?text=No+Image"
-
+                        : "hover:shadow-lg"
                 }
 
-                alt={food.name}
+                ${
+                    selected && type !== "main"
 
-                className="h-52 w-full object-cover"
+                        ? "border-violet-500 bg-violet-50"
 
-            />
-
-            {/* Content */}
-
-            <div className="p-4">
-
-                <h3 className="text-lg font-bold">
-
-                    {food.name}
-
-                </h3>
-
-                {
-
-                    type === "main"
-
-                        ?
-
-                        (
-
-                            <div className="mt-5">
-
-                                <QuantitySelector
-
-                                    quantity={quantity}
-
-                                    disabled={disabled}
-
-                                    onChange={(value) =>
-
-                                        onQuantityChange(
-
-                                            food,
-
-                                            value
-
-                                        )
-
-                                    }
-
-                                />
-
-                            </div>
-
-                        )
-
-                        :
-
-                        (
-
-                            <button
-
-                                disabled={disabled}
-
-                                onClick={(e) => {
-
-                                    e.stopPropagation();
-
-                                    handleClick();
-
-                                }}
-
-                                className={`mt-5 w-full rounded-xl py-3 font-bold transition
-
-                                ${selected
-
-                                        ?
-
-                                        "bg-blue-600 text-white"
-
-                                        :
-
-                                        "bg-gray-100 hover:bg-blue-100"
-
-                                    }`}
-
-                            >
-
-                                {
-
-                                    selected
-
-                                        ?
-
-                                        "Đã chọn"
-
-                                        :
-
-                                        "Chọn"
-
-                                }
-
-                            </button>
-
-                        )
-
+                        : "border-gray-200"
                 }
+            `}
+        >
+
+            {/* LEFT */}
+
+            <div className="flex items-center gap-4">
+
+                <img
+
+                    src={
+
+                        food.image
+
+                            ? API_URL + food.image
+
+                            : "https://placehold.co/120"
+
+                    }
+
+                    alt={food.name}
+
+                    className="
+                        h-16
+                        w-16
+                        rounded-full
+                        object-cover
+                        border
+                        border-gray-200
+                        shrink-0
+                    "
+
+                />
+
+                <div>
+
+                    <h3 className="text-lg font-semibold text-gray-900">
+
+                        {food.name}
+
+                    </h3>
+
+                </div>
 
             </div>
+
+            {/* RIGHT */}
+
+            {
+
+                type === "main"
+
+                    ?
+
+                    (
+
+                        <QuantitySelector
+
+                            quantity={quantity}
+
+                            disabled={disabled}
+
+                            onChange={(value)=>
+
+                                onQuantityChange(
+
+                                    food,
+
+                                    value
+
+                                )
+
+                            }
+
+                        />
+
+                    )
+
+                    :
+
+                    (
+
+                        <button
+
+                            disabled={disabled}
+
+                            onClick={(e)=>{
+
+                                e.stopPropagation();
+
+                                handleClick();
+
+                            }}
+
+                            className={`
+                                flex
+                                h-10
+                                w-10
+                                items-center
+                                justify-center
+                                rounded-full
+                                transition
+
+                                ${
+                                    selected
+
+                                        ? "bg-violet-600 text-white"
+
+                                        : "border border-gray-300 bg-white hover:border-violet-500 hover:bg-violet-50"
+                                }
+                            `}
+
+                        >
+
+                            {
+
+                                selected
+
+                                    ? <Check size={18} />
+
+                                    : <Plus size={18} />
+
+                            }
+
+                        </button>
+
+                    )
+
+            }
 
         </div>
 

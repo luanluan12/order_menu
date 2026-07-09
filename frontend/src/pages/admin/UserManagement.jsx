@@ -266,11 +266,6 @@ function UserManagement() {
 
             <div className="flex justify-between items-center">
 
-                <h1 className="text-3xl font-bold">
-
-                    User Management
-
-                </h1>
 
                 <button onClick={handleAdd}
                     className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700"

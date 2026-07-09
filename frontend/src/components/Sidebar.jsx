@@ -5,115 +5,204 @@ import {
     FaClipboardList,
     FaChartBar,
     FaSignOutAlt,
+    FaChevronRight,
 } from "react-icons/fa";
 
 import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
+
     const navigate = useNavigate();
 
     const user = JSON.parse(localStorage.getItem("user"));
 
     const logout = () => {
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
         navigate("/");
+
     };
 
-    const menuClass = ({ isActive }) =>
-        `flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-200 ${isActive
-            ? "bg-blue-600 text-white"
-            : "text-gray-300 hover:bg-slate-700 hover:text-white"
-        }`;
+    const menus = [
+
+        {
+            to: "/admin/dashboard",
+            label: "Dashboard",
+            icon: FaHome,
+        },
+
+        {
+            to: "/admin/menu",
+            label: "Menu",
+            icon: FaUtensils,
+        },
+
+        {
+            to: "/admin/user",
+            label: "Users",
+            icon: FaUsers,
+        },
+
+        {
+            to: "/admin/order",
+            label: "Orders",
+            icon: FaClipboardList,
+        },
+
+        {
+            to: "/admin/report",
+            label: "Reports",
+            icon: FaChartBar,
+        },
+
+    ];
 
     return (
-        <aside className="flex h-screen w-64 flex-col bg-slate-900 text-white shadow-xl">
+
+<aside className="flex h-screen w-[250px] flex-col border-r border-[#ECECF3] bg-white">
             {/* Logo */}
-            <div className="border-b border-slate-700 p-6">
-                <h1 className="text-2xl font-bold text-blue-400">
-                    Food Admin
-                </h1>
 
-                <p className="mt-2 text-sm text-gray-400">
-                    Food Ordering System
-                </p>
+           <div className="flex justify-center pt-10 pb-8">
+
+    <h1 className="text-[28px] font-bold tracking-tight">
+
+        Food
+
+        <span className="text-[#5B39F5]">
+
+            Admin
+
+        </span>
+
+    </h1>
+
+</div >
+
+            <nav className="mt-2 flex-1 px-2">
+
+                <div className="space-y-2">
+
+                    {
+
+                        menus.map((item) => {
+
+                            const Icon = item.icon;
+
+                            return (
+
+                                <NavLink
+    key={item.to}
+    to={item.to}
+>
+    {({ isActive }) => (
+
+        <div
+            className={`mx-3 flex h-12 items-center rounded-xl px-4 transition-all duration-300
+
+            ${
+                isActive
+                    ? "bg-[#5B39F5] text-white shadow-md"
+                    : "text-[#9197B3] hover:bg-[#F8F7FF]"
+            }`}
+        >
+
+            {/* Icon */}
+
+            <div className="flex w-8 items-center justify-center">
+
+                <Icon
+                    className={
+                        isActive
+                            ? "text-white text-[16px]"
+                            : "text-[#9197B3] text-[16px]"
+                    }
+                />
+
             </div>
 
-            {/* User */}
-            <div className="border-b border-slate-700 p-5">
-                <p className="text-sm text-gray-400">
-                    Xin chào
-                </p>
+            {/* Text */}
 
-                <h2 className="mt-1 font-semibold">
-                    {user?.name}
-                </h2>
+            <span
+                className={`ml-4 flex-1 text-[14px] font-medium
 
-                <p className="text-xs text-blue-400">
-                    {user?.role}
-                </p>
-            </div>
+                ${
+                    isActive
+                        ? "text-white"
+                        : "text-[#9197B3]"
+                }`}
+            >
 
-            {/* Menu */}
-            <nav className="flex-1 space-y-2 p-4">
+                {item.label}
 
-                <NavLink
-                    to="/admin/dashboard"
-                    className={menuClass}
-                >
-                    <FaHome />
-                    Dashboard
-                </NavLink>
+            </span>
 
-                <NavLink
-                    to="/admin/menu"
-                    className={menuClass}
-                >
-                    <FaUtensils />
-                    Menu
-                </NavLink>
+        </div>
 
-                <NavLink
-                    to="/admin/user"
-                    className={menuClass}
-                >
-                    <FaUsers />
-                    User
-                </NavLink>
+    )}
+</NavLink>
 
-                <NavLink
-                    to="/admin/order"
-                    className={menuClass}
-                >
-                    <FaClipboardList />
-                    Order
-                </NavLink>
+                            );
 
-                <NavLink
-                    to="/admin/report"
-                    className={menuClass}
-                >
-                    <FaChartBar />
-                    Report
-                </NavLink>
+                        })
+
+                    }
+
+                </div>
 
             </nav>
 
-            {/* Logout */}
-            <div className="border-t border-slate-700 p-4">
+            {/* User */}
+
+            <div className="border-t border-[#ECECF3] px-6 py-5">
+
+                <div className="flex items-center gap-3">
+
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-lg font-bold text-violet-600">
+
+                        {user?.name?.charAt(0).toUpperCase() || "A"}
+
+                    </div>
+
+                    <div>
+
+                        <h3 className="text-sm font-semibold text-gray-800">
+
+                            {user?.name}
+
+                        </h3>
+
+                        <p className="text-xs text-[#9197B3]">
+
+                            {user?.role}
+
+                        </p>
+
+                    </div>
+
+                </div>
 
                 <button
+
                     onClick={logout}
-                    className="flex w-full items-center justify-center gap-3 rounded-lg bg-red-500 px-4 py-3 font-medium transition hover:bg-red-600"
+
+                    className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-500 font-medium text-white transition hover:bg-red-600"
+
                 >
+
                     <FaSignOutAlt />
+
                     Logout
+
                 </button>
 
             </div>
+
         </aside>
+
     );
+
 }
 
 export default Sidebar;

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
 
-import WeekTableEditor from "../../components/WeekTableEditor";
+import WeekMenuEditor from "../../components/WeekMenuEditor";
 
 import {
 
@@ -19,10 +19,6 @@ function MenuWeekCreate() {
     const [loading, setLoading] = useState(false);
 
     const handleSave = async (formData) => {
-        console.log("===== HANDLE SAVE =====");
-        console.log(formData);
-
-        alert("handleSave");
 
         try {
 
@@ -44,7 +40,9 @@ function MenuWeekCreate() {
 
         catch (err) {
 
-            console.log(err);
+            console.log(err.response);
+
+    console.log(err.response.data);
 
             toast.error(
 
@@ -70,27 +68,10 @@ function MenuWeekCreate() {
 
             <div className="mb-6 flex items-center justify-between">
 
-                <div>
-
-                    <h1 className="text-3xl font-bold">
-
-                        Tạo Menu Tuần
-
-                    </h1>
-
-                    <p className="mt-2 text-gray-500">
-
-                        Nhập thực đơn cho cả tuần
-
-                    </p>
-
-                </div>
-
             </div>
 
-            <WeekTableEditor
+            <WeekMenuEditor
 
-                loading={loading}
 
                 onSave={handleSave}
 

@@ -459,6 +459,11 @@ function WeekMenuContent({
         );
 
     }
+    const expired =
+
+    new Date() >
+
+    new Date(menu.deadline);
 
     return (
 
@@ -472,105 +477,28 @@ function WeekMenuContent({
 
                 </h1>
 
-                <p className="mt-2 text-gray-500">
+                {
+    expired && (
 
-                    Chọn món cho từng ngày
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-center">
 
-                </p>
+            <div className="text-xl font-bold text-red-600">
+
+                ⛔ Đã hết thời gian đặt món
 
             </div>
 
-            <DayTabs
+            <div className="mt-2 text-gray-600">
 
-                days={menu.days}
+                Hạn chót:
 
-                currentDay={currentDay}
-
-                onChange={setCurrentDay}
-
-            />
-
-            <div className="mt-8 space-y-10">
-
-                {/* ================= MAIN ================= */}
-
-                <FoodGroup
-
-                    title="🍱 Món chính"
-
-                    subtitle="Chọn tối đa 2 phần"
-
-                    foods={day.mains || []}
-
-                    type="main"
-
-                    disabled={disableMain()}
-
-                    quantityOf={getMainQuantity}
-
-                    onQuantityChange={changeMainQuantity}
-
-                />
-
-                {/* ================= DRINK ================= */}
-
-                <FoodGroup
-
-                    title="🥤 Nước"
-
-                    subtitle="Chọn 1"
-
-                    foods={day.drinks || []}
-
-                    type="drink"
-
-                    disabled={disableDrink()}
-
-                    selected={isDrinkSelected}
-
-                    onSelect={toggleDrink}
-
-                />
-
-                {/* ================= SOUP ================= */}
-
-                <FoodGroup
-
-                    title="🥣 Cháo / Súp"
-
-                    subtitle="Chọn 1"
-
-                    foods={day.soups || []}
-
-                    type="soup"
-
-                    disabled={disableSoup()}
-
-                    selected={isSoupSelected}
-
-                    onSelect={toggleSoup}
-
-                />
-
-                {/* ================= DESSERT ================= */}
+                {" "}
 
                 {
 
-                    day.desserts?.length > 0 && (
+                    new Date(menu.deadline).toLocaleString(
 
-                        <FoodGroup
-
-                            title="🍰 Tráng miệng"
-
-                            subtitle="Chỉ hiển thị"
-
-                            foods={day.desserts}
-
-                            type="dessert"
-
-                            disabled={true}
-
-                        />
+                        "vi-VN"
 
                     )
 
@@ -578,27 +506,143 @@ function WeekMenuContent({
 
             </div>
 
+        </div>
+
+    )
+}
+
+            </div>
+
+
+            <div className="mt-8 grid grid-cols-[220px_1fr] gap-8">
+
+    {/* LEFT */}
+    <DayTabs
+        days={menu.days}
+        currentDay={currentDay}
+        onChange={setCurrentDay}
+    />
+
+    {/* RIGHT */}
+    <div className="space-y-10">
+
+        {/* ================= MAIN ================= */}
+
+        <FoodGroup
+            title="Món chính"
+            subtitle="Chọn tối đa 2 phần"
+            foods={day.mains || []}
+            type="main"
+            disabled={expired || disableMain()}
+            quantityOf={getMainQuantity}
+            onQuantityChange={changeMainQuantity}
+        />
+
+        {/* ================= DRINK ================= */}
+
+        <FoodGroup
+            title="Món nước"
+            subtitle="Chọn 1"
+            foods={day.drinks || []}
+            type="drink"
+            disabled={expired || disableDrink()}
+            selected={isDrinkSelected}
+            onSelect={toggleDrink}
+        />
+
+        {/* ================= SOUP ================= */}
+
+        <FoodGroup
+            title="Cháo / Súp"
+            subtitle="Chọn 1"
+            foods={day.soups || []}
+            type="soup"
+            disabled={expired || disableSoup()}
+            selected={isSoupSelected}
+            onSelect={toggleSoup}
+        />
+
+        {/* ================= DESSERT ================= */}
+
+        {
+            day.desserts?.length > 0 && (
+                <FoodGroup
+                    title="🍰 Tráng miệng"
+                    subtitle="Chỉ hiển thị"
+                    foods={day.desserts}
+                    type="dessert"
+                    disabled={true}
+                />
+            )
+        }
+
+    </div>
+
+</div>
+
             {
 
-                editable && (
+               <div className="mt-12 flex justify-center">
 
-                    <div className="mt-12 flex justify-end">
+    <button
 
-                        <button
+        disabled={expired}
 
-                            onClick={handleSubmit}
+        onClick={handleSubmit}
 
-                            className="rounded-xl bg-blue-600 px-10 py-4 text-lg font-bold text-white transition hover:bg-blue-700"
+        className={`
 
-                        >
+            rounded-2xl
 
-                            {submitText}
+            px-16
 
-                        </button>
+            py-4
 
-                    </div>
+            text-xl
 
-                )
+            font-bold
+
+            text-white
+
+            shadow-lg
+
+            transition
+
+            ${
+
+                expired
+
+                ?
+
+                "cursor-not-allowed bg-gray-400"
+
+                :
+
+                "bg-violet-600 hover:bg-violet-700"
+
+            }
+
+        `}
+
+    >
+
+        {
+
+            expired
+
+            ?
+
+            "ĐÃ HẾT HẠN"
+
+            :
+
+            submitText
+
+        }
+
+    </button>
+
+</div>
 
             }
 

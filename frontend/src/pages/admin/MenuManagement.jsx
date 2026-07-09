@@ -199,41 +199,14 @@ function MenuManagement() {
             {/* Title */}
             <div className="flex items-center justify-between">
 
-                <h1 className="text-3xl font-bold">
-                    Menu Management
-                </h1>
-
                 <button
+    onClick={() => navigate("/admin/menu/create")}
+    className="flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:bg-violet-700 hover:shadow-lg"
+>
+    <span className="text-lg">+</span>
 
-                    onClick={() =>
-
-                        navigate("/admin/menu/create")
-
-                    }
-
-                >
-
-                    + Tạo Menu Tuần
-
-                </button>
-
-            </div>
-
-            {/* Search */}
-
-            <div className="flex w-96 items-center rounded-lg border bg-white px-4 py-3">
-
-                <FaSearch className="mr-3 text-gray-500" />
-
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm..."
-                    className="w-full outline-none"
-                    value={keyword}
-                    onChange={(e) =>
-                        setKeyword(e.target.value)
-                    }
-                />
+    <span>Tạo Menu Tuần</span>
+</button>
 
             </div>
 

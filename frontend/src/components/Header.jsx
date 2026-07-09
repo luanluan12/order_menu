@@ -1,102 +1,60 @@
-import { useEffect, useState } from "react";
 import {
     FaBell,
-    FaSearch,
-    FaUserCircle,
+    FaCog,
+    FaSearch
 } from "react-icons/fa";
 
 function Header() {
-    const user = JSON.parse(localStorage.getItem("user"));
 
-    const [currentTime, setCurrentTime] = useState("");
+    const user = JSON.parse(
 
-    useEffect(() => {
-        const updateTime = () => {
-            const now = new Date();
+        localStorage.getItem("user")
 
-            setCurrentTime(
-                now.toLocaleString("vi-VN", {
-                    dateStyle: "full",
-                    timeStyle: "medium",
-                })
-            );
-        };
-
-        updateTime();
-
-        const timer = setInterval(updateTime, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
+    );
 
     return (
-        <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
+
+        <header className="flex h-24 items-center justify-between border-b border-gray-200 bg-[#F7F8FC] px-10">
 
             {/* Left */}
+
             <div>
-                <h1 className="text-2xl font-bold text-gray-800">
-                    Dashboard
+
+                <h1 className="text-3xl font-bold text-gray-800">
+
+                    Hello,
+
+                    <span className="ml-2 text-violet-600">
+
+                        {user?.name || "Admin"}
+
+                    </span>
+
+                    👋
+
                 </h1>
-
-                <p className="text-sm text-gray-500">
-                    {currentTime}
-                </p>
-            </div>
-
-            {/* Center */}
-            <div className="hidden w-96 items-center rounded-xl border bg-gray-50 px-4 py-2 md:flex">
-
-                <FaSearch className="mr-3 text-gray-400" />
-
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full bg-transparent outline-none"
-                />
 
             </div>
 
             {/* Right */}
-            <div className="flex items-center gap-6">
 
-                <button className="relative">
+            <div className="flex items-center gap-5">
 
-                    <FaBell
-                        size={22}
-                        className="text-gray-600"
-                    />
+                {/* Setting */}
 
-                    <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                        3
-                    </span>
+                <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition hover:bg-violet-50">
+
+                    <FaCog className="text-gray-600" />
 
                 </button>
 
-                <div className="flex items-center gap-3">
-
-                    <FaUserCircle
-                        size={40}
-                        className="text-blue-600"
-                    />
-
-                    <div>
-
-                        <h3 className="font-semibold">
-                            {user?.name}
-                        </h3>
-
-                        <p className="text-sm text-gray-500">
-                            {user?.role}
-                        </p>
-
-                    </div>
-
-                </div>
 
             </div>
 
         </header>
+
     );
+
 }
 
 export default Header;

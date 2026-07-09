@@ -6,12 +6,20 @@ import WeekMenuContent from "../../components/WeekMenuContent";
 
 import { getWeekMenu } from "../../api/menuApi";
 
+import { useSearchParams } from "react-router-dom";
+
 import {
 
     createOrder,
 
     updateOrder,
 
+} from "../../api/orderApi";
+
+
+import {
+    verifyInvite,
+    createOrderFromInvite
 } from "../../api/orderApi";
 
 function WeekMenu() {
@@ -22,122 +30,143 @@ function WeekMenu() {
 
     const [order, setOrder] = useState(null);
 
+    const [searchParams] = useSearchParams();
+
+    const token = searchParams.get("token");
+
     useEffect(() => {
 
-        loadData();
+    loadData();
 
-    }, []);
+}, [token]);
 
     const loadData = async () => {
 
-        try {
+    try {
 
-            const menuRes = await getWeekMenu();
+        if (token) {
 
-            const menuData = menuRes.data.data;
+            const res =
+                await verifyInvite(token);
 
-            setMenu(menuData);
-
-
-            if (
-
-                orderRes.data.ordered &&
-
-                orderRes.data.data
-
-            ) {
-
-                setOrder(
-
-                    orderRes.data.data
-
-                );
-
-            }
-
-        }
-
-        catch (err) {
-
-            toast.error(
-
-                err.response?.data?.message ||
-
-                "Không tải được thực đơn."
-
+            setMenu(
+                res.data.data.menu
             );
 
+            return;
         }
 
-        finally {
+        const menuRes =
+            await getWeekMenu();
 
-            setLoading(false);
+        setMenu(
+            menuRes.data.data
+        );
 
-        }
+    }
 
-    };
+    catch (err) {
+
+        toast.error(
+
+            err.response?.data?.message ||
+
+            "Không tải được thực đơn."
+
+        );
+
+    }
+
+    finally {
+
+        setLoading(false);
+
+    }
+
+};
 
     const submit = async (days) => {
 
-        try {
+    try {
 
-            if (order) {
+        if (token) {
 
-                await updateOrder(
+            const res =
+                await createOrderFromInvite({
 
-                    order._id,
-
-                    {
-
-                        days
-
-                    }
-
-                );
-
-                toast.success(
-
-                    "Cập nhật thành công."
-
-                );
-
-            }
-
-            else {
-
-                await createOrder({
-
-                    menuId: menu._id,
+                    token,
 
                     days
 
                 });
 
-                toast.success(
+            toast.success(
 
-                    "Đặt món thành công."
+                res.data.message
 
-                );
+            );
 
-            }
-
-            loadData();
+            return;
 
         }
 
-        catch (err) {
+        if (order) {
 
-            toast.error(
+            await updateOrder(
 
-                err.response?.data?.message ||
+                order._id,
 
-                "Có lỗi xảy ra."
+                {
+
+                    days
+
+                }
+
+            );
+
+            toast.success(
+
+                "Cập nhật thành công."
 
             );
 
         }
 
-    };
+        else {
+
+            await createOrder({
+
+                menuId: menu._id,
+
+                days
+
+            });
+
+            toast.success(
+
+                "Đặt món thành công."
+
+            );
+
+        }
+
+        loadData();
+
+    }
+
+    catch (err) {
+
+        toast.error(
+
+            err.response?.data?.message ||
+
+            "Có lỗi xảy ra."
+
+        );
+
+    }
+
+};
 
     if (loading) {
 
@@ -171,27 +200,29 @@ function WeekMenu() {
 
         <WeekMenuContent
 
-            menu={menu}
+    menu={menu}
 
-            initialOrder={order}
+    initialOrder={order}
 
-            submitText={
+    editable={!token || !order}
 
-                order
+    submitText={
 
-                    ?
+        token
 
-                    "CẬP NHẬT ĐƠN"
+            ? "ĐẶT MÓN"
 
-                    :
+            : order
 
-                    "ĐẶT MÓN"
+                ? "CẬP NHẬT"
 
-            }
+                : "ĐẶT MÓN"
 
-            onSubmit={submit}
+    }
 
-        />
+    onSubmit={submit}
+
+/>
 
     );
 
