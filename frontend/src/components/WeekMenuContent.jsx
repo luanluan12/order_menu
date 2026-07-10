@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import DayTabs from "./DayTabs";
 import FoodGroup from "./FoodGroup";
 import OrderNotice from "./OrderNotice";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function WeekMenuContent({
     menu,
@@ -14,6 +16,7 @@ function WeekMenuContent({
 }) {
     const [currentDay, setCurrentDay] = useState(0);
     const [orders, setOrders] = useState([]);
+    const navigate = useNavigate();
 
     // =========================
     // Init Order
@@ -207,12 +210,25 @@ function WeekMenuContent({
     // Submit
     // =========================
 
-    const handleSubmit = () => {
-        if (!editable) return;
-        if (!onSubmit) return;
+    const handleSubmit = async () => {
+    if (!editable) return;
+    if (!onSubmit) return;
 
-        onSubmit(orders);
-    };
+    const success = await onSubmit(orders);
+
+    if (!success) return;
+
+    await Swal.fire({
+        icon: "success",
+        title: "🎉 Đặt món thành công!",
+        text: "Cảm ơn bạn đã đặt món. Chúc bạn ngon miệng!",
+        confirmButtonText: "Xem lịch sử",
+        confirmButtonColor: "#f97316",
+        allowOutsideClick: false,
+    });
+
+    navigate("/history");
+};
 
     if (!menu) {
         return (

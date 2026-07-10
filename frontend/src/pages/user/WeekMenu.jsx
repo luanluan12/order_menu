@@ -85,87 +85,53 @@ function WeekMenu() {
 
 };
 
-    const submit = async (days) => {
-
+const submit = async (days) => {
     try {
 
         if (token) {
 
-            const res =
-                await createOrderFromInvite({
+            const res = await createOrderFromInvite({
+                token,
+                days,
+            });
 
-                    token,
+            toast.success(res.data.message);
 
-                    days
-
-                });
-
-            toast.success(
-
-                res.data.message
-
-            );
-
-            return;
-
+            return true;
         }
 
         if (order) {
 
-            await updateOrder(
-
-                order._id,
-
-                {
-
-                    days
-
-                }
-
-            );
-
-            toast.success(
-
-                "Cập nhật thành công."
-
-            );
-
-        }
-
-        else {
-
-            await createOrder({
-
-                menuId: menu._id,
-
-                days
-
+            await updateOrder(order._id, {
+                days,
             });
 
-            toast.success(
+            toast.success("Cập nhật thành công.");
 
-                "Đặt món thành công."
+        } else {
 
-            );
+            await createOrder({
+                menuId: menu._id,
+                days,
+            });
+
+            toast.success("Đặt món thành công.");
 
         }
 
-        loadData();
+        await loadData();
 
-    }
+        return true;
 
-    catch (err) {
+    } catch (err) {
 
         toast.error(
-
             err.response?.data?.message ||
-
             "Có lỗi xảy ra."
-
         );
 
+        return false;
     }
-
 };
 
     if (loading) {

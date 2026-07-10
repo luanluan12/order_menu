@@ -19,7 +19,7 @@ function History() {
         } catch (err) {
             toast.error(
                 err.response?.data?.message ||
-                    "Không tải được lịch sử."
+                "Không tải được lịch sử."
             );
         }
     };
@@ -31,43 +31,73 @@ function History() {
             month: "2-digit",
         });
 
+    const DishCard = ({ dish, type = "", quantity }) => (
+        <div className="w-[150px] overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+
+            <div className="p-2">
+
+                <img
+                    src={
+                        dish.image
+                            ? API_URL + dish.image
+                            : "https://placehold.co/600"
+                    }
+                    alt={dish.name}
+                    className="h-[125px] w-full rounded-[16px] object-cover"
+                />
+
+            </div>
+
+            <div className="px-3 pb-4">
+
+                <h3 className="min-h-[42px] text-center text-[16px] font-semibold text-slate-800">
+                    {dish.name}
+                </h3>
+
+                <div className="mt-2 text-center text-xs font-medium text-gray-500">
+                    {type}
+                </div>
+
+                {quantity && (
+                    <div className="mt-3 flex justify-center">
+                        <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-bold text-orange-600">
+                            x{quantity}
+                        </span>
+                    </div>
+                )}
+
+            </div>
+
+        </div>
+    );
+
     return (
         <div className="mx-auto max-w-[1080px] px-8 py-8">
 
             {/* Header */}
 
-            <div className="mb-10">
+            <div className="mb-10 flex items-center gap-4">
 
-                <div className="flex items-center gap-4">
-
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-500">
-
-                        <ClipboardList size={28} />
-
-                    </div>
-
-                    <div>
-
-                        <h1 className="text-4xl font-bold text-slate-800">
-                            Lịch sử đặt món
-                        </h1>
-
-                    </div>
-
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-500">
+                    <ClipboardList size={28} />
                 </div>
+
+                <h1 className="text-4xl font-bold text-slate-800">
+                    Lịch sử đặt món
+                </h1>
 
             </div>
 
             {orders.length === 0 ? (
 
-                <div className="rounded-3xl bg-white p-16 text-center shadow">
+                <div className="rounded-3xl bg-white py-20 text-center shadow">
 
                     <ClipboardList
                         size={60}
                         className="mx-auto text-orange-300"
                     />
 
-                    <h2 className="mt-6 text-2xl font-bold text-slate-700">
+                    <h2 className="mt-5 text-2xl font-bold text-slate-700">
                         Chưa có đơn đặt món
                     </h2>
 
@@ -75,13 +105,13 @@ function History() {
 
             ) : (
 
-                <div className="space-y-8">
+                <div className="space-y-10">
 
                     {orders.map((order) => (
 
                         <div
                             key={order._id}
-                            className="rounded-[28px] bg-white p-8 shadow"
+                            className="rounded-[30px] bg-white p-8 shadow"
                         >
 
                             {/* Week */}
@@ -96,20 +126,12 @@ function History() {
 
                                     <div className="mt-2 flex items-center gap-2 text-gray-500">
 
-                                        <CalendarDays size={16} />
-
-                                        {new Date(
-                                            order.createdAt
-                                        ).toLocaleDateString("vi-VN")}
-
                                     </div>
 
                                 </div>
 
                                 <span
-                                    className={`rounded-full px-5 py-2 font-semibold
-
-                                    ${
+                                    className={`rounded-full px-5 py-2 font-semibold ${
                                         order.status === "ordered"
                                             ? "bg-green-100 text-green-700"
                                             : "bg-red-100 text-red-700"
@@ -124,132 +146,51 @@ function History() {
 
                             {/* Days */}
 
-                            <div className="space-y-5">
+                            <div className="space-y-8">
 
                                 {order.days.map((day) => (
 
                                     <div
                                         key={day._id || day.date}
-                                        className="rounded-3xl border border-orange-100 bg-orange-50 p-5"
+                                        className="rounded-[24px] bg-orange-50 p-6"
                                     >
 
-                                        <div className="mb-4 text-lg font-bold text-slate-800">
-
+                                        <h3 className="mb-5 text-xl font-bold text-slate-800">
                                             {formatDay(day.date)}
+                                        </h3>
+
+                                        <div className="flex flex-wrap gap-5">
+
+                                            {day.mains.map((dish) => (
+
+                                                <DishCard
+                                                    key={dish.dishId || dish.name}
+                                                    dish={dish}
+                                                    quantity={dish.quantity}
+                                                    type="Món cơm"
+                                                />
+
+                                            ))}
+
+                                            {day.drink && (
+
+                                                <DishCard
+                                                    dish={day.drink}
+                                                    type="🥤 Món nước"
+                                                />
+
+                                            )}
+
+                                            {day.soup && (
+
+                                                <DishCard
+                                                    dish={day.soup}
+                                                    type="🥣 Cháo / Súp"
+                                                />
+
+                                            )}
 
                                         </div>
-
-                                        {/* Main */}
-
-                                        {day.mains.map((dish) => (
-
-                                            <div
-                                                key={
-                                                    dish.dishId ||
-                                                    dish.name
-                                                }
-                                                className="mb-3 flex items-center justify-between rounded-2xl bg-white p-3"
-                                            >
-
-                                                <div className="flex items-center gap-4">
-
-                                                    <img
-                                                        src={
-                                                            dish.image
-                                                                ? API_URL +
-                                                                  dish.image
-                                                                : "https://placehold.co/72"
-                                                        }
-                                                        className="h-[72px] w-[72px] rounded-2xl object-cover"
-                                                    />
-
-                                                    <div>
-
-                                                        <h3 className="text-lg font-bold text-slate-800">
-                                                            {dish.name}
-                                                        </h3>
-
-                                                        <p className="text-sm text-gray-500">
-                                                            Món cơm
-                                                        </p>
-
-                                                    </div>
-
-                                                </div>
-
-                                                <div className="rounded-full bg-orange-100 px-4 py-2 font-bold text-orange-600">
-
-                                                    ×{dish.quantity}
-
-                                                </div>
-
-                                            </div>
-
-                                        ))}
-
-                                        {/* Drink */}
-
-                                        {day.drink && (
-
-                                            <div className="mb-3 flex items-center gap-4 rounded-2xl bg-white p-3">
-
-                                                <img
-                                                    src={
-                                                        day.drink.image
-                                                            ? API_URL +
-                                                              day.drink.image
-                                                            : "https://placehold.co/72"
-                                                    }
-                                                    className="h-[72px] w-[72px] rounded-2xl object-cover"
-                                                />
-
-                                                <div>
-
-                                                    <h3 className="text-lg font-bold">
-                                                        {day.drink.name}
-                                                    </h3>
-
-                                                    <p className="text-sm text-gray-500">
-                                                        🥤 Món nước
-                                                    </p>
-
-                                                </div>
-
-                                            </div>
-
-                                        )}
-
-                                        {/* Soup */}
-
-                                        {day.soup && (
-
-                                            <div className="flex items-center gap-4 rounded-2xl bg-white p-3">
-
-                                                <img
-                                                    src={
-                                                        day.soup.image
-                                                            ? API_URL +
-                                                              day.soup.image
-                                                            : "https://placehold.co/72"
-                                                    }
-                                                    className="h-[72px] w-[72px] rounded-2xl object-cover"
-                                                />
-
-                                                <div>
-
-                                                    <h3 className="text-lg font-bold">
-                                                        {day.soup.name}
-                                                    </h3>
-
-                                                    <p className="text-sm text-gray-500">
-                                                        🥣 Cháo / Súp
-                                                    </p>
-
-                                                </div>
-
-                                            </div>
-
-                                        )}
 
                                     </div>
 
