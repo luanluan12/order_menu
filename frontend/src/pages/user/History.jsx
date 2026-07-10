@@ -170,7 +170,7 @@ function History() {
                                                         </h3>
 
                                                         <p className="text-sm text-gray-500">
-                                                            Món chính
+                                                            Món cơm
                                                         </p>
 
                                                     </div>

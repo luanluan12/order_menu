@@ -253,10 +253,10 @@ function WeekMenuContent({
     <OrderNotice />
 </div>
 
-        {/* Món chính */}
+        {/* Món cơm */}
 
         <FoodGroup
-            title="Món chính"
+            title="Món cơm"
             subtitle="Chọn tối đa 2 phần"
             foods={day.mains || []}
             type="main"

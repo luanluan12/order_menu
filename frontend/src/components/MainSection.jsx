@@ -16,7 +16,7 @@ function MainSection({
                 <div>
 
                     <h2 className="text-[26px] font-bold text-slate-800">
-                        Món chính
+                        Món cơm
                     </h2>
                 </div>
 

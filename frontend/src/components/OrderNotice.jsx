@@ -44,7 +44,7 @@ function OrderNotice() {
                     <p className="text-[18px] font-semibold text-slate-800">
                         Bạn chỉ được chọn tối đa
                         <span className="text-orange-500">
-                            {" "}2 phần món chính
+                            {" "}2 phần món cơm
                         </span>
                         {" "}hoặc
                         <span className="text-orange-500">

@@ -92,7 +92,7 @@ function OrderDetailModal({
 
                                         <div className="mb-3 font-semibold">
 
-                                            🍱 Món chính
+                                            Món cơm
 
                                         </div>
 
