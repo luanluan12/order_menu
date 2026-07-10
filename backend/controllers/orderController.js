@@ -149,7 +149,7 @@ const buildOrderDays = (menu, days) => {
 
                     throw new Error(
 
-                        `Ngày ${i + 1}: Món chính không tồn tại.`
+                        `Ngày ${i + 1}: Món cơm không tồn tại.`
 
                     );
 
