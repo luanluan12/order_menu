@@ -12,7 +12,7 @@
   "notice_main": "밥 메뉴 2인분",
   "notice_or": "또는",
   "notice_side": "음료 / 죽 1개만 선택할 수 있습니다.",
-  "notice_description": "확인하기 전에 수량을 다시 확인해 주세요.",
+  "skip_day_message": "식사하지 않는 날은 해당 날짜를 선택하지 않으셔도 됩니다.",
   "selected": "선택됨",
   "select_dish": "선택",
   "no_dish": "등록된 메뉴가 없습니다.",

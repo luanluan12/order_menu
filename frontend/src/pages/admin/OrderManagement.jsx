@@ -82,11 +82,24 @@ function OrderManagement() {
     const loadOrders = async () => {
         try {
             const res = await getOrders({
-
     date: selectedDate
+});
+
+const filteredOrders = res.data.data.filter(order => {
+
+    const day = order.selectedDay;
+
+    if (!day) return false;
+
+    return (
+        day.mains?.length > 0 ||
+        !!day.drink ||
+        !!day.soup
+    );
 
 });
-            setOrders(res.data.data);
+
+setOrders(filteredOrders);
         } catch (err) {
             console.log(err);
         }
