@@ -4,84 +4,34 @@ const router = express.Router();
 
 const auth = require("../middleware/auth");
 
-const admin = require("../middleware/admin");
-
-const authorize = require("../middleware/authorize");
-
 const reportController = require("../controllers/reportController");
 
+// ======================================
+// Export Excel theo ngày
+// ======================================
+
 router.get(
-
-    "/dashboard",
-
+    "/export-daily",
     auth,
-
-    admin("admin_nexon", "admin_eocmn"),
-
-    reportController.dashboard
-
+    reportController.exportDailyExcel
 );
 
 router.get(
-
     "/daily",
-
     auth,
-
-    admin("admin_nexon", "admin_eocmn"),
-
-    reportController.dailyReport
-
+    reportController.getDailyReport
 );
 
 router.get(
-
-    "/monthly",
-
+    "/invoice",
     auth,
-
-    admin("admin_nexon", "admin_eocmn"),
-
-    reportController.monthlyReport
-
+    reportController.getInvoiceReport
 );
 
 router.get(
-
-    "/floor",
-
+    "/invoice/export",
     auth,
-
-    admin("admin_nexon", "admin_eocmn"),
-
-    reportController.floorReport
-
+    reportController.exportInvoiceExcel
 );
 
-router.get(
-    "/export",
-    auth,
-    admin("admin_eocmn", "admin_nexon"),
-    reportController.exportExcel
-);
-
-router.get(
-
-    "/floor/daily",
-
-    auth,
-
-    reportController.floorDailyReport
-
-);
-
-router.get(
-
-    "/floor/monthly",
-
-    auth,
-
-    reportController.floorMonthlyReport
-
-);
 module.exports = router;

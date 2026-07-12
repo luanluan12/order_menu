@@ -450,55 +450,103 @@ exports.getMenus = async (req, res) => {
 /**
  * Lấy Menu tuần
  */
-exports.getWeekMenu = async (req,res)=>{
+// exports.getWeekMenu = async (req,res)=>{
 
-    try{
+//     try{
 
-        const now = new Date();
+//         const now = new Date();
+
+//         const menu = await Menu.findOne({
+
+//             status:"published",
+
+//             openTime:{
+//                 $lte:now
+//             },
+
+//             deadline:{
+//                 $gte:now
+//             }
+
+//         }).lean();
+
+//         if(!menu){
+
+//             return res.status(404).json({
+
+//                 success:false,
+
+//                 message:"Hiện chưa đến thời gian đặt món."
+
+//             });
+
+//         }
+
+//         res.json({
+
+//             success:true,
+
+//             data:menu
+
+//         });
+
+//     }
+
+//     catch(err){
+
+//         res.status(500).json({
+
+//             success:false,
+
+//             message:err.message
+
+//         });
+
+//     }
+
+// };
+
+exports.getWeekMenu = async (req, res) => {
+
+    try {
 
         const menu = await Menu.findOne({
 
-            status:"published",
+            status: "published"
 
-            openTime:{
-                $lte:now
-            },
+        })
+        .sort({ createdAt: -1 })
+        .lean();
 
-            deadline:{
-                $gte:now
-            }
-
-        }).lean();
-
-        if(!menu){
+        if (!menu) {
 
             return res.status(404).json({
 
-                success:false,
+                success: false,
 
-                message:"Hiện chưa đến thời gian đặt món."
+                message: "Chưa có menu được Publish."
 
             });
 
         }
 
-        res.json({
+        return res.json({
 
-            success:true,
+            success: true,
 
-            data:menu
+            data: menu
 
         });
 
     }
 
-    catch(err){
+    catch (err) {
 
-        res.status(500).json({
+        return res.status(500).json({
 
-            success:false,
+            success: false,
 
-            message:err.message
+            message: err.message
 
         });
 

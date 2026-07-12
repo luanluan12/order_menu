@@ -8,31 +8,24 @@ const admin = require("../middleware/admin");
 
 const userController = require("../controllers/userController");
 
+// ==========================
 // Upload Excel
+// ==========================
+
 const upload = multer({
     dest: "uploads/"
 });
 
-/**
- * ==========================
- * USER CRUD
- * ==========================
- */
+// ==========================
+// USER CRUD
+// ==========================
 
-// Lấy danh sách User
+// Danh sách User
 router.get(
     "/",
     auth,
     admin("admin_eocmn"),
     userController.getUsers
-);
-
-// Lấy User theo ID
-router.get(
-    "/:id",
-    auth,
-    admin("admin_eocmn"),
-    userController.getUserById
 );
 
 // Thêm User
@@ -59,11 +52,9 @@ router.delete(
     userController.deleteUser
 );
 
-/**
- * ==========================
- * PASSWORD
- * ==========================
- */
+// ==========================
+// PASSWORD
+// ==========================
 
 // Đổi mật khẩu
 router.put(
@@ -80,11 +71,9 @@ router.put(
     userController.resetPassword
 );
 
-/**
- * ==========================
- * SEARCH & PAGINATION
- * ==========================
- */
+// ==========================
+// SEARCH
+// ==========================
 
 // Tìm kiếm User
 router.get(
@@ -102,11 +91,9 @@ router.get(
     userController.pagination
 );
 
-/**
- * ==========================
- * IMPORT EXCEL
- * ==========================
- */
+// ==========================
+// IMPORT EXCEL
+// ==========================
 
 router.post(
     "/import",
@@ -114,6 +101,24 @@ router.post(
     admin("admin_eocmn"),
     upload.single("file"),
     userController.importExcel
+);
+
+router.get(
+    "/template",
+    auth,
+    admin("admin_eocmn"),
+    userController.downloadTemplate
+);
+
+// ==========================
+// GET USER BY ID
+// ==========================
+
+router.get(
+    "/:id",
+    auth,
+    admin("admin_eocmn"),
+    userController.getUserById
 );
 
 module.exports = router;

@@ -120,7 +120,16 @@ const orderDaySchema = new mongoose.Schema({
 
         default: null
 
-    }
+    },
+    received: {
+    type: Boolean,
+    default: false
+},
+
+receivedAt: {
+    type: Date,
+    default: null
+}
 
 }, {
 
@@ -194,7 +203,11 @@ const orderSchema = new mongoose.Schema({
 
         default: "ordered"
 
-    }
+    },
+    qrToken: {
+    type: String,
+    default: ""
+}
 
 }, {
 

@@ -23,6 +23,7 @@
     "moment-timezone": "^0.6.2",
     "mongoose": "^9.7.3",
     "multer": "^2.2.0",
+    "qrcode": "^1.5.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

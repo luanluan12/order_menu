@@ -1,56 +1,113 @@
 const User = require("../models/User");
 const Order = require("../models/Order");
-const Menu = require("../models/Menu");
-const moment = require("moment-timezone");
 
 exports.getDashboard = async (req, res) => {
 
     try {
 
-        const today = moment()
-            .tz("Asia/Ho_Chi_Minh")
-            .startOf("day")
-            .toDate();
-
-        const tomorrow = moment(today)
-            .add(1, "day")
-            .toDate();
+        // Tổng user
 
         const totalUsers = await User.countDocuments({
+
             role: "guest"
+
         });
 
-        const orderedToday = await Order.countDocuments({
+        // Order đang đặt
 
-            date: {
-
-                $gte: today,
-
-                $lt: tomorrow
-
-            },
+        const orders = await Order.find({
 
             status: "ordered"
 
-        });
+        }).populate(
 
-        const notOrderedToday = Math.max(
+            "user",
 
-            totalUsers - orderedToday,
-
-            0
+            "floor"
 
         );
 
-        const currentWeek = `${moment().year()}-W${String(moment().isoWeek()).padStart(2, "0")}`;
+        let todayOrders = 0;
 
-        const currentMenu = await Menu.findOne({
+        let received = 0;
 
-            week: currentWeek
+        let pending = 0;
 
-        });
+        const floorMap = {};
 
-        const totalMenus = await Menu.countDocuments();
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        for (const order of orders) {
+
+            const floor = order.user?.floor || 0;
+
+            if (!floorMap[floor]) {
+
+                floorMap[floor] = {
+
+                    floor,
+
+                    ordered: 0,
+
+                    received: 0,
+
+                    pending: 0
+
+                };
+
+            }
+
+            for (const day of order.days) {
+
+                const d = new Date(day.date);
+
+                d.setHours(0, 0, 0, 0);
+
+                if (d.getTime() !== today.getTime()) continue;
+
+                const hasFood =
+
+                    day.mains.length ||
+
+                    day.drink ||
+
+                    day.soup;
+
+                if (!hasFood) continue;
+
+                todayOrders++;
+
+                floorMap[floor].ordered++;
+
+                if (day.received) {
+
+                    received++;
+
+                    floorMap[floor].received++;
+
+                }
+
+                else {
+
+                    pending++;
+
+                    floorMap[floor].pending++;
+
+                }
+
+            }
+
+        }
+
+        const floors = Object.values(floorMap)
+
+            .sort(
+
+                (a, b) => a.floor - b.floor
+
+            );
 
         res.json({
 
@@ -60,15 +117,13 @@ exports.getDashboard = async (req, res) => {
 
                 totalUsers,
 
-                orderedToday,
+                todayOrders,
 
-                notOrderedToday,
+                received,
 
-                totalMenus,
+                pending,
 
-                currentWeek,
-
-                menuStatus: currentMenu?.status || "draft"
+                floors
 
             }
 

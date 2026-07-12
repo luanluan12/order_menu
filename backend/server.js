@@ -27,6 +27,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 
 const userRoutes = require("./routes/userRoutes");
+
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 connectDB();
@@ -47,9 +48,15 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
 
-    console.log(`Server running at http://localhost:${PORT}`);
+//     console.log(`Server running at http://localhost:${PORT}`);
+
+// });
+
+app.listen(PORT, "0.0.0.0", () => {
+
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
 
 });
 

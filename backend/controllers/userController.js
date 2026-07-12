@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const XLSX = require("xlsx");
+const fs = require("fs");
 
 /**
  * Lấy danh sách User
@@ -653,9 +655,17 @@ exports.importExcel = async (req, res) => {
 
                 const email = row.Email?.toString().trim().toLowerCase();
 
-                const floor = row.Floor || "";
+                const floor = Number(row.Floor) || 0;
 
-                const role = row.Role || "guest";
+                const roles = [
+    "guest",
+    "admin_eocmn",
+    "admin_nexon"
+];
+
+const role = roles.includes(row.Role)
+    ? row.Role
+    : "guest";
 
                 if (!employeeId || !name || !email) {
 
@@ -787,5 +797,73 @@ exports.importExcel = async (req, res) => {
         });
 
     }
+
+};
+
+exports.downloadTemplate = async (req, res) => {
+
+    const data = [
+
+        {
+
+            EmployeeID: "EOC001",
+
+            Name: "Nguyen Van A",
+
+            Email: "a@company.com",
+
+            Floor: 3,
+
+            Role: "guest"
+
+        }
+
+    ];
+
+    const workbook = XLSX.utils.book_new();
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    XLSX.utils.book_append_sheet(
+
+        workbook,
+
+        worksheet,
+
+        "Users"
+
+    );
+
+    const buffer = XLSX.write(
+
+        workbook,
+
+        {
+
+            type: "buffer",
+
+            bookType: "xlsx"
+
+        }
+
+    );
+
+    res.setHeader(
+
+        "Content-Disposition",
+
+        "attachment; filename=User_Template.xlsx"
+
+    );
+
+    res.setHeader(
+
+        "Content-Type",
+
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    );
+
+    res.send(buffer);
 
 };

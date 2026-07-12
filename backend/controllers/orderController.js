@@ -1,8 +1,11 @@
 const Order = require("../models/Order");
 const Menu = require("../models/Menu");
 const User = require("../models/User");
-
+const QRCode = require("qrcode");
 const moment = require("moment-timezone");
+const crypto = require("crypto");
+const XLSX = require("xlsx");
+const fs = require("fs");
 
 const {
 
@@ -14,46 +17,50 @@ const {
 // Có được phép đặt món?
 // ===========================================
 
+// const canOrder = () => {
+
+//     const now = moment().tz("Asia/Ho_Chi_Minh");
+
+//     const day = now.isoWeekday();
+
+//     const hour = now.hour();
+
+//     // Thứ 2 - Thứ 3
+
+//     if (day < 3) {
+
+//         return false;
+
+//     }
+
+//     // Thứ 4 trước 9h
+
+//     if (day === 3 && hour < 9) {
+
+//         return false;
+
+//     }
+
+//     // Sau 17h thứ 6
+
+//     if (day === 5 && hour >= 17) {
+
+//         return false;
+
+//     }
+
+//     // Thứ 7 + CN
+
+//     if (day > 5) {
+
+//         return false;
+
+//     }
+
+//     return true;
+
+// };
 const canOrder = () => {
-
-    const now = moment().tz("Asia/Ho_Chi_Minh");
-
-    const day = now.isoWeekday();
-
-    const hour = now.hour();
-
-    // Thứ 2 - Thứ 3
-
-    if (day < 3) {
-
-        return false;
-
-    }
-
-    // Thứ 4 trước 9h
-
-    if (day === 3 && hour < 9) {
-
-        return false;
-
-    }
-
-    // Sau 17h thứ 6
-
-    if (day === 5 && hour >= 17) {
-
-        return false;
-
-    }
-
-    // Thứ 7 + CN
-
-    if (day > 5) {
-
-        return false;
-
-    }
-
     return true;
 
 };
@@ -87,27 +94,51 @@ const buildOrderDays = (menu, days) => {
 
         const hasMain = mains.length > 0;
 
-        const hasDrink = !!drink;
+const hasDrink = !!drink;
 
-        const hasSoup = !!soup;
+const hasSoup = !!soup;
 
-        const totalGroup =
+const totalGroup =
 
-            Number(hasMain) +
+    Number(hasMain) +
 
-            Number(hasDrink) +
+    Number(hasDrink) +
 
-            Number(hasSoup);
+    Number(hasSoup);
 
-        if (totalGroup !== 1) {
+// Không chọn gì => nghỉ ăn
+if (totalGroup === 0) {
 
-            throw new Error(
+    result.push({
 
-                `Ngày ${i + 1}: Chỉ được chọn 1 nhóm.`
+        date: menuDay.date,
 
-            );
+        mains: [],
 
-        }
+        drink: null,
+
+        soup: null,
+
+        received: false,
+
+        receivedAt: null
+
+    });
+
+    continue;
+
+}
+
+// Chỉ được chọn tối đa 1 nhóm
+if (totalGroup > 1) {
+
+    throw new Error(
+
+        `Ngày ${i + 1}: Chỉ được chọn 1 nhóm.`
+
+    );
+
+}
 
         // ===================================
         // MAIN
@@ -399,23 +430,23 @@ exports.createOrder = async (req, res) => {
 
         const menu = await Menu.findById(menuId);
 
-        if (
+//         if (
 
-    new Date() >
+//     new Date() >
 
-    new Date(menu.deadline)
+//     new Date(menu.deadline)
 
-) {
+// ) {
 
-    return res.status(400).json({
+//     return res.status(400).json({
 
-        success:false,
+//         success:false,
 
-        message:"Đã hết thời gian đặt món."
+//         message:"Đã hết thời gian đặt món."
 
-    });
+//     });
 
-}
+// }
 
         if (!menu) {
 
@@ -479,7 +510,9 @@ exports.createOrder = async (req, res) => {
 
             days: orderDays,
 
-            status: "ordered"
+            status: "ordered",
+
+            qrToken: crypto.randomUUID()
 
         });
 
@@ -637,7 +670,9 @@ exports.createOrderFromInvite = async (
 
             days: orderDays,
 
-            status: "ordered"
+            status: "ordered",
+
+            qrToken: crypto.randomUUID()
 
         });
 
@@ -731,23 +766,23 @@ exports.updateOrder = async (req, res) => {
 
         );
 
-        if (
+//         if (
 
-    new Date() >
+//     new Date() >
 
-    new Date(menu.deadline)
+//     new Date(menu.deadline)
 
-) {
+// ) {
 
-    return res.status(400).json({
+//     return res.status(400).json({
 
-        success:false,
+//         success:false,
 
-        message:"Đã hết thời gian chỉnh sửa."
+//         message:"Đã hết thời gian chỉnh sửa."
 
-    });
+//     });
 
-}
+// }
 
         if (!menu) {
 
@@ -965,7 +1000,7 @@ exports.getOrderById = async (req, res) => {
 
             "menu",
 
-            "week year status"
+            "week year status days deadline openTime"
 
         );
 
@@ -1027,29 +1062,13 @@ exports.getOrderById = async (req, res) => {
 
 };
 
-// ===========================================
-// Admin - Danh sách Order
-// ===========================================
-
 exports.getAllOrders = async (req, res) => {
 
     try {
 
-        const {
-
-            week,
-
-            status
-
-        } = req.query;
+        const { week, status, date } = req.query;
 
         const filter = {};
-
-        if (status) {
-
-            filter.status = status;
-
-        }
 
         if (week) {
 
@@ -1057,37 +1076,71 @@ exports.getAllOrders = async (req, res) => {
 
         }
 
+        if (status) {
+
+            filter.status = status;
+
+        }
+
         const orders = await Order.find(filter)
 
-        .populate(
+    .populate(
 
-            "user",
+        "user",
 
-            "employeeId name email department"
+        "employeeId name email floor"
 
-        )
+    )
 
-        .populate(
+    .populate(
 
-            "menu",
+        "menu",
 
-            "week year"
+        "week year"
 
-        )
+    )
 
-        .sort({
+    .sort({
 
-            createdAt: -1
+        createdAt: -1
 
-        });
+    });
+
+const result = orders.map(order => {
+
+    const obj = order.toObject();
+
+    let selectedDay = null;
+
+    if (date) {
+
+        selectedDay = obj.days.find(day =>
+
+            new Date(day.date)
+
+                .toISOString()
+
+                .slice(0, 10) === date
+
+        );
+
+    }
+
+    return {
+
+        ...obj,
+
+        selectedDay
+
+    };
+
+});
 
         return res.json({
 
             success: true,
 
-            total: orders.length,
-
-            data: orders
+            data: result
 
         });
 
@@ -1109,49 +1162,212 @@ exports.getAllOrders = async (req, res) => {
 
 };
 
-exports.getAllOrders = async (req, res) => {
+// ===============================
+// GET MY QR
+// ===============================
+
+exports.getMyQr = async (req, res) => {
 
     try {
 
-        const { week, status } = req.query;
+        const userId = req.user.id;
 
-        const filter = {};
+        const order = await Order.findOne({
 
-        if (week) {
+            user: userId,
 
-            filter.week = week;
+            status: "ordered"
 
-        }
+        }).sort({
 
-        if (status) {
+            createdAt: -1
 
-            filter.status = status;
+        });
 
-        }
+        if (!order) {
 
-        const orders = await Order.find(filter)
+            return res.status(404).json({
 
-            .populate(
-                "user",
-                "employeeId name email department"
-            )
-
-            .populate(
-                "menu",
-                "week year"
-            )
-
-            .sort({
-
-                createdAt: -1
+                message: "Bạn chưa đặt món."
 
             });
+
+        }
+
+        const qrImage = await QRCode.toDataURL(
+
+            JSON.stringify({
+
+                token: order.qrToken
+
+            })
+
+        );
+
+        res.json({
+
+            success: true,
+
+            data: {
+
+                week: order.week,
+
+                qrToken: order.qrToken,
+
+                qrImage
+
+            }
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+
+            message: "Không tạo được QR."
+
+        });
+
+    }
+
+};
+
+// ===============================
+// PREVIEW QR
+// ===============================
+
+exports.previewQr = async (req, res) => {
+
+    try {
+
+        const { token } = req.body;
+
+        if (!token) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu QR."
+
+            });
+
+        }
+
+        const order = await Order.findOne({
+
+            qrToken: token,
+
+            status: "ordered"
+
+        }).populate(
+
+            "user",
+
+            "employeeId name email floor"
+
+        );
+
+        if (!order) {
+
+    console.log("Không tìm thấy order với token:", token);
+
+    return res.status(404).json({
+
+        success: false,
+
+        message: "Không tìm thấy Order."
+
+    });
+
+}
+
+        // ===============================
+        // Lấy ngày hiện tại
+        // Thứ 7 + CN -> lấy Thứ 6 (test)
+        // ===============================
+
+        let today = new Date();
+
+        const dayOfWeek = today.getDay();
+
+        if (dayOfWeek === 0) {
+
+            today.setDate(today.getDate() - 2);
+
+        }
+
+        else if (dayOfWeek === 6) {
+
+            today.setDate(today.getDate() - 1);
+
+        }
+
+        today.setHours(0, 0, 0, 0);
+
+        const day = order.days.find(d => {
+
+            const date = new Date(d.date);
+
+            date.setHours(0, 0, 0, 0);
+
+            return date.getTime() === today.getTime();
+
+        });
+
+        if (!day) {
+
+    console.log("Không tìm thấy ngày.");
+
+    console.log(order.days);
+
+    return res.status(400).json({
+
+        success: false,
+
+        message: "Không tìm thấy ngày."
+
+    });
+
+}
 
         return res.json({
 
             success: true,
 
-            data: orders
+            data: {
+
+                orderId: order._id,
+
+                employee: {
+
+                    employeeId: order.user.employeeId,
+
+                    name: order.user.name,
+
+                    email: order.user.email,
+
+                    floor: order.user.floor
+
+                },
+
+                date: day.date,
+
+                received: day.received,
+
+                receivedAt: day.receivedAt,
+
+                mains: day.mains,
+
+                drink: day.drink,
+
+                soup: day.soup
+
+            }
 
         });
 
@@ -1165,7 +1381,156 @@ exports.getAllOrders = async (req, res) => {
 
             success: false,
 
-            message: err.message
+            message: "Lỗi server."
+
+        });
+
+    }
+
+};
+
+// ===============================
+// CONFIRM RECEIVE
+// ===============================
+
+exports.confirmReceive = async (req, res) => {
+
+    try {
+
+        const { orderId } = req.body;
+
+        if (!orderId) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu Order ID."
+
+            });
+
+        }
+
+        const order = await Order.findById(orderId)
+
+            .populate(
+
+                "user",
+
+                "employeeId name email floor"
+
+            );
+
+        if (!order) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Không tìm thấy Order."
+
+            });
+
+        }
+
+        // ===============================
+        // Lấy ngày hiện tại
+        // Thứ 7 + CN -> lấy Thứ 6 (test)
+        // ===============================
+
+        let today = new Date();
+
+        const dayOfWeek = today.getDay();
+
+        if (dayOfWeek === 0) {
+
+            today.setDate(today.getDate() - 2);
+
+        }
+
+        else if (dayOfWeek === 6) {
+
+            today.setDate(today.getDate() - 1);
+
+        }
+
+        today.setHours(0, 0, 0, 0);
+
+        const day = order.days.find(d => {
+
+            const date = new Date(d.date);
+
+            date.setHours(0, 0, 0, 0);
+
+            return date.getTime() === today.getTime();
+
+        });
+
+        if (!day) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Đơn không có suất ăn hôm nay."
+
+            });
+
+        }
+
+        if (day.received) {
+
+            return res.status(409).json({
+
+                success: false,
+
+                code: "ALREADY_RECEIVED",
+
+                message: "Nhân viên đã nhận suất ăn.",
+
+                receivedAt: day.receivedAt
+
+            });
+
+        }
+
+        day.received = true;
+
+        day.receivedAt = new Date();
+
+        await order.save();
+
+        return res.json({
+
+            success: true,
+
+            message: "Xác nhận nhận món thành công.",
+
+            data: {
+
+                employee: order.user,
+
+                date: day.date,
+
+                received: true,
+
+                receivedAt: day.receivedAt
+
+            }
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: "Lỗi server."
 
         });
 

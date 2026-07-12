@@ -1,101 +1,667 @@
-const Order = require("../models/Order");
-const User = require("../models/User");
-const Menu = require("../models/Menu");
-const moment = require("moment-timezone");
 const ExcelJS = require("exceljs");
+const moment = require("moment-timezone");
 
-/**
- * Dashboard
- */
+const Menu = require("../models/Menu");
+const Order = require("../models/Order");
 
-exports.exportExcel = async (req, res) => {
+// ======================================================
+// Helpers
+// ======================================================
+
+function getCompany(email = "") {
+
+    const e = email.toLowerCase();
+
+    if (e.endsWith("@nexonnetworks.com")) {
+
+        return "NEXON Networks VINA";
+
+    }
+
+    if (e.endsWith("@nexondv.com")) {
+
+        return "NEXON Dev VINA";
+
+    }
+
+    if (e.endsWith("@nexonsv.com")) {
+
+        return "NEXON Creative Studio VINA";
+
+    }
+
+    return "Khác";
+
+}
+
+function getFoodName(day) {
+
+    if (!day) return "";
+
+    // Main
+
+    if (day.mains && day.mains.length > 0) {
+
+        return day.mains
+
+            .map(item => `${item.name} x${item.quantity}`)
+
+            .join(", ");
+
+    }
+
+    // Drink
+
+    if (day.drink) {
+
+        return day.drink.name;
+
+    }
+
+    // Soup
+
+    if (day.soup) {
+
+        return day.soup.name;
+
+    }
+
+    return "";
+
+}
+
+// ======================================================
+// Export Daily Excel
+// ======================================================
+
+exports.exportDailyExcel = async (req, res) => {
 
     try {
 
-        const orders = await Order.find({
-            status: "ordered"
-        })
-            .populate(
-    "user",
-    "floor"
-)
-            .populate("menu");
+        const { date } = req.query;
 
-        const workbook = new ExcelJS.Workbook();
+        if (!date) {
 
-        const worksheet = workbook.addWorksheet("Food Orders");
+            return res.status(400).json({
 
-        worksheet.columns = [
+                message: "Vui lòng chọn ngày."
 
-            {
-                header: "Employee ID",
-                key: "employeeId",
-                width: 20
-            },
+            });
 
-            {
-                header: "Name",
-                key: "name",
-                width: 25
-            },
+        }
 
-            {
-                header: "Email",
-                key: "email",
-                width: 30
-            },
+        const targetDate = moment(date)
+            .tz("Asia/Ho_Chi_Minh")
+            .format("YYYY-MM-DD");
 
-            {
-                header: "Floor",
-                key: "floor",
-                width: 10
-            },
+        // ==================================================
+        // Tìm menu chứa ngày này
+        // ==================================================
 
-            {
-                header: "Date",
-                key: "date",
-                width: 18
-            },
+        const menus = await Menu.find();
 
-            {
-                header: "Main",
-                key: "main",
-                width: 20
-            },
+        let selectedMenu = null;
 
-            {
-                header: "Option",
-                key: "option",
-                width: 10
+        let selectedDay = null;
+
+        for (const menu of menus) {
+
+            const day = menu.days.find(item =>
+
+                moment(item.date)
+                    .tz("Asia/Ho_Chi_Minh")
+                    .format("YYYY-MM-DD") === targetDate
+
+            );
+
+            if (day) {
+
+                selectedMenu = menu;
+
+                selectedDay = day;
+
+                break;
+
             }
 
-        ];
+        }
 
-        orders.forEach(order => {
+        if (!selectedMenu) {
 
-            worksheet.addRow({
+            return res.status(404).json({
 
-                employeeId: order.user.employeeId,
+                message: "Không tìm thấy menu của ngày này."
 
-                name: order.user.name,
+            });
 
-                email: order.user.email,
+        }
 
-                floor: order.user.floor,
+        // ==================================================
+        // Danh sách món của đúng ngày
+        // ==================================================
 
-                date: order.menu.date,
+        const headers = [];
 
-                main: order.selectedMain,
+        (selectedDay.mains || []).forEach(item => {
 
-                option: order.option
+            headers.push({
+
+                type: "main",
+
+                id: String(item._id),
+
+                name: item.name
 
             });
 
         });
 
-        worksheet.getRow(1).font = {
+        (selectedDay.drinks || []).forEach(item => {
+
+            headers.push({
+
+                type: "drink",
+
+                id: String(item._id),
+
+                name: item.name
+
+            });
+
+        });
+
+        (selectedDay.soups || []).forEach(item => {
+
+            headers.push({
+
+                type: "soup",
+
+                id: String(item._id),
+
+                name: item.name
+
+            });
+
+        });
+
+        // ==================================================
+        // Lấy Order
+        // ==================================================
+
+        const orders = await Order.find({
+
+            menu: selectedMenu._id,
+
+            status: "ordered"
+
+        })
+
+        .populate({
+
+            path: "user",
+
+            select: "employeeId name email floor"
+
+        })
+
+        .sort({
+
+            "user.employeeId": 1
+
+        });
+
+        // ==================================================
+        // Workbook
+        // ==================================================
+
+        const workbook = new ExcelJS.Workbook();
+
+        workbook.creator = "Food Ordering";
+
+        workbook.created = new Date();
+
+        const sheet = workbook.addWorksheet(
+
+            "Food Report"
+
+        );
+
+        sheet.properties.defaultRowHeight = 24;
+
+        // ==================================================
+        // Thống kê
+        // ==================================================
+
+        const totalSummary = {};
+
+        const floorSummary = {};
+
+        headers.forEach(item => {
+
+            totalSummary[item.name] = 0;
+
+        });
+
+        // current row
+
+        let rowIndex = 1;
+
+                // ==================================================
+        // TITLE
+        // ==================================================
+
+        const lastColumn = headers.length + 3;
+
+        sheet.mergeCells(
+            1,
+            1,
+            1,
+            lastColumn
+        );
+
+        sheet.getCell("A1").value =
+            `BÁO CÁO THỐNG KÊ MÓN ĂN NGÀY ${moment(targetDate).format("DD/MM/YYYY")}`;
+
+        sheet.getCell("A1").font = {
+
+            name: "Times New Roman",
+
+            size: 18,
+
             bold: true
+
         };
+
+        sheet.getCell("A1").alignment = {
+
+            horizontal: "center",
+
+            vertical: "middle"
+
+        };
+
+        sheet.getRow(1).height = 30;
+
+        // ==================================================
+        // HEADER
+        // ==================================================
+
+        rowIndex = 3;
+
+        sheet.getCell(rowIndex, 1).value = "Employee ID";
+
+        sheet.getCell(rowIndex, 2).value = "Email";
+
+        sheet.getCell(rowIndex, 3).value = "Floor";
+
+        let column = 4;
+
+        headers.forEach(item => {
+
+            sheet.getCell(rowIndex, column).value =
+
+                item.name;
+
+            column++;
+
+        });
+
+        sheet.getRow(rowIndex).height = 45;
+
+        sheet.getRow(rowIndex).eachCell(cell => {
+
+            cell.font = {
+
+                bold: true,
+
+                name: "Times New Roman",
+
+                size: 13
+
+            };
+
+            cell.alignment = {
+
+                horizontal: "center",
+
+                vertical: "middle",
+
+                wrapText: true
+
+            };
+
+            cell.fill = {
+
+                type: "pattern",
+
+                pattern: "solid",
+
+                fgColor: {
+
+                    argb: "FFD9EAD3"
+
+                }
+
+            };
+
+            cell.border = {
+
+                top: {
+
+                    style: "thin"
+
+                },
+
+                left: {
+
+                    style: "thin"
+
+                },
+
+                bottom: {
+
+                    style: "thin"
+
+                },
+
+                right: {
+
+                    style: "thin"
+
+                }
+
+            };
+
+        });
+
+        // ==================================================
+        // Column Width
+        // ==================================================
+
+        sheet.getColumn(1).width = 18;
+
+        sheet.getColumn(2).width = 36;
+
+        sheet.getColumn(3).width = 10;
+
+        for (let i = 4; i <= lastColumn; i++) {
+
+            sheet.getColumn(i).width = 18;
+
+        }
+
+        // ==================================================
+        // DATA
+        // ==================================================
+
+        rowIndex++;
+
+        for (const order of orders) {
+
+            const day = order.days.find(
+
+                d =>
+
+                    moment(d.date)
+
+                        .tz("Asia/Ho_Chi_Minh")
+
+                        .format("YYYY-MM-DD") === targetDate
+
+            );
+
+            if (!day) continue;
+
+            sheet.getCell(rowIndex, 1).value =
+
+                order.user.employeeId;
+
+            sheet.getCell(rowIndex, 2).value =
+
+                order.user.email;
+
+            sheet.getCell(rowIndex, 3).value =
+
+                order.user.floor;
+
+            const floor = String(order.user.floor);
+
+            if (!floorSummary[floor]) {
+
+                floorSummary[floor] = {};
+
+                headers.forEach(item => {
+
+                    floorSummary[floor][item.name] = 0;
+
+                });
+
+            }
+
+            column = 4;
+
+            headers.forEach(item => {
+
+                let value = "";
+
+                // =====================
+                // MAIN
+                // =====================
+
+                if (item.type === "main") {
+
+                    const found = day.mains.find(
+
+                        m =>
+
+                            String(m.dishId) === item.id
+
+                    );
+
+                    if (found) {
+
+                        value = found.quantity;
+
+                        totalSummary[item.name] +=
+
+                            found.quantity;
+
+                        floorSummary[floor][item.name] +=
+
+                            found.quantity;
+
+                    }
+
+                }
+
+                // =====================
+                // DRINK
+                // =====================
+
+                else if (
+
+                    item.type === "drink"
+
+                ) {
+
+                    if (
+
+                        day.drink &&
+
+                        String(day.drink.dishId) === item.id
+
+                    ) {
+
+                        value = 1;
+
+                        totalSummary[item.name]++;
+
+                        floorSummary[floor][item.name]++;
+
+                    }
+
+                }
+
+                // =====================
+                // SOUP
+                // =====================
+
+                else {
+
+                    if (
+
+                        day.soup &&
+
+                        String(day.soup.dishId) === item.id
+
+                    ) {
+
+                        value = 1;
+
+                        totalSummary[item.name]++;
+
+                        floorSummary[floor][item.name]++;
+
+                    }
+
+                }
+
+                sheet.getCell(
+
+                    rowIndex,
+
+                    column
+
+                ).value = value;
+
+                column++;
+
+            });
+
+            sheet.getRow(rowIndex)
+
+                .eachCell(cell => {
+
+                    cell.border = {
+
+                        top: {
+
+                            style: "thin"
+
+                        },
+
+                        left: {
+
+                            style: "thin"
+
+                        },
+
+                        bottom: {
+
+                            style: "thin"
+
+                        },
+
+                        right: {
+
+                            style: "thin"
+
+                        }
+
+                    };
+
+                    cell.alignment = {
+
+                        horizontal: "center",
+
+                        vertical: "middle"
+
+                    };
+
+                });
+
+            rowIndex++;
+
+        }
+
+                // ==========================================
+        // TỔNG SỐ LƯỢNG
+        // ==========================================
+
+        rowIndex++;
+
+        sheet.getCell(rowIndex, 1).value = "TỔNG";
+
+        sheet.getCell(rowIndex, 1).font = {
+            bold: true,
+            size: 13
+        };
+
+        let col = 4;
+
+        headers.forEach(item => {
+
+            sheet.getCell(rowIndex, col).value =
+                totalSummary[item.name];
+
+            sheet.getCell(rowIndex, col).font = {
+
+                bold: true
+
+            };
+
+            sheet.getCell(rowIndex, col).alignment = {
+
+                horizontal: "center"
+
+            };
+
+            col++;
+
+        });
+
+        // ==========================================
+        // THỐNG KÊ THEO TẦNG
+        // ==========================================
+
+        rowIndex += 2;
+
+        sheet.getCell(rowIndex, 1).value =
+            "THỐNG KÊ THEO TẦNG";
+
+        sheet.getCell(rowIndex, 1).font = {
+
+            bold: true,
+
+            size: 14
+
+        };
+
+        rowIndex++;
+
+        Object.keys(floorSummary).sort().forEach(floor => {
+
+            sheet.getCell(rowIndex, 1).value =
+                `Tầng ${floor}`;
+
+            col = 4;
+
+            headers.forEach(item => {
+
+                sheet.getCell(rowIndex, col).value =
+                    floorSummary[floor][item.name];
+
+                col++;
+
+            });
+
+            rowIndex++;
+
+        });
+
+        // ==========================================
+        // Download
+        // ==========================================
 
         res.setHeader(
             "Content-Type",
@@ -104,7 +670,1144 @@ exports.exportExcel = async (req, res) => {
 
         res.setHeader(
             "Content-Disposition",
-            "attachment; filename=FoodOrders.xlsx"
+            `attachment; filename=Food_Report_${targetDate}.xlsx`
+        );
+
+        await workbook.xlsx.write(res);
+
+        res.end();
+            } catch (err) {
+
+        console.log(err);
+
+        res.status(500).json({
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Daily Report (JSON)
+// ======================================================
+
+exports.getDailyReport = async (req, res) => {
+
+    try {
+
+        const { date } = req.query;
+
+        if (!date) {
+
+            return res.status(400).json({
+
+                message: "Vui lòng chọn ngày."
+
+            });
+
+        }
+
+        const targetDate = moment(date)
+
+            .tz("Asia/Ho_Chi_Minh")
+
+            .format("YYYY-MM-DD");
+
+        // =====================================
+        // Tìm menu
+        // =====================================
+
+        const menus = await Menu.find();
+
+        let selectedMenu = null;
+
+        let selectedDay = null;
+
+        for (const menu of menus) {
+
+            const day = menu.days.find(item =>
+
+                moment(item.date)
+
+                    .tz("Asia/Ho_Chi_Minh")
+
+                    .format("YYYY-MM-DD") === targetDate
+
+            );
+
+            if (day) {
+
+                selectedMenu = menu;
+
+                selectedDay = day;
+
+                break;
+
+            }
+
+        }
+
+        if (!selectedMenu) {
+
+            return res.status(404).json({
+
+                message: "Không tìm thấy menu."
+
+            });
+
+        }
+
+        // =====================================
+        // Header
+        // =====================================
+
+        const headers = [];
+
+        (selectedDay.mains || []).forEach(item => {
+
+            headers.push({
+
+                type: "main",
+
+                id: String(item._id),
+
+                name: item.name
+
+            });
+
+        });
+
+        (selectedDay.drinks || []).forEach(item => {
+
+            headers.push({
+
+                type: "drink",
+
+                id: String(item._id),
+
+                name: item.name
+
+            });
+
+        });
+
+        (selectedDay.soups || []).forEach(item => {
+
+            headers.push({
+
+                type: "soup",
+
+                id: String(item._id),
+
+                name: item.name
+
+            });
+
+        });
+
+        // =====================================
+        // Orders
+        // =====================================
+
+        const orders = await Order.find({
+
+            menu: selectedMenu._id,
+
+            status: "ordered"
+
+        })
+
+        .populate({
+
+            path: "user",
+
+            select: "employeeId name email floor"
+
+        });
+
+        const totals = {};
+
+        const floors = {};
+
+        headers.forEach(h => {
+
+            totals[h.name] = 0;
+
+        });
+
+        const rows = [];
+
+        for (const order of orders) {
+
+            const day = order.days.find(d =>
+
+                moment(d.date)
+
+                    .tz("Asia/Ho_Chi_Minh")
+
+                    .format("YYYY-MM-DD") === targetDate
+
+            );
+
+            if (!day) continue;
+
+            const floor = String(order.user.floor);
+
+            if (!floors[floor]) {
+
+                floors[floor] = {};
+
+                headers.forEach(h => {
+
+                    floors[floor][h.name] = 0;
+
+                });
+
+            }
+
+            const items = {};
+
+            headers.forEach(h => {
+
+                items[h.name] = "";
+
+            });
+
+            // Main
+
+            day.mains.forEach(main => {
+
+                const head = headers.find(
+
+                    h =>
+
+                        h.type === "main" &&
+
+                        h.id === String(main.dishId)
+
+                );
+
+                if (head) {
+
+                    items[head.name] = main.quantity;
+
+                    totals[head.name] += main.quantity;
+
+                    floors[floor][head.name] += main.quantity;
+
+                }
+
+            });
+
+            // Drink
+
+            if (day.drink) {
+
+                const head = headers.find(
+
+                    h =>
+
+                        h.type === "drink" &&
+
+                        h.id === String(day.drink.dishId)
+
+                );
+
+                if (head) {
+
+                    items[head.name] = 1;
+
+                    totals[head.name]++;
+
+                    floors[floor][head.name]++;
+
+                }
+
+            }
+
+            // Soup
+
+            if (day.soup) {
+
+                const head = headers.find(
+
+                    h =>
+
+                        h.type === "soup" &&
+
+                        h.id === String(day.soup.dishId)
+
+                );
+
+                if (head) {
+
+                    items[head.name] = 1;
+
+                    totals[head.name]++;
+
+                    floors[floor][head.name]++;
+
+                }
+
+            }
+
+            rows.push({
+
+                employeeId: order.user.employeeId,
+
+                name: order.user.name,
+
+                email: order.user.email,
+
+                floor,
+
+                received: day.received,
+
+                items
+
+            });
+
+        }
+
+        const floorRows = Object.keys(floors)
+
+            .sort((a, b) => Number(a) - Number(b))
+
+            .map(floor => ({
+
+                floor,
+
+                items: floors[floor]
+
+            }));
+
+        res.json({
+
+            success: true,
+
+            data: {
+
+                date: targetDate,
+
+                headers,
+
+                rows,
+
+                totals,
+
+                floors: floorRows
+
+            }
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.log(err);
+
+        res.status(500).json({
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Invoice Report (JSON)
+// ======================================================
+
+exports.getInvoiceReport = async (req, res) => {
+
+    try {
+
+        const {
+
+            from,
+
+            to
+
+        } = req.query;
+
+        if (!from || !to) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu khoảng thời gian."
+
+            });
+
+        }
+
+        const fromDate = moment(from)
+
+            .tz("Asia/Ho_Chi_Minh")
+
+            .startOf("day");
+
+        const toDate = moment(to)
+
+            .tz("Asia/Ho_Chi_Minh")
+
+            .endOf("day");
+
+        const orders = await Order.find({
+
+            status: "ordered"
+
+        })
+
+        .populate({
+
+            path: "user",
+
+            select: "employeeId name email floor"
+
+        })
+
+        .sort({
+
+            "user.employeeId": 1
+
+        });
+
+        const rows = [];
+
+        const companySummary = {};
+
+        for (const order of orders) {
+
+            for (const day of order.days) {
+
+                const current = moment(day.date)
+
+                    .tz("Asia/Ho_Chi_Minh");
+
+                if (
+
+                    current.isBefore(fromDate) ||
+
+                    current.isAfter(toDate)
+
+                ) {
+
+                    continue;
+
+                }
+
+                const company = getCompany(
+
+                    order.user.email
+
+                );
+
+                companySummary[company] =
+
+                    (companySummary[company] || 0) + 1;
+
+                rows.push({
+
+                    date: current.format("DD/MM/YYYY"),
+
+                    employeeId: order.user.employeeId,
+
+                    name: order.user.name,
+
+                    email: order.user.email,
+
+                    company,
+
+                    food: getFoodName(day),
+
+                    floor: order.user.floor,
+
+                    received: day.received
+
+                });
+
+            }
+
+        }
+
+        rows.sort((a, b) => {
+
+            if (a.date === b.date) {
+
+                return a.employeeId.localeCompare(
+
+                    b.employeeId
+
+                );
+
+            }
+
+            return moment(
+
+                a.date,
+
+                "DD/MM/YYYY"
+
+            ) -
+
+            moment(
+
+                b.date,
+
+                "DD/MM/YYYY"
+
+            );
+
+        });
+
+        return res.json({
+
+            success: true,
+
+            data: {
+
+                from,
+
+                to,
+
+                rows,
+
+                summary: companySummary
+
+            }
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.log(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Export Invoice Excel
+// ======================================================
+
+exports.exportInvoiceExcel = async (req, res) => {
+
+    try {
+
+        const {
+
+            from,
+
+            to
+
+        } = req.query;
+
+        if (!from || !to) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Thiếu khoảng thời gian."
+
+            });
+
+        }
+
+        const fromDate = moment(from)
+
+            .tz("Asia/Ho_Chi_Minh")
+
+            .startOf("day");
+
+        const toDate = moment(to)
+
+            .tz("Asia/Ho_Chi_Minh")
+
+            .endOf("day");
+
+        const orders = await Order.find({
+
+            status: "ordered"
+
+        })
+
+        .populate({
+
+            path: "user",
+
+            select: "employeeId name email floor"
+
+        })
+
+        .sort({
+
+            "user.employeeId": 1
+
+        });
+
+        // ==========================================
+        // Chuẩn bị dữ liệu
+        // ==========================================
+
+        const rows = [];
+
+        const companySummary = {};
+
+        for (const order of orders) {
+
+            for (const day of order.days) {
+
+                const current = moment(day.date)
+
+                    .tz("Asia/Ho_Chi_Minh");
+
+                if (
+
+                    current.isBefore(fromDate) ||
+
+                    current.isAfter(toDate)
+
+                ) {
+
+                    continue;
+
+                }
+
+                const company = getCompany(
+
+                    order.user.email
+
+                );
+
+                companySummary[company] =
+
+                    (companySummary[company] || 0) + 1;
+
+                rows.push({
+
+                    date: current.format("DD/MM/YYYY"),
+
+                    employeeId: order.user.employeeId,
+
+                    name: order.user.name,
+
+                    email: order.user.email,
+
+                    company,
+
+                    food: getFoodName(day)
+
+                });
+
+            }
+
+        }
+
+        rows.sort((a, b) => {
+
+            if (a.date === b.date) {
+
+                return a.employeeId.localeCompare(
+
+                    b.employeeId
+
+                );
+
+            }
+
+            return moment(
+
+                a.date,
+
+                "DD/MM/YYYY"
+
+            ) -
+
+            moment(
+
+                b.date,
+
+                "DD/MM/YYYY"
+
+            );
+
+        });
+
+        // ==========================================
+        // Workbook
+        // ==========================================
+
+        const workbook = new ExcelJS.Workbook();
+
+        workbook.creator = "Food Ordering";
+
+        workbook.created = new Date();
+
+        const sheet = workbook.addWorksheet(
+
+            "Invoice Report"
+
+        );
+
+        sheet.properties.defaultRowHeight = 24;
+
+        // ==========================================
+        // Width
+        // ==========================================
+
+        sheet.columns = [
+
+            {
+
+                width: 15
+
+            },
+
+            {
+
+                width: 18
+
+            },
+
+            {
+
+                width: 28
+
+            },
+
+            {
+
+                width: 38
+
+            },
+
+            {
+
+                width: 30
+
+            },
+
+            {
+
+                width: 45
+
+            }
+
+        ];
+
+        // ==========================================
+        // Title
+        // ==========================================
+
+        sheet.mergeCells("A1:F1");
+
+        sheet.getCell("A1").value =
+
+            `BÁO CÁO SUẤT ĂN (${moment(from).format("DD/MM/YYYY")} - ${moment(to).format("DD/MM/YYYY")})`;
+
+        sheet.getCell("A1").font = {
+
+            bold: true,
+
+            size: 18,
+
+            name: "Times New Roman"
+
+        };
+
+        sheet.getCell("A1").alignment = {
+
+            horizontal: "center",
+
+            vertical: "middle"
+
+        };
+
+        sheet.getRow(1).height = 30;
+
+        // ==========================================
+        // Header
+        // ==========================================
+
+        const headers = [
+
+            "Ngày",
+
+            "Mã nhân viên",
+
+            "Tên nhân viên",
+
+            "Email",
+
+            "Tên công ty",
+
+            "Món ăn"
+
+        ];
+
+        headers.forEach((item, index) => {
+
+            const cell = sheet.getCell(
+
+                3,
+
+                index + 1
+
+            );
+
+            cell.value = item;
+
+            cell.font = {
+
+                bold: true,
+
+                size: 12,
+
+                name: "Times New Roman"
+
+            };
+
+            cell.alignment = {
+
+                horizontal: "center",
+
+                vertical: "middle",
+
+                wrapText: true
+
+            };
+
+            cell.fill = {
+
+                type: "pattern",
+
+                pattern: "solid",
+
+                fgColor: {
+
+                    argb: "FFD9EAD3"
+
+                }
+
+            };
+
+            cell.border = {
+
+                top: {
+
+                    style: "thin"
+
+                },
+
+                left: {
+
+                    style: "thin"
+
+                },
+
+                bottom: {
+
+                    style: "thin"
+
+                },
+
+                right: {
+
+                    style: "thin"
+
+                }
+
+            };
+
+        });
+
+        let rowIndex = 4;
+                // ==========================================
+        // DATA
+        // ==========================================
+
+        rows.forEach(item => {
+
+            sheet.getCell(rowIndex, 1).value = item.date;
+            sheet.getCell(rowIndex, 2).value = item.employeeId;
+            sheet.getCell(rowIndex, 3).value = item.name;
+            sheet.getCell(rowIndex, 4).value = item.email;
+            sheet.getCell(rowIndex, 5).value = item.company;
+            sheet.getCell(rowIndex, 6).value = item.food;
+
+            for (let i = 1; i <= 6; i++) {
+
+                const cell = sheet.getCell(rowIndex, i);
+
+                cell.font = {
+
+                    name: "Times New Roman",
+
+                    size: 11
+
+                };
+
+                cell.alignment = {
+
+                    vertical: "middle",
+
+                    horizontal: i === 6 ? "left" : "center",
+
+                    wrapText: true
+
+                };
+
+                cell.border = {
+
+                    top: {
+
+                        style: "thin"
+
+                    },
+
+                    left: {
+
+                        style: "thin"
+
+                    },
+
+                    bottom: {
+
+                        style: "thin"
+
+                    },
+
+                    right: {
+
+                        style: "thin"
+
+                    }
+
+                };
+
+            }
+
+            rowIndex++;
+
+        });
+
+        // ==========================================
+        // SUMMARY
+        // ==========================================
+
+        rowIndex += 2;
+
+        sheet.mergeCells(
+
+            `A${rowIndex}:F${rowIndex}`
+
+        );
+
+        sheet.getCell(`A${rowIndex}`).value =
+
+            "THỐNG KÊ THEO CÔNG TY";
+
+        sheet.getCell(`A${rowIndex}`).font = {
+
+            bold: true,
+
+            size: 14,
+
+            name: "Times New Roman"
+
+        };
+
+        sheet.getCell(`A${rowIndex}`).alignment = {
+
+            horizontal: "center"
+
+        };
+
+        rowIndex++;
+
+        sheet.getCell(rowIndex, 1).value =
+
+            "Tên công ty";
+
+        sheet.getCell(rowIndex, 2).value =
+
+            "Số suất";
+
+        ["A", "B"].forEach(col => {
+
+            const cell = sheet.getCell(
+
+                `${col}${rowIndex}`
+
+            );
+
+            cell.font = {
+
+                bold: true,
+
+                name: "Times New Roman"
+
+            };
+
+            cell.alignment = {
+
+                horizontal: "center"
+
+            };
+
+            cell.fill = {
+
+                type: "pattern",
+
+                pattern: "solid",
+
+                fgColor: {
+
+                    argb: "FFD9EAD3"
+
+                }
+
+            };
+
+            cell.border = {
+
+                top: {
+
+                    style: "thin"
+
+                },
+
+                left: {
+
+                    style: "thin"
+
+                },
+
+                bottom: {
+
+                    style: "thin"
+
+                },
+
+                right: {
+
+                    style: "thin"
+
+                }
+
+            };
+
+        });
+
+        rowIndex++;
+
+        Object.keys(companySummary)
+
+            .sort()
+
+            .forEach(company => {
+
+                sheet.getCell(rowIndex, 1).value =
+
+                    company;
+
+                sheet.getCell(rowIndex, 2).value =
+
+                    companySummary[company];
+
+                for (let i = 1; i <= 2; i++) {
+
+                    const cell = sheet.getCell(
+
+                        rowIndex,
+
+                        i
+
+                    );
+
+                    cell.border = {
+
+                        top: {
+
+                            style: "thin"
+
+                        },
+
+                        left: {
+
+                            style: "thin"
+
+                        },
+
+                        bottom: {
+
+                            style: "thin"
+
+                        },
+
+                        right: {
+
+                            style: "thin"
+
+                        }
+
+                    };
+
+                    cell.alignment = {
+
+                        horizontal:
+
+                            i === 1
+
+                                ? "left"
+
+                                : "center"
+
+                    };
+
+                }
+
+                rowIndex++;
+
+            });
+
+        // ==========================================
+        // Download
+        // ==========================================
+
+        res.setHeader(
+
+            "Content-Type",
+
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+        );
+
+        res.setHeader(
+
+            "Content-Disposition",
+
+            `attachment; filename=Invoice_Report_${from}_${to}.xlsx`
+
         );
 
         await workbook.xlsx.write(res);
@@ -115,722 +1818,9 @@ exports.exportExcel = async (req, res) => {
 
     catch (err) {
 
-        res.status(500).json({
+        console.log(err);
 
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-exports.dashboard = async (req, res) => {
-
-    try {
-
-        const today = moment().startOf("day").toDate();
-        const tomorrow = moment().add(1, "day").startOf("day").toDate();
-
-        const totalUsers = await User.countDocuments();
-
-        const totalMenus = await Menu.countDocuments();
-
-        const todayOrders = await Order.countDocuments({
-            createdAt: {
-                $gte: today,
-                $lt: tomorrow
-            },
-            status: "ordered"
-        });
-
-        const normal = await Order.countDocuments({
-            selectedMain: "mainNormal",
-            status: "ordered"
-        });
-
-        const vegetarian = await Order.countDocuments({
-            selectedMain: "mainVegetarian",
-            status: "ordered"
-        });
-
-        const cancelled = await Order.countDocuments({
-            status: "cancelled"
-        });
-
-        res.json({
-            success: true,
-            data: {
-                totalUsers,
-                totalMenus,
-                todayOrders,
-                normal,
-                vegetarian,
-                cancelled
-            }
-        });
-
-    } catch (err) {
-
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-
-    }
-
-};
-
-/**
- * Báo cáo theo ngày
- */
-exports.dailyReport = async (req, res) => {
-
-    try {
-
-        const report = await Order.aggregate([
-
-            {
-                $match: {
-                    status: "ordered"
-                }
-            },
-
-            {
-                $lookup: {
-                    from: "menus",
-                    localField: "menu",
-                    foreignField: "_id",
-                    as: "menu"
-                }
-            },
-
-            {
-                $unwind: "$menu"
-            },
-
-            {
-                $group: {
-
-                    _id: "$menu.date",
-
-                    totalOrders: {
-                        $sum: 1
-                    },
-
-                    normal: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainNormal"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    vegetarian: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainVegetarian"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    }
-
-                }
-
-            },
-
-            {
-                $sort: {
-                    _id: 1
-                }
-            }
-
-        ]);
-
-        res.json({
-            success: true,
-            data: report
-        });
-
-    } catch (err) {
-
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-
-    }
-
-};
-
-/**
- * Báo cáo theo tháng
- */
-exports.monthlyReport = async (req, res) => {
-
-    try {
-
-        const report = await Order.aggregate([
-
-            {
-                $lookup: {
-                    from: "menus",
-                    localField: "menu",
-                    foreignField: "_id",
-                    as: "menu"
-                }
-            },
-
-            {
-                $unwind: "$menu"
-            },
-
-            {
-                $group: {
-
-                    _id: "$menu.week",
-
-                    totalOrders: {
-                        $sum: 1
-                    },
-
-                    normal: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainNormal"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    vegetarian: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$selectedMain",
-                                        "mainVegetarian"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    }
-
-                }
-
-            }
-
-        ]);
-
-        res.json({
-            success: true,
-            data: report
-        });
-
-    } catch (err) {
-
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-
-    }
-
-};
-
-/**
- * Báo cáo theo tầng
- */
-
-
-exports.floorReport = async (req, res) => {
-
-    try {
-
-        const { type, date, month } = req.query;
-
-        const filter = {
-
-            status: "ordered"
-
-        };
-
-        const orders = await Order.find(filter)
-
-            .populate(
-
-                "user",
-
-                "department"
-
-            )
-
-            .lean();
-
-        const result = {};
-
-        orders.forEach(order => {
-
-            const floor =
-    order.user?.floor != null
-        ? ` ${order.user.floor}`
-        : "Khác";
-            if (!result[floor]) {
-
-                result[floor] = 0;
-
-            }
-
-            order.days.forEach(day => {
-
-                // Có đặt món trong ngày -> tính 1 suất
-
-                const ordered =
-
-                    day.mains.length > 0 ||
-
-                    day.drink ||
-
-                    day.soup;
-
-                if (!ordered) return;
-
-                // Theo ngày
-
-                if (type === "daily" && date) {
-
-                    const d = new Date(day.date)
-
-                        .toISOString()
-
-                        .slice(0, 10);
-
-                    if (d !== date) return;
-
-                }
-
-                // Theo tháng
-
-                if (type === "monthly" && month) {
-
-                    const m = new Date(day.date)
-
-                        .toISOString()
-
-                        .slice(0, 7);
-
-                    if (m !== month) return;
-
-                }
-
-                result[floor]++;
-
-            });
-
-        });
-
-        const data = Object.keys(result)
-
-            .sort()
-
-            .map(floor => ({
-
-                floor,
-
-                total: result[floor]
-
-            }));
-
-        res.json({
-
-            success: true,
-
-            data
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        res.status(500).json({
-
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-/**
- * Thống kê theo Option
- */
-exports.optionReport = async (req, res) => {
-
-    try {
-
-        const report = await Order.aggregate([
-
-            {
-                $group: {
-
-                    _id: "$option",
-
-                    total: {
-                        $sum: 1
-                    }
-
-                }
-
-            },
-
-            {
-                $sort: {
-                    _id: 1
-                }
-            }
-
-        ]);
-
-        res.json({
-
-            success: true,
-
-            data: report
-
-        });
-
-    }
-
-    catch (err) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-/**
- * Tổng số User
- */
-exports.totalUsers = async (req, res) => {
-
-    try {
-
-        const total = await User.countDocuments();
-
-        res.json({
-
-            success: true,
-
-            total
-
-        });
-
-    }
-
-    catch (err) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-/**
- * Tổng số Menu
- */
-exports.totalMenus = async (req, res) => {
-
-    try {
-
-        const total = await Menu.countDocuments();
-
-        res.json({
-
-            success: true,
-
-            total
-
-        });
-
-    }
-
-    catch (err) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-// =======================================
-// Báo cáo theo tầng - Theo ngày
-// =======================================
-
-exports.floorDailyReport = async (req, res) => {
-
-    try {
-
-        const { date } = req.query;
-
-        if (!date) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Thiếu ngày."
-
-            });
-
-        }
-
-        const orders = await Order.find({
-
-            status: "ordered"
-
-        })
-
-        .populate(
-
-            "user",
-
-            "floor"
-
-        )
-
-        .lean();
-        console.log(JSON.stringify(orders[0], null, 2));
-
-        const floors = {};
-
-        orders.forEach(order => {
-
-    const floor =
-        order.user?.floor != null
-            ? `Tầng ${order.user.floor}`
-            : "Khác";
-
-    if (!floors[floor]) {
-
-        floors[floor] = 0;
-
-    }
-
-    order.days.forEach(day => {
-
-        const dayString = moment(day.date)
-    .tz("Asia/Ho_Chi_Minh")
-    .format("YYYY-MM-DD");
-
-        if (dayString !== date) return;
-
-        const ordered =
-            day.mains.length > 0 ||
-            day.drink ||
-            day.soup;
-
-        if (ordered) {
-
-            floors[floor]++;
-
-        }
-
-    });
-
-});
-
-        const data = Object.keys(floors)
-
-            .sort()
-
-            .map(floor => ({
-
-                floor,
-
-                total: floors[floor]
-
-            }));
-
-        res.json({
-
-            success: true,
-
-            data
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        res.status(500).json({
-
-            success: false,
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-// =======================================
-// Báo cáo theo tầng - Theo tháng
-// =======================================
-
-exports.floorMonthlyReport = async (req, res) => {
-
-    try {
-
-        const { month } = req.query;
-
-        if (!month) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Thiếu tháng."
-
-            });
-
-        }
-
-        const orders = await Order.find({
-
-            status: "ordered"
-
-        })
-
-        .populate(
-
-            "user",
-
-            "floor"
-
-        )
-
-        .lean();
-
-        const floors = {};
-
-        orders.forEach(order => {
-
-            const floor =
-    order.user?.floor != null
-        ? `${order.user.floor}`
-        : "Khác";
-
-            if (!floors[floor]) {
-
-                floors[floor] = 0;
-
-            }
-
-            order.days.forEach(day => {
-
-                const monthString = moment(day.date)
-    .tz("Asia/Ho_Chi_Minh")
-    .format("YYYY-MM");
-
-                if (monthString !== month) return;
-
-                const ordered =
-
-                    day.mains.length > 0 ||
-
-                    day.drink ||
-
-                    day.soup;
-
-                if (ordered) {
-
-                    floors[floor]++;
-
-                }
-
-            });
-
-        });
-
-        const data = Object.keys(floors)
-
-            .sort()
-
-            .map(floor => ({
-
-                floor,
-
-                total: floors[floor]
-
-            }));
-
-        res.json({
-
-            success: true,
-
-            data
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
