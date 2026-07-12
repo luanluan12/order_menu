@@ -1274,8 +1274,6 @@ exports.previewQr = async (req, res) => {
 
         if (!order) {
 
-    console.log("Không tìm thấy order với token:", token);
-
     return res.status(404).json({
 
         success: false,
@@ -1308,22 +1306,21 @@ exports.previewQr = async (req, res) => {
         }
 
         today.setHours(0, 0, 0, 0);
+        const todayStr = moment()
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM-DD");
 
-        const day = order.days.find(d => {
+const day = order.days.find(d => {
 
-            const date = new Date(d.date);
+    return (
+        moment(d.date)
+            .tz("Asia/Ho_Chi_Minh")
+            .format("YYYY-MM-DD") === todayStr
+    );
 
-            date.setHours(0, 0, 0, 0);
-
-            return date.getTime() === today.getTime();
-
-        });
+});
 
         if (!day) {
-
-    console.log("Không tìm thấy ngày.");
-
-    console.log(order.days);
 
     return res.status(400).json({
 
