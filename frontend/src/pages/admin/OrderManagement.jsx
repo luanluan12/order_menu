@@ -3,123 +3,166 @@ import { getOrders } from "../../api/orderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import OrderDetailModal from "./OrderDetailModal";
+import QrScannerModal from "./QrScannerModal";
 
 function OrderManagement() {
-
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const exportExcel = () => {
+    const [openScanner, setOpenScanner] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().slice(0, 10)
+);
+    const getTodayOrder = (order) => {
+        let today = new Date();
 
-    const data = orders.map((order, index) => ({
+        const dayOfWeek = today.getDay();
 
-        STT: index + 1,
-        "Nhân viên": order.user?.name,
-        Email: order.user?.email,
-        Tuần: order.week,
-        "Trạng thái":
-            order.status === "ordered"
-                ? "Đã đặt"
-                : "Đã hủy"
-
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Orders"
-    );
-
-    const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-    });
-
-    const blob = new Blob(
-        [excelBuffer],
-        {
-            type:
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+        // Test giống backend
+        if (dayOfWeek === 0) {
+            today.setDate(today.getDate() - 2);
+        } else if (dayOfWeek === 6) {
+            today.setDate(today.getDate() - 1);
         }
-    );
 
-    saveAs(blob, "DanhSachDatMon.xlsx");
-};
-    const loadOrders = async () => {
+        today.setHours(0, 0, 0, 0);
 
-    try {
+        return order.days?.find((d) => {
+            const date = new Date(d.date);
+            date.setHours(0, 0, 0, 0);
+            return date.getTime() === today.getTime();
+        });
+    };
 
-        const res = await getOrders();
-        console.log("ORDER API:");
-        console.log(res.data);
+    const receivedCount = orders.filter(
 
-        setOrders(
-            res.data.data
+    order => order.selectedDay?.received
+
+).length;
+
+    const notReceivedCount = orders.length - receivedCount;
+
+    const exportExcel = () => {
+        const data = orders.map((order, index) => {
+            const todayOrder = order.selectedDay;
+
+            return {
+                STT: index + 1,
+                "Nhân viên": order.user?.name,
+                Email: order.user?.email,
+                Tuần: order.week,
+                "Nhận hôm nay": todayOrder?.received
+                    ? "Đã nhận"
+                    : "Chưa nhận"
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+
+        const workbook = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Orders"
         );
 
-    }
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array"
+        });
 
-    catch (err) {
+        const blob = new Blob([excelBuffer], {
+            type:
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+        });
 
-        console.log(err);
+        saveAs(blob, "DanhSachDatMon.xlsx");
+    };
 
-    }
+    const loadOrders = async () => {
+        try {
+            const res = await getOrders({
 
-};
+    date: selectedDate
+
+});
+            setOrders(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     useEffect(() => {
-
-        // TODO:
-        loadOrders()
-
-    }, []);
+        loadOrders();
+    }, [selectedDate]);
 
     return (
-
         <div className="mx-auto max-w-7xl p-8">
 
-            <div className="mb-5 flex items-center justify-between">
+            <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div />
+                <button
+        onClick={() => setOpenScanner(true)}
+        className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 lg:w-auto"
+    >
+        📷 Quét QR
+    </button>
+            </div>
 
-                <div>
+            {/* Thống kê */}
 
+            <div className="mb-6 grid grid grid-cols-1 gap-4 sm:grid-cols-3 gap-4">
+
+                <div className="rounded-xl border bg-white p-5 shadow">
+                    <p className="text-sm text-gray-500">
+                        Tổng đơn
+                    </p>
+                    <p className="mt-2 text-3xl font-bold">
+                        {orders.length}
+                    </p>
                 </div>
 
-                <button onClick={exportExcel} className="rounded-xl bg-green-600 px-2 py-2 font-semibold text-white hover:bg-green-700">
+                <div className="rounded-xl border bg-green-50 p-5 shadow">
+                    <p className="text-sm text-green-600">
+                        Đã nhận hôm nay
+                    </p>
+                    <p className="mt-2 text-3xl font-bold text-green-700">
+                        {receivedCount}
+                    </p>
+                </div>
 
-                    Xuất Excel
-
-                </button>
+                <div className="rounded-xl border bg-orange-50 p-5 shadow">
+                    <p className="text-sm text-orange-600">
+                        Chưa nhận hôm nay
+                    </p>
+                    <p className="mt-2 text-3xl font-bold text-orange-700">
+                        {notReceivedCount}
+                    </p>
+                </div>
 
             </div>
 
-            <div className="mb-6 flex gap-4">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row">
 
                 <input
 
-                    placeholder="Tìm nhân viên..."
+    type="date"
 
-                    className="w-80 rounded-xl border p-3"
+    value={selectedDate}
 
-                />
+    onChange={(e) =>
 
-                <select className="rounded-xl border p-3">
+        setSelectedDate(e.target.value)
 
-                    <option>Tất cả tuần</option>
+    }
 
-                </select>
+    className="w-full rounded-xl border p-3 sm:w-auto"
 
-                <select className="rounded-xl border p-3">
-
-                    <option>Tất cả trạng thái</option>
-
-                </select>
+/>
 
             </div>
 
-            <div className="overflow-hidden rounded-2xl border bg-white shadow">
+            <div className="hidden overflow-hidden rounded-2xl border bg-white shadow lg:block">
 
                 <table className="w-full">
 
@@ -128,145 +171,329 @@ function OrderManagement() {
                         <tr>
 
                             <th className="p-4 text-left">
-
                                 STT
-
                             </th>
 
                             <th className="p-4 text-left">
-
                                 Nhân viên
-
                             </th>
 
                             <th className="p-4 text-left">
-
                                 Email
-
                             </th>
 
                             <th className="p-4 text-center">
+                                Tầng
+                            </th>
 
+                            <th className="p-4 text-center">
                                 Tuần
-
                             </th>
 
                             <th className="p-4 text-center">
-
-                                Trạng thái
-
+                                Nhận hôm nay
                             </th>
 
                             <th className="p-4 text-center">
-
                                 Chi tiết
-
                             </th>
 
                         </tr>
 
                     </thead>
+
                     <tbody>
 
-{
-    orders.length === 0 ? (
+                        {orders.length === 0 ? (
 
-        <tr>
+                            <tr>
 
-            <td
-                colSpan={6}
-                className="py-12 text-center text-gray-400"
-            >
-                Chưa có đơn đặt món.
-            </td>
+                                <td
+                                    colSpan={7}
+                                    className="py-12 text-center text-gray-400"
+                                >
+                                    Chưa có đơn đặt món.
+                                </td>
 
-        </tr>
+                            </tr>
 
-    ) : (
+                        ) : (
 
-        orders.map((order, index) => (
+                            orders.map((order, index) => {
 
-            <tr
-                key={order._id}
-                className="border-t hover:bg-gray-50"
-            >
+                                const todayOrder =
+                                    getTodayOrder(order);
 
-                <td className="p-4">
-                    {index + 1}
-                </td>
+                                return (
 
-                <td className="p-4">
-                    {order.user?.name}
-                </td>
+                                    <tr
+                                        key={order._id}
+                                        className="border-t hover:bg-gray-50"
+                                    >
 
-                <td className="p-4">
-                    {order.user?.email}
-                </td>
+                                        <td className="p-4">
+                                            {index + 1}
+                                        </td>
 
-                <td className="p-4 text-center">
-                    {order.week}
-                </td>
+                                        <td className="p-4">
+                                            {order.user?.name}
+                                        </td>
 
-                <td className="p-4 text-center">
+                                        <td className="p-4">
+                                            {order.user?.email}
+                                        </td>
 
-                    <span
-                        className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                            order.status === "ordered"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                        }`}
-                    >
-                        {order.status === "ordered"
-                            ? "Đã đặt"
-                            : "Đã hủy"}
-                    </span>
+                                        <td className="p-4 text-center">
+                                            {order.user?.floor}
+                                        </td>
 
-                </td>
+                                        <td className="p-4 text-center">
+                                            {order.week}
+                                        </td>
 
-                <td className="p-4 text-center">
+                                        <td className="p-4 text-center">
 
-                    <button onClick={() =>
+                                            <span
+                                                title={
+                                                    todayOrder?.receivedAt
+                                                        ? new Date(
+                                                              todayOrder.receivedAt
+                                                          ).toLocaleString(
+                                                              "vi-VN"
+                                                          )
+                                                        : ""
+                                                }
+                                                className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                                                    todayOrder?.received
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-orange-100 text-orange-700"
+                                                }`}
+                                            >
+                                                {todayOrder?.received
+                                                    ? "✓ Đã nhận"
+                                                    : "⏳ Chưa nhận"}
+                                            </span>
 
-        setSelectedOrder(order)
+                                        </td>
 
-    }
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                    >
-                        Xem
-                    </button>
+                                        <td className="p-4 text-center">
 
-                </td>
+                                            <button
+                                                onClick={() =>
+                                                    setSelectedOrder(order)
+                                                }
+                                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                            >
+                                                Xem
+                                            </button>
 
-            </tr>
+                                        </td>
 
-        ))
+                                    </tr>
 
-    )
-}
+                                );
+                            })
 
-</tbody>
+                        )}
+
+                    </tbody>
 
                 </table>
+
                 <OrderDetailModal
+                    open={!!selectedOrder}
+                    order={selectedOrder}
+                    onClose={() =>
+                        setSelectedOrder(null)
+                    }
+                />
 
-    open={!!selectedOrder}
+                <QrScannerModal
+    open={openScanner}
+    onClose={() => setOpenScanner(false)}
+    onSuccess={async () => {
 
-    order={selectedOrder}
+        await loadOrders();
 
-    onClose={() =>
+        setOpenScanner(false);
 
-        setSelectedOrder(null)
+    }}
 
-    }
-
+    
 />
 
             </div>
+            <div className="space-y-4 lg:hidden">
+
+    {
+
+        orders.length === 0 ? (
+
+            <div className="rounded-xl bg-white p-6 text-center shadow">
+
+                Chưa có đơn đặt món.
+
+            </div>
+
+        ) : (
+
+            orders.map((order) => {
+
+                const day = order.selectedDay;
+
+                return (
+
+                    <div
+                        key={order._id}
+                        className="rounded-2xl bg-white p-5 shadow"
+                    >
+
+                        <div className="flex items-start justify-between">
+
+                            <div>
+
+                                <h2 className="text-lg font-bold">
+
+                                    {order.user?.name}
+
+                                </h2>
+
+                                <p className="text-sm text-gray-500">
+
+                                    {order.user?.email}
+
+                                </p>
+
+                            </div>
+
+                            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
+
+                                Tầng {order.user?.floor}
+
+                            </span>
+
+                        </div>
+
+                        <div className="mt-4 space-y-2 text-sm">
+
+                            <div className="flex justify-between">
+
+                                <span className="text-gray-500">
+
+                                    Tuần
+
+                                </span>
+
+                                <span>
+
+                                    {order.week}
+
+                                </span>
+
+                            </div>
+
+                            <div className="flex justify-between">
+
+                                <span className="text-gray-500">
+
+                                    Trạng thái
+
+                                </span>
+
+                                <span>
+
+                                    {
+
+                                        day?.received
+
+                                            ? "✅ Đã nhận"
+
+                                            : "⏳ Chưa nhận"
+
+                                    }
+
+                                </span>
+
+                            </div>
+
+                            {
+
+                                day?.receivedAt && (
+
+                                    <div className="flex justify-between">
+
+                                        <span className="text-gray-500">
+
+                                            Thời gian
+
+                                        </span>
+
+                                        <span>
+
+                                            {
+
+                                                new Date(
+
+                                                    day.receivedAt
+
+                                                ).toLocaleString("vi-VN")
+
+                                            }
+
+                                        </span>
+
+                                    </div>
+
+                                )
+
+                            }
+
+                        </div>
+
+                        <button
+
+                            onClick={() =>
+
+                                setSelectedOrder(order)
+
+                            }
+
+                            className="mt-5 w-full rounded-lg bg-blue-600 py-2 text-white"
+
+                        >
+
+                            Xem chi tiết
+
+                        </button>
+
+                    </div>
+
+                );
+
+            })
+
+        )
+
+    }
+
+            </div>
+            <OrderDetailModal
+    open={!!selectedOrder}
+    order={selectedOrder}
+    onClose={() => setSelectedOrder(null)}
+/>
+
+<QrScannerModal
+    open={openScanner}
+    onClose={() => setOpenScanner(false)}
+    onSuccess={async () => {
+        await loadOrders();
+        setOpenScanner(false);
+    }}
+/>
 
         </div>
-
     );
-
 }
 
 export default OrderManagement;

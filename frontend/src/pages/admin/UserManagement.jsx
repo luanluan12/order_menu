@@ -9,7 +9,6 @@ import {
     FaFileExcel
 } from "react-icons/fa";
 import { toast } from "react-toastify";
-
 import UserModal from "../../components/UserModal";
 
 import {
@@ -18,7 +17,8 @@ import {
     updateUser,
     deleteUser,
     resetPassword,
-    importExcel
+    importExcel,
+    downloadTemplate
 } from "../../api/userApi";
 
 function UserManagement() {
@@ -37,6 +37,42 @@ function UserManagement() {
     const [openModal, setOpenModal] = useState(false);
 
     const [editingUser, setEditingUser] = useState(null);
+
+    const handleDownloadTemplate = async () => {
+
+    try {
+
+        const res = await downloadTemplate();
+
+        const url = window.URL.createObjectURL(
+
+            new Blob([res.data])
+
+        );
+
+        const link = document.createElement("a");
+
+        link.href = url;
+
+        link.download = "User_Template.xlsx";
+
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+
+    }
+
+    catch {
+
+        toast.error(
+
+            "Không tải được Template"
+
+        );
+
+    }
+
+};
 
     const handleAdd = () => {
 
@@ -81,12 +117,24 @@ function UserManagement() {
         formData.append("file", file);
 
         try {
+            const res = await importExcel(formData);
 
-            await importExcel(formData);
+const result = res.data;
 
-            toast.success("Import thành công");
+toast.success(
+
+    `Đã thêm ${result.success} user, bỏ qua ${result.failed} user.`
+
+);
+
+if (result.errors?.length) {
+
+    console.table(result.errors);
+
+}
 
             loadUsers();
+            fileRef.current.value = "";
 
         } catch (err) {
 
@@ -97,6 +145,7 @@ function UserManagement() {
                 "Import thất bại"
 
             );
+            fileRef.current.value = "";
 
         }
 
@@ -264,11 +313,10 @@ function UserManagement() {
 
         <div className="space-y-6">
 
-            <div className="flex justify-between items-center">
-
+            <div className="flex gap-3">
 
                 <button onClick={handleAdd}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
                 >
 
                     <FaPlus />
@@ -281,8 +329,7 @@ function UserManagement() {
 
                     onClick={() => fileRef.current.click()}
 
-                    className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-white"
-
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-white hover:bg-green-700"
                 >
 
                     <FaFileExcel />
@@ -290,6 +337,20 @@ function UserManagement() {
                     Import Excel
 
                 </button>
+
+                <button
+
+    onClick={handleDownloadTemplate}
+
+    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-white hover:bg-emerald-700"
+
+>
+
+    <FaFileExcel />
+
+    Download Template
+
+</button>
 
                 <input
 
@@ -307,7 +368,7 @@ function UserManagement() {
 
             </div>
 
-            <div className="flex items-center w-96 border rounded-lg bg-white px-4 py-3">
+            <div className="flex w-full items-center rounded-lg border bg-white px-4 py-3 lg:w-96">
 
                 <FaSearch className="mr-3 text-gray-500" />
 
@@ -331,7 +392,7 @@ function UserManagement() {
 
             </div>
 
-            <div className="overflow-hidden rounded-xl bg-white shadow">
+            <div className="hidden overflow-hidden rounded-xl bg-white shadow lg:block">
 
                 <table className="min-w-full">
 
@@ -470,7 +531,7 @@ function UserManagement() {
 
                                             <td className="px-4 py-3 text-center">
 
-                                                <div className="flex justify-center gap-3">
+                                                <div className="flex flex-wrap justify-center gap-2">
 
                                                     <button
 
@@ -534,7 +595,137 @@ function UserManagement() {
                 </table>
 
             </div>
+            <div className="space-y-4 lg:hidden">
 
+    {
+
+        loading ? (
+
+            <div className="rounded-xl bg-white p-6 text-center shadow">
+
+                Loading...
+
+            </div>
+
+        ) :
+
+        displayUsers.length === 0 ? (
+
+            <div className="rounded-xl bg-white p-6 text-center shadow">
+
+                Không có dữ liệu
+
+            </div>
+
+        ) :
+
+        displayUsers.map(user => (
+
+            <div
+                key={user._id}
+                className="rounded-2xl bg-white p-5 shadow"
+            >
+
+                <div className="flex items-start justify-between">
+
+                    <div>
+
+                        <h2 className="text-lg font-bold">
+
+                            {user.name}
+
+                        </h2>
+
+                        <p className="text-sm text-gray-500">
+
+                            {user.employeeId}
+
+                        </p>
+
+                    </div>
+
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
+
+                        {user.role}
+
+                    </span>
+
+                </div>
+
+                <div className="mt-4 space-y-2 text-sm">
+
+                    <div className="flex justify-between">
+
+                        <span className="text-gray-500">
+
+                            Email
+
+                        </span>
+
+                        <span className="text-right">
+
+                            {user.email}
+
+                        </span>
+
+                    </div>
+
+                    <div className="flex justify-between">
+
+                        <span className="text-gray-500">
+
+                            Tầng
+
+                        </span>
+
+                        <span>
+
+                            {user.floor}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-2">
+
+                    <button
+                        onClick={() => handleEdit(user)}
+                        className="rounded-lg bg-blue-500 py-2 text-white"
+                    >
+
+                        <FaEdit className="mx-auto" />
+
+                    </button>
+
+                    <button
+                        onClick={() => handleDelete(user._id)}
+                        className="rounded-lg bg-red-500 py-2 text-white"
+                    >
+
+                        <FaTrash className="mx-auto" />
+
+                    </button>
+
+                    <button
+                        onClick={() => handleResetPassword(user._id)}
+                        className="rounded-lg bg-yellow-500 py-2 text-white"
+                    >
+
+                        <FaKey className="mx-auto" />
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        ))
+
+    }
+
+</div>
             {
 
                 totalPages > 1 &&
@@ -553,9 +744,7 @@ function UserManagement() {
 
                                 className={`
 
-                                    px-4
-
-                                    py-2
+                                    px-3 py-2 text-sm lg:px-4
 
                                     rounded
 

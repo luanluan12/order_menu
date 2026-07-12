@@ -1,0 +1,55 @@
+{
+  "login": "로그인",
+  "logout": "로그아웃",
+  "history": "주문 내역",
+  "dashboard": "대시보드",
+  "menu": "메뉴",
+  "order": "주문",
+  "report": "보고서",
+  "change_password": "비밀번호 변경",
+  "select_day": "주문할 날짜 선택",
+  "notice_prefix": "최대",
+  "notice_main": "밥 메뉴 2인분",
+  "notice_or": "또는",
+  "notice_side": "음료 / 죽 1개만 선택할 수 있습니다.",
+  "notice_description": "확인하기 전에 수량을 다시 확인해 주세요.",
+  "selected": "선택됨",
+  "select_dish": "선택",
+  "no_dish": "등록된 메뉴가 없습니다.",
+  "wait_admin_update": "관리자가 메뉴를 업데이트할 때까지 기다려 주세요.",
+      "warning_other_group": "다른 메뉴 그룹이 이미 선택되었습니다.",
+    "warning_max_main": "최대 2인분까지 선택할 수 있습니다.",
+
+    "order_success_title": "주문이 완료되었습니다!",
+    "order_success_message": "주문해 주셔서 감사합니다. 맛있게 드세요!",
+    "view_history": "주문 내역 보기",
+
+    "no_menu": "등록된 메뉴가 없습니다.",
+    "order_closed": "주문 시간이 종료되었습니다.",
+    "deadline": "마감 시간",
+
+    "main_dish": "메인 메뉴",
+    "drink": "음료",
+    "soup": "죽 / 수프",
+    "dessert": "디저트",
+
+    "max_2_portions": "최대 2인분 선택",
+    "choose_1": "1개 선택",
+    "free_gift": "제공 메뉴",
+
+    "expired": "주문 마감",
+
+    "submit_order": "주문하기",
+    "update_order": "수정하기",
+  "cannot_load_history": "주문 내역을 불러올 수 없습니다.",
+  "no_order": "주문 내역이 없습니다.",
+  "ordered": "주문 완료",
+  "cancelled": "주문 취소",
+  "edit": "수정",
+  "loading": "로딩 중...",
+    "cannot_load_qr": "QR을 불러올 수 없습니다.",
+    "qr_receive": "식사 수령 QR",
+    "qr_description": "이 QR 코드를 배식 직원에게 보여주세요.",
+    "week": "주차"
+
+}

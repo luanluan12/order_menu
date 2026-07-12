@@ -6,17 +6,20 @@ import FoodGroup from "./FoodGroup";
 import OrderNotice from "./OrderNotice";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
+import bgFood from "../assets/bgfood.png";
 
 function WeekMenuContent({
     menu,
     initialOrder = null,
     onSubmit,
-    submitText = "ĐẶT MÓN",
+    submitText = "submit_order",
     editable = true,
 }) {
     const [currentDay, setCurrentDay] = useState(0);
     const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
+    const { t, i18n} = useTranslation();
 
     // =========================
     // Init Order
@@ -55,7 +58,9 @@ function WeekMenuContent({
         const current = { ...clone[currentDay] };
 
         if (current.drink || current.soup) {
-            toast.warning("Đã chọn nhóm khác.");
+            toast.warning(
+                t("warning_other_group")
+            );
             return;
         }
 
@@ -74,7 +79,11 @@ function WeekMenuContent({
             );
 
             if (total + quantity > 2) {
-                toast.warning("Chỉ được chọn tối đa 2 phần.");
+                toast.warning(
+
+                t("warning_max_main")
+
+            );
                 return;
             }
 
@@ -95,7 +104,11 @@ function WeekMenuContent({
                 mains.splice(index, 1);
             } else {
                 if (totalWithoutCurrent + quantity > 2) {
-                    toast.warning("Chỉ được chọn tối đa 2 phần.");
+                    toast.warning(
+
+                    t("warning_max_main")
+
+                );
                     return;
                 }
 
@@ -122,7 +135,11 @@ function WeekMenuContent({
         const current = { ...clone[currentDay] };
 
         if (current.mains.length > 0 || current.soup) {
-            toast.warning("Đã chọn nhóm khác.");
+            toast.warning(
+
+            t("warning_other_group")
+
+        );
             return;
         }
 
@@ -154,7 +171,11 @@ function WeekMenuContent({
         const current = { ...clone[currentDay] };
 
         if (current.mains.length > 0 || current.drink) {
-            toast.warning("Đã chọn nhóm khác.");
+            toast.warning(
+
+            t("warning_other_group")
+
+        );
             return;
         }
 
@@ -178,6 +199,22 @@ function WeekMenuContent({
     // =========================
     // Helpers
     // =========================
+
+    const formatDateTime = (date) => {
+
+    if (!date) return "";
+
+    const locale =
+
+        i18n.language === "ko"
+
+            ? "ko-KR"
+
+            : "vi-VN";
+
+    return new Date(date).toLocaleString(locale);
+
+};
 
     const getMainQuantity = (dishId) => {
         const item = orders[currentDay]?.mains.find(
@@ -209,10 +246,42 @@ function WeekMenuContent({
             // =========================
     // Submit
     // =========================
-
     const handleSubmit = async () => {
+
     if (!editable) return;
+
     if (!onSubmit) return;
+
+    // Validate
+    for (const day of orders) {
+
+        const hasMain = day.mains.length > 0;
+
+        const hasDrink = !!day.drink;
+
+        const hasSoup = !!day.soup;
+
+        // Không chọn gì => nghỉ ăn
+        if (!hasMain && !hasDrink && !hasSoup) {
+            continue;
+        }
+
+        const groupCount =
+            Number(hasMain) +
+            Number(hasDrink) +
+            Number(hasSoup);
+
+        if (groupCount > 1) {
+
+            toast.warning(
+                "Mỗi ngày chỉ được chọn 1 nhóm món."
+            );
+
+            return;
+
+        }
+
+    }
 
     const success = await onSubmit(orders);
 
@@ -220,38 +289,39 @@ function WeekMenuContent({
 
     await Swal.fire({
         icon: "success",
-        title: "🎉 Đặt món thành công!",
-        text: "Cảm ơn bạn đã đặt món. Chúc bạn ngon miệng!",
-        confirmButtonText: "Xem lịch sử",
+        title: `🎉 ${t("order_success_title")}`,
+        text: t("order_success_message"),
+        confirmButtonText: t("view_history"),
         confirmButtonColor: "#f97316",
         allowOutsideClick: false,
     });
 
     navigate("/history");
+
 };
 
     if (!menu) {
         return (
             <div className="flex h-screen items-center justify-center">
-                Chưa có thực đơn.
+                {t("no_menu")}
             </div>
         );
     }
 
-    const expired = new Date() > new Date(menu.deadline);
+    // const expired = new Date() > new Date(menu.deadline);
+    const expired = false;
 
     return (
-    <div className="mx-auto w-full max-w-[1080px] px-10 py-8">
+    <div className="mx-auto w-full max-w-[1080px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
 
         {expired && (
-            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-center">
-                <h2 className="text-xl font-bold text-red-600">
-                    ⛔ Đã hết thời gian đặt món
+            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-center sm:p-5">
+                <h2 className="text-lg font-bold text-red-600 sm:text-xl">
+                    ⛔ {t("order_closed")}
                 </h2>
 
                 <p className="mt-2 text-gray-600">
-                    Hạn chót{" "}
-                    {new Date(menu.deadline).toLocaleString("vi-VN")}
+                    {t("deadline")}: {formatDateTime(menu.deadline)}
                 </p>
             </div>
         )}
@@ -272,12 +342,18 @@ function WeekMenuContent({
         {/* Món cơm */}
 
         <FoodGroup
-            title="Món cơm"
-            subtitle="Chọn tối đa 2 phần"
+            title={t("main_dish")}
+
+            subtitle={t("max_2_portions")}
+
             foods={day.mains || []}
+
             type="main"
+
             disabled={expired || disableMain()}
+
             quantityOf={getMainQuantity}
+
             onQuantityChange={changeMainQuantity}
         />
 
@@ -285,12 +361,18 @@ function WeekMenuContent({
 
         <div className="mt-10">
             <FoodGroup
-                title="Món nước"
-                subtitle="Chọn 1 món"
+                title={t("drink")}
+
+                subtitle={t("choose_1")}
+
                 foods={day.drinks || []}
+
                 type="drink"
+
                 disabled={expired || disableDrink()}
+
                 selected={isDrinkSelected}
+
                 onSelect={toggleDrink}
             />
         </div>
@@ -299,12 +381,18 @@ function WeekMenuContent({
 
         <div className="mt-10">
             <FoodGroup
-                title="Cháo / Súp"
-                subtitle="Chọn 1 món"
+                title={t("soup")}
+
+                subtitle={t("choose_1")}
+
                 foods={day.soups || []}
+
                 type="soup"
+
                 disabled={expired || disableSoup()}
+
                 selected={isSoupSelected}
+
                 onSelect={toggleSoup}
             />
         </div>
@@ -314,11 +402,15 @@ function WeekMenuContent({
         {day.desserts?.length > 0 && (
             <div className="mt-10">
                 <FoodGroup
-                    title="Tráng miệng"
-                    subtitle="Món tặng kèm"
-                    foods={day.desserts}
-                    type="dessert"
-                    disabled
+                    title={t("dessert")}
+
+                        subtitle={t("free_gift")}
+
+                        foods={day.desserts}
+
+                        type="dessert"
+
+                        disabled
                 />
             </div>
         )}
@@ -345,7 +437,7 @@ function WeekMenuContent({
         }
     `}
 >
-    {expired ? "ĐÃ HẾT HẠN" : submitText}
+    {expired ? t("expired") : t(submitText)}
 </button>
         </div>
 

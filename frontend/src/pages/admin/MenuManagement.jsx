@@ -197,11 +197,11 @@ function MenuManagement() {
         <div className="space-y-6">
 
             {/* Title */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                 <button
     onClick={() => navigate("/admin/menu/create")}
-    className="flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:bg-orange-700 hover:shadow-lg"
+    className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-orange-700 sm:w-auto"
 >
     <span className="text-lg">+</span>
 
@@ -212,7 +212,7 @@ function MenuManagement() {
 
             {/* Table */}
 
-            <div className="overflow-hidden rounded-xl bg-white shadow">
+            <div className="hidden overflow-hidden rounded-xl bg-white shadow lg:block">
 
                 <table className="min-w-full">
 
@@ -384,6 +384,163 @@ function MenuManagement() {
                 </table>
 
             </div>
+            <div className="space-y-4 lg:hidden">
+
+    {
+
+        filteredMenus.length === 0 ? (
+
+            <div className="rounded-xl bg-white p-8 text-center shadow">
+
+                Không có dữ liệu
+
+            </div>
+
+        ) : (
+
+            filteredMenus.map(menu => (
+
+                <div
+                    key={menu._id}
+                    className="rounded-2xl bg-white p-5 shadow"
+                >
+
+                    <div className="flex items-center justify-between">
+
+                        <div>
+
+                            <h2 className="text-lg font-bold">
+
+                                {menu.week}
+
+                            </h2>
+
+                            <p className="text-sm text-gray-500">
+
+                                Năm {menu.year}
+
+                            </p>
+
+                        </div>
+
+                        {
+
+                            menu.status === "published"
+
+                                ?
+
+                                <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+
+                                    Published
+
+                                </span>
+
+                                :
+
+                                <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
+
+                                    Draft
+
+                                </span>
+
+                        }
+
+                    </div>
+
+                    <div className="mt-4 space-y-2 text-sm">
+
+                        <div className="flex justify-between">
+
+                            <span className="text-gray-500">
+
+                                Số ngày
+
+                            </span>
+
+                            <span>
+
+                                {menu.days?.length || 0}
+
+                            </span>
+
+                        </div>
+
+                        <div className="flex justify-between">
+
+                            <span className="text-gray-500">
+
+                                Ngày tạo
+
+                            </span>
+
+                            <span>
+
+                                {
+
+                                    new Date(menu.createdAt)
+
+                                        .toLocaleDateString("vi-VN")
+
+                                }
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div className="mt-5 flex gap-2">
+
+                        <button
+                            onClick={() => handleEdit(menu)}
+                            className="flex-1 rounded-lg bg-blue-500 py-2 text-white"
+                        >
+
+                            <FaEdit className="mx-auto" />
+
+                        </button>
+
+                        <button
+                            onClick={() => handleDelete(menu._id)}
+                            className="flex-1 rounded-lg bg-red-500 py-2 text-white"
+                        >
+
+                            <FaTrash className="mx-auto" />
+
+                        </button>
+
+                        <button
+
+                            disabled={
+                                menu.status === "published" ||
+                                publishingId === menu._id
+                            }
+
+                            onClick={() => handlePublish(menu)}
+
+                            className={`flex-1 rounded-lg py-2 text-white ${
+                                menu.status === "published"
+                                    ? "bg-gray-400"
+                                    : "bg-green-500"
+                            }`}
+
+                        >
+
+                            <FaPaperPlane className="mx-auto" />
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            ))
+
+        )
+
+    }
+
+</div>
 
         </div>
 

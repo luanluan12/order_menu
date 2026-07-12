@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ClipboardList, CalendarDays } from "lucide-react";
 import { getHistory } from "../../api/orderApi";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function History() {
     const [orders, setOrders] = useState([]);
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     useEffect(() => {
         loadHistory();
@@ -19,17 +23,22 @@ function History() {
         } catch (err) {
             toast.error(
                 err.response?.data?.message ||
-                "Không tải được lịch sử."
+                t("cannot_load_history")
             );
         }
     };
 
     const formatDay = (date) =>
-        new Date(date).toLocaleDateString("vi-VN", {
+    new Date(date).toLocaleDateString(
+        i18n.language === "ko"
+            ? "ko-KR"
+            : "vi-VN",
+        {
             weekday: "long",
             day: "2-digit",
             month: "2-digit",
-        });
+        }
+    );
 
     const DishCard = ({ dish, type = "", quantity }) => (
         <div className="w-[150px] overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
@@ -83,7 +92,7 @@ function History() {
                 </div>
 
                 <h1 className="text-4xl font-bold text-slate-800">
-                    Lịch sử đặt món
+                    {t("history")}
                 </h1>
 
             </div>
@@ -98,7 +107,7 @@ function History() {
                     />
 
                     <h2 className="mt-5 text-2xl font-bold text-slate-700">
-                        Chưa có đơn đặt món
+                        {t("no_order")}
                     </h2>
 
                 </div>
@@ -116,33 +125,51 @@ function History() {
 
                             {/* Week */}
 
-                            <div className="mb-8 flex items-center justify-between">
+                            {/* Header */}
 
-                                <div>
+<div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-                                    <h2 className="text-3xl font-bold text-slate-800">
-                                        {order.week}
-                                    </h2>
+    <div>
 
-                                    <div className="mt-2 flex items-center gap-2 text-gray-500">
+        <h2 className="text-3xl font-bold text-slate-800">
+            {order.week}
+        </h2>
 
-                                    </div>
+    </div>
 
-                                </div>
+    <div className="flex items-center gap-3">
 
-                                <span
-                                    className={`rounded-full px-5 py-2 font-semibold ${
-                                        order.status === "ordered"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700"
-                                    }`}
-                                >
-                                    {order.status === "ordered"
-                                        ? "Đã đặt"
-                                        : "Đã hủy"}
-                                </span>
+        <span
+            className={`rounded-full px-5 py-2 font-semibold ${
+                order.status === "ordered"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+            }`}
+        >
+            {order.status === "ordered"
+                ? t("ordered")
+                : t("cancelled")}
+        </span>
 
-                            </div>
+        {order.status === "ordered" && (
+
+            <button
+
+                onClick={() =>
+                    navigate(`/order/edit/${order._id}`)
+                }
+
+                className="rounded-xl bg-orange-500 px-5 py-2 font-semibold text-white transition hover:bg-orange-600"
+
+            >
+                {t("edit")}
+            </button>
+
+        )}
+
+    </div>
+
+</div>
 
                             {/* Days */}
 
@@ -167,7 +194,7 @@ function History() {
                                                     key={dish.dishId || dish.name}
                                                     dish={dish}
                                                     quantity={dish.quantity}
-                                                    type="Món cơm"
+                                                    type={t("main_dish")}
                                                 />
 
                                             ))}
@@ -176,7 +203,7 @@ function History() {
 
                                                 <DishCard
                                                     dish={day.drink}
-                                                    type="🥤 Món nước"
+                                                    type={`🥤 ${t("drink")}`}
                                                 />
 
                                             )}
@@ -185,7 +212,7 @@ function History() {
 
                                                 <DishCard
                                                     dish={day.soup}
-                                                    type="🥣 Cháo / Súp"
+                                                    type={`🥣 ${t("soup")}`}
                                                 />
 
                                             )}

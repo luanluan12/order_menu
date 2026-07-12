@@ -28,19 +28,36 @@ function AddDishModal({
             : image || null;
 
     const submit = () => {
-        if (!name.trim()) {
-            alert("Vui lòng nhập tên món.");
-            return;
-        }
 
-        onSave({
-            name,
-            type: dish?.type || "normal",
-            image,
-        });
+    if (!name.trim()) {
 
-        onClose();
-    };
+        alert("Vui lòng nhập tên món.");
+
+        return;
+
+    }
+
+    if (!image) {
+
+        alert("Vui lòng chọn ảnh món ăn.");
+
+        return;
+
+    }
+
+    onSave({
+
+        name: name.trim(),
+
+        type: dish?.type || "normal",
+
+        image,
+
+    });
+
+    onClose();
+
+};
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">

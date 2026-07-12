@@ -1,31 +1,77 @@
 import axios from "./axios";
 
-export const getDashboard = () =>
-    axios.get("/report/dashboard");
-
-export const getWeeklyReport = (week) =>
-    axios.get(`/report/weekly?week=${week}`);
-
-export const exportExcel = (week) =>
-    axios.get(`/report/export?week=${week}`, {
-        responseType: "blob"
-    });
-
-export const getFloorDailyReport = (date) => {
+export const exportDailyReport = (date) => {
 
     return axios.get(
 
-        `/report/floor/daily?date=${date}`
+        "/report/export-daily",
+
+        {
+
+            params: {
+
+                date
+
+            },
+
+            responseType: "blob"
+
+        }
 
     );
 
 };
 
-export const getFloorMonthlyReport = (month) => {
+export const getDailyReport = (date) =>
+
+    axios.get(
+
+        "/report/daily",
+
+        {
+
+            params: {
+
+                date
+
+            }
+
+        }
+
+    );
+// ======================================
+// Invoice Report
+// ======================================
+
+export const getInvoiceReport = (params) => {
 
     return axios.get(
 
-        `/report/floor/monthly?month=${month}`
+        "/report/invoice",
+
+        {
+
+            params
+
+        }
+
+    );
+
+};
+
+export const exportInvoiceReport = (params) => {
+
+    return axios.get(
+
+        "/report/invoice/export",
+
+        {
+
+            params,
+
+            responseType: "blob"
+
+        }
 
     );
 

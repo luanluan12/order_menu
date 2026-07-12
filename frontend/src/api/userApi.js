@@ -24,3 +24,19 @@ export const importExcel = (formData) =>
             "Content-Type": "multipart/form-data"
         }
     });
+
+export const downloadTemplate = () => {
+
+    return axios.get(
+
+        "/user/template",
+
+        {
+
+            responseType: "blob"
+
+        }
+
+    );
+
+};

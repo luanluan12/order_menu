@@ -11,12 +11,16 @@ import UserManagement from "../pages/admin/UserManagement";
 import OrderManagement from "../pages/admin/OrderManagement";
 import Report from "../pages/admin/Report";
 import History from "../pages/user/History";
+import MyQr from "../pages/user/MyQr";
+import OrderEdit from "../pages/user/OrderEdit";
 
 import AdminLayout from "../layouts/AdminLayout";
 
 import PrivateRoute from "../components/PrivateRoute";
 
 import MenuWeekCreate from "../pages/admin/MenuWeekCreate";
+
+import MenuWeekEdit from "../pages/admin/MenuWeekEdit";
 
 function AppRoutes() {
 
@@ -40,6 +44,15 @@ function AppRoutes() {
                 }
             />
             <Route
+    path="/order/edit/:id"
+    element={
+        <PrivateRoute>
+            <OrderEdit />
+        </PrivateRoute>
+    }
+/>
+        <Route
+            
 
     path="/change-password"
 
@@ -61,6 +74,15 @@ function AppRoutes() {
                 }
 
             />
+
+            <Route
+    path="/my-qr"
+    element={
+        <PrivateRoute>
+            <MyQr />
+        </PrivateRoute>
+    }
+/>
 
             {/* Admin */}
             <Route
@@ -94,6 +116,11 @@ function AppRoutes() {
                 <Route
                     path="/admin/report"
                     element={<Report />}
+                />
+
+                <Route
+                    path="admin/menu/edit/:id"
+                    element={<MenuWeekEdit />}
                 />
 
                 <Route

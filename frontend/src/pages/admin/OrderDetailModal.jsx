@@ -20,21 +20,23 @@ function OrderDetailModal({
 
     return (
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6">
 
-            <div className="max-h-[90vh] w-[900px] overflow-y-auto rounded-3xl bg-white p-8">
+            <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 sm:rounded-3xl sm:p-8">
 
-                <div className="mb-8 flex items-center justify-between">
+                {/* Header */}
+
+                <div className="mb-6 flex items-start justify-between">
 
                     <div>
 
-                        <h2 className="text-3xl font-bold">
+                        <h2 className="text-2xl font-bold sm:text-3xl">
 
                             Đơn đặt món
 
                         </h2>
 
-                        <p className="mt-2 text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 sm:text-base">
 
                             {order.user?.name} - {order.week}
 
@@ -46,7 +48,7 @@ function OrderDetailModal({
 
                         onClick={onClose}
 
-                        className="text-3xl"
+                        className="text-2xl font-bold text-gray-500 hover:text-black"
 
                     >
 
@@ -64,21 +66,31 @@ function OrderDetailModal({
 
                             key={index}
 
-                            className="mb-8 rounded-2xl border p-6"
+                            className="mb-5 rounded-2xl border p-4 sm:mb-8 sm:p-6"
 
                         >
 
-                            <h3 className="mb-5 text-xl font-bold">
+                            <h3 className="mb-4 text-lg font-bold capitalize sm:text-xl">
 
-                                {new Date(day.date).toLocaleDateString("vi-VN", {
+                                {
 
-                                    weekday: "long",
+                                    new Date(day.date).toLocaleDateString(
 
-                                    day: "2-digit",
+                                        "vi-VN",
 
-                                    month: "2-digit"
+                                        {
 
-                                })}
+                                            weekday: "long",
+
+                                            day: "2-digit",
+
+                                            month: "2-digit"
+
+                                        }
+
+                                    )
+
+                                }
 
                             </h3>
 
@@ -92,7 +104,7 @@ function OrderDetailModal({
 
                                         <div className="mb-3 font-semibold">
 
-                                            Món cơm
+                                            🍱 Món cơm
 
                                         </div>
 
@@ -104,7 +116,7 @@ function OrderDetailModal({
 
                                                     key={i}
 
-                                                    className="mb-3 flex items-center gap-4"
+                                                    className="mb-3 flex items-center gap-3"
 
                                                 >
 
@@ -112,17 +124,17 @@ function OrderDetailModal({
 
                                                         src={image(dish.image)}
 
-                                                        className="h-14 w-14 rounded-full object-cover"
+                                                        className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
 
                                                     />
 
-                                                    <div className="flex-1">
+                                                    <div className="flex-1 text-sm sm:text-base">
 
                                                         {dish.name}
 
                                                     </div>
 
-                                                    <div>
+                                                    <div className="font-semibold">
 
                                                         x{dish.quantity}
 
@@ -146,17 +158,17 @@ function OrderDetailModal({
 
                                 day.drink && (
 
-                                    <div className="mb-5 flex items-center gap-4">
+                                    <div className="mb-4 flex items-center gap-3">
 
                                         <img
 
                                             src={image(day.drink.image)}
 
-                                            className="h-14 w-14 rounded-full object-cover"
+                                            className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
 
                                         />
 
-                                        <div>
+                                        <div className="text-sm sm:text-base">
 
                                             🥤 {day.drink.name}
 
@@ -174,17 +186,17 @@ function OrderDetailModal({
 
                                 day.soup && (
 
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
 
                                         <img
 
                                             src={image(day.soup.image)}
 
-                                            className="h-14 w-14 rounded-full object-cover"
+                                            className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
 
                                         />
 
-                                        <div>
+                                        <div className="text-sm sm:text-base">
 
                                             🥣 {day.soup.name}
 
@@ -202,13 +214,13 @@ function OrderDetailModal({
 
                 }
 
-                <div className="mt-8 flex justify-end">
+                <div className="mt-6 flex justify-center sm:justify-end">
 
                     <button
 
                         onClick={onClose}
 
-                        className="rounded-xl bg-blue-600 px-8 py-3 font-bold text-white"
+                        className="w-full rounded-xl bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700 sm:w-auto"
 
                     >
 

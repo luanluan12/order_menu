@@ -240,7 +240,7 @@ function DayMenuEditor({
 
     return (
 
-        <div className="space-y-12">
+        <div className="space-y-6 lg:space-y-12">
 
             {/* MAIN */}
 

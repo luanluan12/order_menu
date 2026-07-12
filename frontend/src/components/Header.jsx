@@ -24,7 +24,7 @@ function Header() {
 
                     Hello,
 
-                    <span className="ml-2 text-violet-600">
+                    <span className="ml-2 text-orange-600">
 
                         {user?.name || "Admin"}
 
@@ -42,7 +42,7 @@ function Header() {
 
                 {/* Setting */}
 
-                <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition hover:bg-violet-50">
+                <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm transition hover:bg-orange-50">
 
                     <FaCog className="text-gray-600" />
 

@@ -1,22 +1,37 @@
 import WeekMenu from "./WeekMenu";
 import Header from "./components/Header";
+
+import bgFood from "../../assets/bgfood.png";
+
 function Home() {
+     console.log(bgFood);
 
     return (
 
-    <>
+        <div
+            className="min-h-screen bg-cover bg-center bg-fixed"
+            style={{
+                backgroundImage: `url(${bgFood})`,
+            }}
+        >
 
-        <Header />
+            {/* Lớp phủ trắng mờ */}
 
-        <div className="mx-auto max-w-7xl p-6">
+            <div className="min-h-screen">
 
-            <WeekMenu />
+                <Header />
+
+                <div className="mx-auto max-w-7xl p-6">
+
+                    <WeekMenu />
+
+                </div>
+
+            </div>
 
         </div>
 
-    </>
-
-);
+    );
 
 }
 

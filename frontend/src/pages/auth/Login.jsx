@@ -47,25 +47,24 @@ function Login() {
 
             switch (res.data.user.role) {
 
-                case "guest":
+    case "guest":
 
-                    navigate("/home");
+        navigate("/home");
+        break;
 
-                    break;
+    case "admin_eocmn":
+        navigate("/admin/dashboard");
+        break;
 
-                case "admin_eocmn":
+    case "admin_nexon":
 
-                case "admin_nexon":
+        navigate("/admin/dashboard");
+        break;
 
-                    navigate("/admin/dashboard");
+    default:
 
-                    break;
-
-                default:
-
-                    navigate("/");
-
-            }
+        navigate("/");
+}
 
         } catch (err) {
 

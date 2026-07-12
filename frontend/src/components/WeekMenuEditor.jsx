@@ -4,6 +4,8 @@ import DayMenuEditor from "./DayMenuEditor";
 
 function WeekMenuEditor({
 
+    initialData = null,
+
     onSave
 
 }) {
@@ -19,12 +21,107 @@ function WeekMenuEditor({
     const [deadline, setDeadline] = useState("");
 
     const [allowedWeek, setAllowedWeek] = useState("");
+    useEffect(() => {
+
+    if (!initialData) return;
+
+    setWeek(initialData.week);
+
+    setOpenTime(
+        initialData.openTime
+            ? initialData.openTime.slice(0, 16)
+            : ""
+    );
+
+    setDeadline(
+        initialData.deadline
+            ? initialData.deadline.slice(0, 16)
+            : ""
+    );
+
+    const loadedDays = initialData.days.map((day) => ({
+
+        ...day,
+
+        date: new Date(day.date),
+
+        drink: day.drinks?.[0] || {
+            name: "",
+            image: null,
+        },
+
+        soup: day.soups?.[0] || {
+            name: "",
+            image: null,
+        },
+
+        mains: day.mains || [],
+
+    }));
+
+    setDays(loadedDays);
+
+    setCurrentDay(0);
+
+}, [initialData]);
     
 
     // ===============================
     // Generate days
     // ===============================
-    useEffect(() => {
+//     useEffect(() => {
+
+//     const now = new Date();
+
+//     const getISOWeek = (date) => {
+
+//         const d = new Date(Date.UTC(
+//             date.getFullYear(),
+//             date.getMonth(),
+//             date.getDate()
+//         ));
+
+//         d.setUTCDate(
+//             d.getUTCDate() + 4 - (d.getUTCDay() || 7)
+//         );
+
+//         const yearStart = new Date(Date.UTC(
+//             d.getUTCFullYear(),
+//             0,
+//             1
+//         ));
+
+//         const week = Math.ceil(
+//             (((d - yearStart) / 86400000) + 1) / 7
+//         );
+
+//         return {
+
+//             year: d.getUTCFullYear(),
+
+//             week
+
+//         };
+
+//     };
+
+//     const next = new Date(now);
+
+//     next.setDate(
+//         next.getDate() + 7
+//     );
+
+//     const { year, week } = getISOWeek(next);
+
+//     const value =
+//         `${year}-W${String(week).padStart(2, "0")}`;
+
+//     setAllowedWeek(value);
+
+//     setWeek(value);
+
+// }, []);
+useEffect(() => {
 
     const now = new Date();
 
@@ -60,36 +157,30 @@ function WeekMenuEditor({
 
     };
 
-    const next = new Date(now);
-
-    next.setDate(
-        next.getDate() + 7
-    );
-
-    const { year, week } = getISOWeek(next);
+    // Tuần hiện tại
+    const { year, week } = getISOWeek(now);
 
     const value =
         `${year}-W${String(week).padStart(2, "0")}`;
 
-    setAllowedWeek(value);
-
     setWeek(value);
 
 }, []);
-
     useEffect(() => {
 
-        if (!week) {
+    if (initialData) return;
 
-            setDays([]);
+    if (!week) {
 
-            return;
+        setDays([]);
 
-        }
+        return;
 
-        generateDays(week);
+    }
 
-    }, [week]);
+    generateDays(week);
+
+}, [week, initialData]);
 
     const generateDays = (weekString) => {
 
@@ -299,6 +390,33 @@ const submit = () => {
         return;
 
     }
+    for (const day of days) {
+
+        if (day.mains.length === 0) {
+
+            alert(`${day.name}: Vui lòng thêm ít nhất 1 món cơm.`);
+
+            return;
+
+        }
+
+        if (!day.drink?.name?.trim()) {
+
+            alert(`${day.name}: Vui lòng thêm món nước.`);
+
+            return;
+
+        }
+
+        if (!day.soup?.name?.trim()) {
+
+            alert(`${day.name}: Vui lòng thêm món cháo / súp.`);
+
+            return;
+
+        }
+
+    }
 
     const formData = new FormData();
 
@@ -485,29 +603,22 @@ const submit = () => {
 
             {/* Header */}
 
-            <div className="rounded-2xl bg-white p-6 shadow">
+            <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
 
                 <input
 
-                    type="week"
+                    // type="week"
 
+                    // value={week}
+
+                    // min={allowedWeek}
+
+                    // max={allowedWeek}
+                    type="week"                   
                     value={week}
-
-                    min={allowedWeek}
-
-                    max={allowedWeek}
-
-                    onChange={(e)=>
-
-                        setWeek(
-
-                            e.target.value
-
-                        )
-
-                    }
-
-                    className="rounded-xl border p-3"
+                    disabled={!!initialData}
+                    onChange={(e) => setWeek(e.target.value)}
+                    className="w-full rounded-xl border p-3 sm:w-auto"
                 />
 
             </div>
@@ -515,36 +626,6 @@ const submit = () => {
             <div className="mt-5">
 
     <div className="mt-5 grid grid-cols-2 gap-6">
-
-    <div>
-
-        <label className="mb-3 block font-semibold">
-            Mở đặt món
-        </label>
-
-        <input
-            type="datetime-local"
-            value={openTime}
-            onChange={(e)=>setOpenTime(e.target.value)}
-            className="w-full rounded-xl border p-3"
-        />
-
-    </div>
-
-    <div>
-
-        <label className="mb-3 block font-semibold">
-            Hạn chót đặt món
-        </label>
-
-        <input
-            type="datetime-local"
-            value={deadline}
-            onChange={(e)=>setDeadline(e.target.value)}
-            className="w-full rounded-xl border p-3"
-        />
-
-    </div>
 
 </div>
 
@@ -555,11 +636,13 @@ const submit = () => {
 
                 week && (
 
-                    <div className="grid grid-cols-[220px_1fr] gap-8">
+                    <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
 
                         {/* LEFT */}
 
-                        <div className="rounded-2xl bg-white p-4 shadow">
+                        <div className="overflow-x-auto rounded-2xl bg-white p-3 shadow">
+
+                            <div className="flex gap-3 lg:block">
 
                             {
 
@@ -583,7 +666,7 @@ const submit = () => {
 
                                             }
 
-                                            className={`mb-3 w-full rounded-xl p-4 text-left transition
+                                            className={`min-w-[150px] lg:mb-3 lg:w-full rounded-xl p-4 transition
 
                                             ${
 
@@ -591,7 +674,7 @@ const submit = () => {
 
                                                 ?
 
-                                                "bg-violet-600 text-white"
+                                                "bg-orange-600 text-white"
 
                                                 :
 
@@ -628,12 +711,13 @@ const submit = () => {
                                 )
 
                             }
+                            </div>
 
                         </div>
 
                         {/* RIGHT */}
 
-                        <div className="rounded-2xl bg-white p-8 shadow">
+                        <div className="rounded-2xl bg-white p-4 shadow sm:p-6 lg:p-8">
 
                             <DayMenuEditor
 
@@ -665,13 +749,13 @@ const submit = () => {
 
                 week && (
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-center lg:justify-end">
 
                         <button
 
                             onClick={submit}
 
-                            className="rounded-xl bg-violet-600 px-8 py-4 font-semibold text-white transition hover:bg-violet-700"
+                            className="w-full rounded-xl bg-orange-600 px-8 py-4 font-semibold text-white transition hover:bg-orange-700 lg:w-auto"
 
                         >
 

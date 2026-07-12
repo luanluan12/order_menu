@@ -173,18 +173,12 @@ const submit = async (days) => {
     editable={!token || !order}
 
     submitText={
-
-        token
-
-            ? "ĐẶT MÓN"
-
-            : order
-
-                ? "CẬP NHẬT"
-
-                : "ĐẶT MÓN"
-
-    }
+    token
+        ? "submit_order"
+        : order
+            ? "update_order"
+            : "submit_order"
+}
 
     onSubmit={submit}
 

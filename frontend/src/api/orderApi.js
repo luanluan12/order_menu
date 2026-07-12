@@ -18,11 +18,11 @@ export const createOrder = (data) => {
 /**
  * Cập nhật đặt món cả tuần
  */
-export const updateOrder = (data) => {
+export const updateOrder = (id, data) => {
 
     return axios.put(
 
-        "/order",
+        `/order/${id}`,
 
         data
 
@@ -57,6 +57,19 @@ export const getHistory = () => {
     return axios.get(
 
         "/order/history"
+
+    );
+
+};
+
+/**
+ * Chi tiết đơn đặt món
+ */
+export const getOrderById = (id) => {
+
+    return axios.get(
+
+        `/order/${id}`
 
     );
 
@@ -103,6 +116,50 @@ export const getOrders = (params = {}) => {
         {
             params
         }
+    );
+
+};
+
+export const getMyQr = () => {
+
+    return axios.get("/order/my-qr");
+
+};
+
+export const scanQr = (data) => {
+
+    return axios.post("/order/scan", data);
+
+};
+
+// ===============================
+// Preview QR
+// ===============================
+
+export const previewQr = (data) => {
+
+    return axios.post(
+
+        "/order/preview",
+
+        data
+
+    );
+
+};
+
+// ===============================
+// Confirm Receive
+// ===============================
+
+export const confirmReceive = (data) => {
+
+    return axios.post(
+
+        "/order/receive",
+
+        data
+
     );
 
 };

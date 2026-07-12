@@ -8,6 +8,7 @@ import {
 
 import FoodCard from "./FoodCard";
 import DrinkCard from "./DrinkCard";
+import { useTranslation } from "react-i18next";
 
 function FoodGroup({
     title,
@@ -21,6 +22,7 @@ function FoodGroup({
     onSelect,
     selectedText,
 }) {
+    const { t } = useTranslation();
     const getIcon = () => {
         switch (type) {
             case "main":
@@ -81,24 +83,24 @@ function FoodGroup({
         <section className="w-full">
             {/* Header */}
 
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-3 sm:items-center sm:gap-4">
 
                     <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-full ${color.bg} ${color.text}`}
-                    >
+    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12 ${color.bg} ${color.text}`}
+>
                         {getIcon()}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
 
-                        <h2 className="text-[18px] font-bold uppercase tracking-wide text-slate-800">
+                        <h2 className="text-base font-bold uppercase tracking-wide text-slate-800 sm:text-lg">
                             {title}
                         </h2>
 
                         {subtitle && (
-                            <span className="text-[15px] text-slate-500">
+                            <span className="text-sm text-slate-500">
                                 ({subtitle})
                             </span>
                         )}
@@ -108,9 +110,9 @@ function FoodGroup({
                 </div>
 
                 {selectedText && (
-                    <div className="text-base font-semibold">
+                    <div className="text-sm font-semibold sm:text-base">
                         <span className={color.selected}>
-                            Đã chọn:
+                            {t("selected")}:
                         </span>
 
                         <span className="text-slate-700">
@@ -126,19 +128,19 @@ function FoodGroup({
 
             {foods.length === 0 ? (
 
-                <div className="flex h-52 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50">
+                <div className="flex h-40 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50 sm:h-52">
 
                     <ChefHat
                         size={46}
                         className="mb-4 text-orange-300"
                     />
 
-                    <h3 className="text-xl font-semibold text-gray-700">
-                        Chưa có món
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-700">
+                        {t("no_dish")}
                     </h3>
 
                     <p className="mt-2 text-sm text-gray-400">
-                        Vui lòng chờ quản trị viên cập nhật.
+                        {t("wait_admin_update")}
                     </p>
 
                 </div>
