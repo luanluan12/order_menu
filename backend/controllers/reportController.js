@@ -38,36 +38,23 @@ function getFoodName(day) {
 
     if (!day) return "";
 
-    // Main
+    const foods = [];
 
-    if (day.mains && day.mains.length > 0) {
+    (day.mains || []).forEach(item => {
+        if (item.quantity > 0) {
+            foods.push(`${item.name} x${item.quantity}`);
+        }
+    });
 
-        return day.mains
-
-            .map(item => `${item.name} x${item.quantity}`)
-
-            .join(", ");
-
+    if (day.drink?.name) {
+        foods.push(day.drink.name);
     }
 
-    // Drink
-
-    if (day.drink) {
-
-        return day.drink.name;
-
+    if (day.soup?.name) {
+        foods.push(day.soup.name);
     }
 
-    // Soup
-
-    if (day.soup) {
-
-        return day.soup.name;
-
-    }
-
-    return "";
-
+    return foods.join(", ");
 }
 
 // ======================================================
@@ -1103,6 +1090,11 @@ exports.getInvoiceReport = async (req, res) => {
                     continue;
 
                 }
+                const food = getFoodName(day);
+
+if (!food) {
+    continue;
+}
 
                 const company = getCompany(
 
@@ -1126,7 +1118,7 @@ exports.getInvoiceReport = async (req, res) => {
 
                     company,
 
-                    food: getFoodName(day),
+                    food,
 
                     floor: order.user.floor,
 
@@ -1291,6 +1283,11 @@ exports.exportInvoiceExcel = async (req, res) => {
                     continue;
 
                 }
+                const food = getFoodName(day);
+
+if (!food) {
+    continue;
+}
 
                 const company = getCompany(
 
@@ -1314,7 +1311,7 @@ exports.exportInvoiceExcel = async (req, res) => {
 
                     company,
 
-                    food: getFoodName(day)
+                    food,
 
                 });
 
