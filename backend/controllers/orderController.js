@@ -1331,42 +1331,48 @@ const day = order.days.find(d => {
     });
 
 }
+const hasMeal =
+    day.mains.length > 0 ||
+    !!day.drink ||
+    !!day.soup;
 
         return res.json({
 
-            success: true,
+    success: true,
 
-            data: {
+    data: {
 
-                orderId: order._id,
+        orderId: order._id,
 
-                employee: {
+        employee: {
 
-                    employeeId: order.user.employeeId,
+            employeeId: order.user.employeeId,
 
-                    name: order.user.name,
+            name: order.user.name,
 
-                    email: order.user.email,
+            email: order.user.email,
 
-                    floor: order.user.floor
+            floor: order.user.floor
 
-                },
+        },
 
-                date: day.date,
+        date: day.date,
 
-                received: day.received,
+        received: day.received,
 
-                receivedAt: day.receivedAt,
+        receivedAt: day.receivedAt,
 
-                mains: day.mains,
+        hasMeal,
 
-                drink: day.drink,
+        mains: day.mains,
 
-                soup: day.soup
+        drink: day.drink,
 
-            }
+        soup: day.soup
 
-        });
+    }
+
+});
 
     }
 
