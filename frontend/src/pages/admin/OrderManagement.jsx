@@ -9,9 +9,12 @@ function OrderManagement() {
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [openScanner, setOpenScanner] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().slice(0, 10)
-);
+    const getLocalDate = () => {
+    const today = new Date();
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+    return today.toISOString().split("T")[0];
+};
+const [selectedDate, setSelectedDate] = useState(getLocalDate());
     const getTodayOrder = (order) => {
         let today = new Date();
 
