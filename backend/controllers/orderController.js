@@ -1106,35 +1106,48 @@ exports.getAllOrders = async (req, res) => {
 
     });
 
-const result = orders.map(order => {
+const result = orders
+    .map(order => {
 
-    const obj = order.toObject();
+        const obj = order.toObject();
 
-    let selectedDay = null;
+        let selectedDay = null;
 
-    if (date) {
+        if (date) {
 
-        selectedDay = obj.days.find(day =>
+            selectedDay = obj.days.find(day =>
 
-            new Date(day.date)
+                moment(day.date)
+                    .tz("Asia/Ho_Chi_Minh")
+                    .format("YYYY-MM-DD") === date
 
-                .toISOString()
+            );
 
-                .slice(0, 10) === date
+        }
 
-        );
+        // Nếu chọn ngày nhưng không có ngày tương ứng
+        if (date && !selectedDay) {
+            return null;
+        }
 
-    }
+        // Không đăng ký suất ăn hôm đó -> bỏ khỏi danh sách
+        if (
+            date &&
+            selectedDay &&
+            selectedDay.mains.length === 0 &&
+            !selectedDay.drink &&
+            !selectedDay.soup
+        ) {
+            return null;
+        }
 
-    return {
+        return {
+            ...obj,
+            selectedDay
+        };
 
-        ...obj,
-
-        selectedDay
-
-    };
-
-});
+    })
+    .filter(Boolean);
 
         return res.json({
 
