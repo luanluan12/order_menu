@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Order = require("../models/Order");
+const moment = require("moment-timezone");
 
 exports.getDashboard = async (req, res) => {
 
@@ -35,9 +36,9 @@ exports.getDashboard = async (req, res) => {
 
         const floorMap = {};
 
-        const today = new Date();
-
-        today.setHours(0, 0, 0, 0);
+        const today = moment()
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM-DD");
 
         for (const order of orders) {
 
@@ -61,19 +62,16 @@ exports.getDashboard = async (req, res) => {
 
             for (const day of order.days) {
 
-                const d = new Date(day.date);
+                const d = moment(day.date)
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM-DD");
 
-                d.setHours(0, 0, 0, 0);
-
-                if (d.getTime() !== today.getTime()) continue;
+if (d !== today) continue;
 
                 const hasFood =
-
-                    day.mains.length ||
-
-                    day.drink ||
-
-                    day.soup;
+    day.mains.some(item => item.quantity > 0) ||
+    !!day.drink ||
+    !!day.soup;
 
                 if (!hasFood) continue;
 
