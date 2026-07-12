@@ -259,10 +259,6 @@ useEffect(() => {
         setDays(list);
 
         setCurrentDay(0);
-        // ========================
-        setDays(list);
-
-setCurrentDay(0);
 
 // ========================
 // Open Time
@@ -311,57 +307,19 @@ setDeadline(
 
     };
 
-    const getMonday = (
+    const getMonday = (year, week) => {
 
-        year,
+    const simple = new Date(Date.UTC(year, 0, 4));
 
-        week
+    const day = simple.getUTCDay() || 7;
 
-    ) => {
+    simple.setUTCDate(simple.getUTCDate() - day + 1);
 
-        const simple = new Date(
+    simple.setUTCDate(simple.getUTCDate() + (week - 1) * 7);
 
-            year,
+    return new Date(simple);
 
-            0,
-
-            1 + (week - 1) * 7
-
-        );
-
-        const day = simple.getDay();
-
-        const monday = new Date(simple);
-
-        if (day <= 4) {
-
-            monday.setDate(
-
-                simple.getDate()
-
-                - simple.getDay()
-
-                + 1
-
-            );
-
-        } else {
-
-            monday.setDate(
-
-                simple.getDate()
-
-                + 8
-
-                - simple.getDay()
-
-            );
-
-        }
-
-        return monday;
-
-    };
+};
 
     // ===============================
     // Update day
