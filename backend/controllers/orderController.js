@@ -1483,6 +1483,23 @@ const day = order.days.find(d =>
 
         }
 
+        const hasMeal =
+    day.mains.length > 0 ||
+    !!day.drink ||
+    !!day.soup;
+
+if (!hasMeal) {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message: "Hôm nay nhân viên không đăng ký suất ăn."
+
+    });
+
+}
+
         if (day.received) {
 
             return res.status(409).json({
