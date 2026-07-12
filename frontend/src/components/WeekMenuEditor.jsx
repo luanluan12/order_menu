@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import DayMenuEditor from "./DayMenuEditor";
 
+
 function WeekMenuEditor({
 
     initialData = null,
@@ -125,6 +126,9 @@ useEffect(() => {
 
     const now = new Date();
 
+    // Luôn tạo menu cho tuần sau
+    now.setDate(now.getDate() + 7);
+
     const getISOWeek = (date) => {
 
         const d = new Date(Date.UTC(
@@ -157,12 +161,11 @@ useEffect(() => {
 
     };
 
-    // Tuần hiện tại
     const { year, week } = getISOWeek(now);
 
     const value =
         `${year}-W${String(week).padStart(2, "0")}`;
-
+    setAllowedWeek(value);
     setWeek(value);
 
 }, []);
@@ -565,15 +568,13 @@ const submit = () => {
 
                 <input
 
-                    // type="week"
+                    type="week"
 
-                    // value={week}
-
-                    // min={allowedWeek}
-
-                    // max={allowedWeek}
-                    type="week"                   
                     value={week}
+
+                    min={allowedWeek}
+
+                    max={allowedWeek}
                     disabled={!!initialData}
                     onChange={(e) => setWeek(e.target.value)}
                     className="w-full rounded-xl border p-3 sm:w-auto"
