@@ -1453,15 +1453,17 @@ exports.confirmReceive = async (req, res) => {
 
         today.setHours(0, 0, 0, 0);
 
-        const day = order.days.find(d => {
+const todayStr = moment()
+    .tz("Asia/Ho_Chi_Minh")
+    .format("YYYY-MM-DD");
 
-            const date = new Date(d.date);
+const day = order.days.find(d =>
 
-            date.setHours(0, 0, 0, 0);
+    moment(d.date)
+        .tz("Asia/Ho_Chi_Minh")
+        .format("YYYY-MM-DD") === todayStr
 
-            return date.getTime() === today.getTime();
-
-        });
+);
 
         if (!day) {
 
