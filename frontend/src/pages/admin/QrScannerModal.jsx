@@ -208,6 +208,13 @@ catch (err) {
 };
 
 const handleConfirm = async () => {
+    if (!preview?.hasMeal) {
+
+        toast.warning("Hôm nay nhân viên không đăng ký suất ăn.");
+
+        return;
+
+    }
 
     if (!orderId) return;
 
@@ -254,6 +261,26 @@ const handleConfirm = async () => {
         setLoading(false);
 
     }
+
+};
+
+const handleScanAgain = () => {
+
+    setPreview(null);
+
+    setOrderId(null);
+
+    setLoading(false);
+
+    clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(
+
+        scanFrame,
+
+        300
+
+    );
 
 };
 
@@ -422,71 +449,65 @@ return (
 
                                 <h3 className="mb-3 text-lg font-bold">
 
-                                    Món đã đặt
+    {preview.hasMeal
+        ? "Món đã đặt"
+        : "Hôm nay không đăng ký suất ăn"}
 
-                                </h3>
+</h3>
 
-                                <div className="space-y-3">
+                                {preview.hasMeal ? (
 
-                                    {
+    <div className="space-y-3">
 
-                                        preview.mains.map((item, index) => (
+        {preview.mains.map((item, index) => (
 
-                                            <div
+            <div
+                key={index}
+                className="flex items-center justify-between rounded-xl border p-3"
+            >
+                <span>🍛 {item.name}</span>
+                <span>x{item.quantity}</span>
+            </div>
 
-                                                key={index}
+        ))}
 
-                                                className="flex items-center justify-between rounded-xl border p-3"
+        {preview.drink && (
 
-                                            >
+            <div className="rounded-xl border p-3">
 
-                                                <span>
+                🥤 {preview.drink.name}
 
-                                                    🍛 {item.name}
+            </div>
 
-                                                </span>
+        )}
 
-                                                <span>
+        {preview.soup && (
 
-                                                    x{item.quantity}
+            <div className="rounded-xl border p-3">
 
-                                                </span>
+                🍲 {preview.soup.name}
 
-                                            </div>
+            </div>
 
-                                        ))
+        )}
 
-                                    }
+    </div>
 
-                                    {
+) : (
 
-                                        preview.drink && (
+    <div className="rounded-2xl bg-yellow-50 p-5 text-center">
 
-                                            <div className="rounded-xl border p-3">
+        <div className="text-5xl">🍽️</div>
 
-                                                🥤 {preview.drink.name}
+        <p className="mt-3 font-semibold text-orange-600">
 
-                                            </div>
+            Nhân viên không đăng ký suất ăn hôm nay.
 
-                                        )
+        </p>
 
-                                    }
+    </div>
 
-                                    {
-
-                                        preview.soup && (
-
-                                            <div className="rounded-xl border p-3">
-
-                                                🍲 {preview.soup.name}
-
-                                            </div>
-
-                                        )
-
-                                    }
-
-                                </div>
+)}
 
                             </div>
 
@@ -506,39 +527,50 @@ return (
 
                             <div className="mt-8 flex gap-3">
 
-                                <button
+    {preview.hasMeal ? (
 
-                                    onClick={handleConfirm}
+        <button
 
-                                    disabled={
+            onClick={handleConfirm}
 
-                                        loading ||
+            disabled={
+                loading ||
+                preview.received
+            }
 
-                                        preview.received
+            className="flex-1 rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-700 disabled:bg-gray-400"
 
-                                    }
+        >
 
-                                    className="flex-1 rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-700 disabled:bg-gray-400"
+            {
 
-                                >
+                loading
 
-                                    {
+                    ? "Đang xác nhận..."
 
-                                        loading
+                    : "Xác nhận nhận món"
 
-                                            ?
+            }
 
-                                            "Đang xác nhận..."
+        </button>
 
-                                            :
+    ) : (
 
-                                            "Xác nhận nhận món"
+        <button
 
-                                    }
+            onClick={handleScanAgain}
 
-                                </button>
+            className="flex-1 rounded-xl bg-orange-500 py-3 font-bold text-white hover:bg-orange-600"
 
-                            </div>
+        >
+
+            Quét QR khác
+
+        </button>
+
+    )}
+
+</div>
 
                         </div>
 
