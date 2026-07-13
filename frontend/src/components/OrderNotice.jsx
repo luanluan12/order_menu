@@ -89,7 +89,7 @@ function OrderNotice() {
 
                     <p className="mt-2 text-sm text-slate-500 sm:text-[15px]">
 
-                        {t("notice_description")}
+                        {t("skip_day_message")}
 
                     </p>
 

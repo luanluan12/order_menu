@@ -65,14 +65,13 @@ function WeekMenuEditor({
     setCurrentDay(0);
 
 }, [initialData]);
-    
 
-    // ===============================
-    // Generate days
-    // ===============================
-//     useEffect(() => {
+// useEffect(() => {
 
 //     const now = new Date();
+
+//     // Luôn tạo menu cho tuần sau
+//     now.setDate(now.getDate() + 7);
 
 //     const getISOWeek = (date) => {
 
@@ -106,19 +105,11 @@ function WeekMenuEditor({
 
 //     };
 
-//     const next = new Date(now);
-
-//     next.setDate(
-//         next.getDate() + 7
-//     );
-
-//     const { year, week } = getISOWeek(next);
+//     const { year, week } = getISOWeek(now);
 
 //     const value =
 //         `${year}-W${String(week).padStart(2, "0")}`;
-
 //     setAllowedWeek(value);
-
 //     setWeek(value);
 
 // }, []);
@@ -126,8 +117,8 @@ useEffect(() => {
 
     const now = new Date();
 
-    // Luôn tạo menu cho tuần sau
-    now.setDate(now.getDate() + 7);
+    // Demo: tạo menu tuần hiện tại
+    // now.setDate(now.getDate() + 7);
 
     const getISOWeek = (date) => {
 
@@ -152,11 +143,8 @@ useEffect(() => {
         );
 
         return {
-
             year: d.getUTCFullYear(),
-
             week
-
         };
 
     };
@@ -165,7 +153,9 @@ useEffect(() => {
 
     const value =
         `${year}-W${String(week).padStart(2, "0")}`;
+
     setAllowedWeek(value);
+
     setWeek(value);
 
 }, []);

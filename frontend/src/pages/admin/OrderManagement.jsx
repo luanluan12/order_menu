@@ -6,6 +6,7 @@ import OrderDetailModal from "./OrderDetailModal";
 import QrScannerModal from "./QrScannerModal";
 
 function OrderManagement() {
+    const user = JSON.parse(localStorage.getItem("user"));
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [openScanner, setOpenScanner] = useState(false);
@@ -117,12 +118,16 @@ setOrders(filteredOrders);
 
             <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div />
-                <button
+                {user?.role === "admin_eocmn" && (
+
+    <button
         onClick={() => setOpenScanner(true)}
-        className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 lg:w-auto"
+        className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
     >
-        📷 Quét QR
+        Quét QR
     </button>
+
+)}
             </div>
 
             {/* Thống kê */}
