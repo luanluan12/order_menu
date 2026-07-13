@@ -214,23 +214,23 @@ function Header() {
 
                                     <button
 
-                                        onClick={() => {
+    onClick={() => {
 
-                                            setOpen(false);
+        setOpen(false);
 
-                                            navigate("/my-qr");
+        navigate("/checkin");
 
-                                        }}
+    }}
 
-                                        className="flex w-full items-center gap-3 px-5 py-4 hover:bg-gray-50"
+    className="flex w-full items-center gap-3 px-5 py-4 hover:bg-gray-50"
 
-                                    >
+>
 
-                                        <QrCode size={18} />
+    <QrCode size={18} />
 
-                                        QR
+    {t("check_in")}
 
-                                    </button>
+</button>
 
                                     <button
 

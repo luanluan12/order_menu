@@ -120,12 +120,6 @@ export const getOrders = (params = {}) => {
 
 };
 
-export const getMyQr = () => {
-
-    return axios.get("/order/my-qr");
-
-};
-
 export const scanQr = (data) => {
 
     return axios.post("/order/scan", data);

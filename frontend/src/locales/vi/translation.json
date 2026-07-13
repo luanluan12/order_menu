@@ -44,6 +44,18 @@
     "cannot_load_qr": "Không tải được QR.",
     "qr_receive": "QR nhận món",
     "qr_description": "Đưa mã này cho nhân viên phát cơm.",
-    "week": "Tuần"
+    "week": "Tuần",
+    "check_in": "Nhận suất ăn",
+      "confirm_order_title": "Bạn chưa chọn món",
+  "confirm_order_content": "Bạn chưa chọn món cho các ngày:",
+  "confirm_order_warning": "Nếu tiếp tục, các ngày này sẽ KHÔNG có suất ăn.",
+  "confirm_order": "Đặt luôn",
+  "go_back": "Quay lại",
+  "monday": "Thứ 2",
+  "tuesday": "Thứ 3",
+  "wednesday": "Thứ 4",
+  "thursday": "Thứ 5",
+  "friday": "Thứ 6",
+  "vegetarian": "Chay"
 
 }

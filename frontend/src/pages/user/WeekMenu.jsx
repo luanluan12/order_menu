@@ -8,6 +8,10 @@ import { getWeekMenu } from "../../api/menuApi";
 
 import { useSearchParams } from "react-router-dom";
 
+import DeadlineBanner from "../../components/DeadlineBanner";
+
+
+
 import {
 
     createOrder,
@@ -164,27 +168,25 @@ const submit = async (days) => {
 
     return (
 
+    <>
+        <DeadlineBanner />
+
         <WeekMenuContent
+            menu={menu}
+            initialOrder={order}
+            editable={!token || !order}
+            submitText={
+                token
+                    ? "submit_order"
+                    : order
+                        ? "update_order"
+                        : "submit_order"
+            }
+            onSubmit={submit}
+        />
+    </>
 
-    menu={menu}
-
-    initialOrder={order}
-
-    editable={!token || !order}
-
-    submitText={
-    token
-        ? "submit_order"
-        : order
-            ? "update_order"
-            : "submit_order"
-}
-
-    onSubmit={submit}
-
-/>
-
-    );
+);
 
 }
 

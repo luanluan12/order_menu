@@ -290,6 +290,8 @@ function DayMenuEditor({
 
                 dish={currentDish}
 
+                mode={mode}
+
                 removable={
 
                     mode !== "main-add"

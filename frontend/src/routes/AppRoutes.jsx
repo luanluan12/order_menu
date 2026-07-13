@@ -11,9 +11,8 @@ import UserManagement from "../pages/admin/UserManagement";
 import OrderManagement from "../pages/admin/OrderManagement";
 import Report from "../pages/admin/Report";
 import History from "../pages/user/History";
-import MyQr from "../pages/user/MyQr";
 import OrderEdit from "../pages/user/OrderEdit";
-
+import Checkin from "../pages/user/Checkin";
 import AdminLayout from "../layouts/AdminLayout";
 
 import PrivateRoute from "../components/PrivateRoute";
@@ -76,10 +75,10 @@ function AppRoutes() {
             />
 
             <Route
-    path="/my-qr"
+    path="/checkin"
     element={
         <PrivateRoute>
-            <MyQr />
+            <Checkin />
         </PrivateRoute>
     }
 />

@@ -244,6 +244,34 @@ function WeekMenuContent({
         orders[currentDay]?.mains.length > 0 ||
         !!orders[currentDay]?.drink;
             // =========================
+
+    const getUnselectedDays = () => {
+
+    const dayKeys = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday"
+    ];
+
+    return orders
+        .map((order, index) => {
+
+            const hasMain = order.mains.length > 0;
+            const hasDrink = !!order.drink;
+            const hasSoup = !!order.soup;
+
+            if (hasMain || hasDrink || hasSoup) {
+                return null;
+            }
+
+            return t(dayKeys[index]);
+
+        })
+        .filter(Boolean);
+
+};
     // Submit
     // =========================
     const handleSubmit = async () => {
@@ -251,6 +279,59 @@ function WeekMenuContent({
     if (!editable) return;
 
     if (!onSubmit) return;
+    const unselectedDays = getUnselectedDays();
+
+if (unselectedDays.length > 0) {
+
+    const result = await Swal.fire({
+
+        icon: "warning",
+
+        title: t("confirm_order_title"),
+
+        html: `
+            <div style="text-align:left">
+
+                <p>${t("confirm_order_content")}</p>
+
+                <ul style="margin-top:10px">
+
+                    ${unselectedDays
+                        .map(day => `<li style="margin:6px 0">• ${day}</li>`)
+                        .join("")}
+
+                </ul>
+
+                <p style="margin-top:16px;color:#dc2626">
+
+                    ${t("confirm_order_warning")}
+
+                </p>
+
+            </div>
+        `,
+
+        showCancelButton: true,
+
+        confirmButtonText: t("confirm_order"),
+
+        cancelButtonText: t("go_back"),
+
+        confirmButtonColor: "#f97316",
+
+        cancelButtonColor: "#6b7280",
+
+        reverseButtons: true
+
+    });
+
+    if (!result.isConfirmed) {
+
+        return;
+
+    }
+
+}
 
     // Validate
     for (const day of orders) {

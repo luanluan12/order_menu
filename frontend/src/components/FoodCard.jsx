@@ -15,6 +15,8 @@ function FoodCard({
     onSelect,
 }) {
 
+    console.log(food);
+
     const { t } = useTranslation();
 
     const selected =
@@ -89,6 +91,17 @@ function FoodCard({
                 )
 
             }
+            {
+    food.vegetarian && (
+
+        <div className="absolute left-2 top-2 z-20 rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white shadow">
+
+            🌱 {t("vegetarian")}
+
+        </div>
+
+    )
+}
 
             {/* Image */}
 

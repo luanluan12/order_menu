@@ -408,6 +408,8 @@ const submit = () => {
 
             name: dish.name,
 
+            vegetarian: dish.vegetarian || false,
+
             type: dish.type || "normal",
 
             image:

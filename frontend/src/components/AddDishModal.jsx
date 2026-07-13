@@ -4,6 +4,7 @@ import { ImagePlus, X } from "lucide-react";
 function AddDishModal({
     open,
     dish = null,
+    mode,
     title = "Thêm món",
     removable = false,
     onClose,
@@ -12,13 +13,21 @@ function AddDishModal({
 }) {
     const [name, setName] = useState("");
     const [image, setImage] = useState(null);
+    const [vegetarian, setVegetarian] = useState(false);
+
+    console.log("MODE:", mode);
 
     useEffect(() => {
-        if (!open) return;
 
-        setName(dish?.name || "");
-        setImage(dish?.image || null);
-    }, [open, dish]);
+    if (!open) return;
+
+    setName(dish?.name || "");
+
+    setImage(dish?.image || null);
+
+    setVegetarian(dish?.vegetarian || false);
+
+}, [open, dish]);
 
     if (!open) return null;
 
@@ -47,13 +56,24 @@ function AddDishModal({
 
     onSave({
 
-        name: name.trim(),
+    name: name.trim(),
 
-        type: dish?.type || "normal",
+    vegetarian,
 
-        image,
+    type:
+    mode === "drink"
+        ? "drink"
+        : mode === "soup"
+            ? "soup"
+            : "normal",
 
-    });
+    image,
+
+});
+console.log({
+    name,
+    vegetarian
+});
 
     onClose();
 
@@ -168,7 +188,44 @@ function AddDishModal({
                     />
 
                 </div>
+                {/*Chay*/}
+                {
 
+    (mode === "main-add" || mode === "main-edit")  && (
+
+        <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3">
+
+            <label className="flex cursor-pointer items-center gap-3">
+
+                <input
+
+                    type="checkbox"
+
+                    checked={vegetarian}
+
+                    onChange={(e) =>
+
+                        setVegetarian(e.target.checked)
+
+                    }
+
+                    className="h-5 w-5 accent-green-600"
+
+                />
+
+                <span className="font-medium text-green-700">
+
+                    🌱 Món chay
+
+                </span>
+
+            </label>
+
+        </div>
+
+    )
+
+}
                 {/* Footer */}
 
                 <div className="mt-6 flex items-center justify-between">

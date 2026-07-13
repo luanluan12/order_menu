@@ -50,6 +50,17 @@
     "cannot_load_qr": "QR을 불러올 수 없습니다.",
     "qr_receive": "식사 수령 QR",
     "qr_description": "이 QR 코드를 배식 직원에게 보여주세요.",
-    "week": "주차"
-
+    "week": "주차",
+    "check_in": "식사 수령",
+      "confirm_order_title": "선택하지 않은 메뉴가 있습니다",
+  "confirm_order_content": "다음 날짜의 메뉴를 선택하지 않았습니다:",
+  "confirm_order_warning": "계속 진행하면 해당 날짜에는 식사가 제공되지 않습니다.",
+  "confirm_order": "주문하기",
+  "go_back": "돌아가기",
+    "monday": "월요일",
+  "tuesday": "화요일",
+  "wednesday": "수요일",
+  "thursday": "목요일",
+  "friday": "금요일",
+  "vegetarian": "채식"
 }

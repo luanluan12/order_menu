@@ -3,7 +3,7 @@ import { getOrders } from "../../api/orderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import OrderDetailModal from "./OrderDetailModal";
-import QrScannerModal from "./QrScannerModal";
+import CheckinQrModal from "./CheckinQrModal";
 
 function OrderManagement() {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -124,7 +124,7 @@ setOrders(filteredOrders);
         onClick={() => setOpenScanner(true)}
         className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
     >
-        Quét QR
+        QR Check-in
     </button>
 
 )}
@@ -329,20 +329,6 @@ setOrders(filteredOrders);
                     }
                 />
 
-                <QrScannerModal
-    open={openScanner}
-    onClose={() => setOpenScanner(false)}
-    onSuccess={async () => {
-
-        await loadOrders();
-
-        setOpenScanner(false);
-
-    }}
-
-    
-/>
-
             </div>
             <div className="space-y-4 lg:hidden">
 
@@ -503,14 +489,9 @@ setOrders(filteredOrders);
     order={selectedOrder}
     onClose={() => setSelectedOrder(null)}
 />
-
-<QrScannerModal
+                <CheckinQrModal
     open={openScanner}
     onClose={() => setOpenScanner(false)}
-    onSuccess={async () => {
-        await loadOrders();
-        setOpenScanner(false);
-    }}
 />
 
         </div>
