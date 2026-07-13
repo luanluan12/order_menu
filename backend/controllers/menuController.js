@@ -282,19 +282,18 @@ exports.createMenu = async (req, res) => {
 
             const mains = (day.mains || []).map((dish, index) => ({
 
-                name: dish.name,
+    name: dish.name,
 
-                type: dish.type,
+    vegetarian: dish.vegetarian || false,
 
-                image:
+    type: dish.type,
 
-                    getImage(`main_${dayIndex}_${index}_image`) ||
+    image:
+        getImage(`main_${dayIndex}_${index}_image`) ||
+        dish.image ||
+        ""
 
-                    dish.image ||
-
-                    ""
-
-            }));
+}));
 
             const drinks = (day.drinks || []).map((dish, index) => ({
 
@@ -635,23 +634,20 @@ exports.updateMenu = async (req, res) => {
 
             const mains = (day.mains || []).map((dish, index) => ({
 
-                name: dish.name,
+    name: dish.name,
 
-                type: dish.type,
+    vegetarian: dish.vegetarian || false,
 
-                image: getImage(
+    type: dish.type,
 
-                    `main_${dayIndex}_${index}_image`,
+    image: getImage(
+        `main_${dayIndex}_${index}_image`,
+        dish.image ||
+        oldDay.mains?.[index]?.image ||
+        ""
+    )
 
-                    dish.image ||
-
-                    oldDay.mains?.[index]?.image ||
-
-                    ""
-
-                )
-
-            }));
+}));
 
             const drinks = (day.drinks || []).map((dish, index) => ({
 

@@ -3,9 +3,10 @@ const Menu = require("../models/Menu");
 const User = require("../models/User");
 const QRCode = require("qrcode");
 const moment = require("moment-timezone");
-const crypto = require("crypto");
 const XLSX = require("xlsx");
 const fs = require("fs");
+const sendMail = require("../utils/mail");
+const orderSuccessTemplate = require("../utils/orderSuccessTemplate");
 
 const {
 
@@ -501,9 +502,18 @@ exports.createOrder = async (req, res) => {
 
             status: "ordered",
 
-            qrToken: crypto.randomUUID()
-
         });
+        const user = await User.findById(userId);
+
+await sendMail({
+
+    to: user.email,
+
+    subject: `🍱 Xác nhận đặt món ${menu.week}`,
+
+    html: orderSuccessTemplate(user, order)
+
+});
 
         return res.status(201).json({
 
@@ -661,9 +671,18 @@ exports.createOrderFromInvite = async (
 
             status: "ordered",
 
-            qrToken: crypto.randomUUID()
 
         });
+
+        await sendMail({
+
+    to: user.email,
+
+    subject: `🍱 Xác nhận đặt món ${menu.week}`,
+
+    html: orderSuccessTemplate(user, order)
+
+});
 
         return res.status(201).json({
 
@@ -1157,359 +1176,6 @@ const result = orders
             success: false,
 
             message: err.message
-
-        });
-
-    }
-
-};
-
-// ===============================
-// GET MY QR
-// ===============================
-
-exports.getMyQr = async (req, res) => {
-
-    try {
-
-        const userId = req.user.id;
-
-        const order = await Order.findOne({
-
-            user: userId,
-
-            status: "ordered"
-
-        }).sort({
-
-            createdAt: -1
-
-        });
-
-        if (!order) {
-
-            return res.status(404).json({
-
-                message: "Bạn chưa đặt món."
-
-            });
-
-        }
-
-        const qrImage = await QRCode.toDataURL(
-
-            JSON.stringify({
-
-                token: order.qrToken
-
-            })
-
-        );
-
-        res.json({
-
-            success: true,
-
-            data: {
-
-                week: order.week,
-
-                qrToken: order.qrToken,
-
-                qrImage
-
-            }
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        res.status(500).json({
-
-            message: "Không tạo được QR."
-
-        });
-
-    }
-
-};
-
-// ===============================
-// PREVIEW QR
-// ===============================
-
-exports.previewQr = async (req, res) => {
-
-    try {
-
-        const { token } = req.body;
-
-        if (!token) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Thiếu QR."
-
-            });
-
-        }
-
-        const order = await Order.findOne({
-
-            qrToken: token,
-
-            status: "ordered"
-
-        }).populate(
-
-            "user",
-
-            "employeeId name email floor"
-
-        );
-
-        if (!order) {
-
-    return res.status(404).json({
-
-        success: false,
-
-        message: "Không tìm thấy Order."
-
-    });
-
-}
-        const todayStr = moment()
-    .tz("Asia/Ho_Chi_Minh")
-    .format("YYYY-MM-DD");
-
-const day = order.days.find(d => {
-
-    return (
-        moment(d.date)
-            .tz("Asia/Ho_Chi_Minh")
-            .format("YYYY-MM-DD") === todayStr
-    );
-
-});
-
-        if (!day) {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message: "Không tìm thấy ngày."
-
-    });
-
-}
-const hasMeal =
-    day.mains.length > 0 ||
-    !!day.drink ||
-    !!day.soup;
-
-        return res.json({
-
-    success: true,
-
-    data: {
-
-        orderId: order._id,
-
-        employee: {
-
-            employeeId: order.user.employeeId,
-
-            name: order.user.name,
-
-            email: order.user.email,
-
-            floor: order.user.floor
-
-        },
-
-        date: day.date,
-
-        received: day.received,
-
-        receivedAt: day.receivedAt,
-
-        hasMeal,
-
-        mains: day.mains,
-
-        drink: day.drink,
-
-        soup: day.soup
-
-    }
-
-});
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        return res.status(500).json({
-
-            success: false,
-
-            message: "Lỗi server."
-
-        });
-
-    }
-
-};
-
-// ===============================
-// CONFIRM RECEIVE
-// ===============================
-
-exports.confirmReceive = async (req, res) => {
-
-    try {
-
-        const { orderId } = req.body;
-
-        if (!orderId) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Thiếu Order ID."
-
-            });
-
-        }
-
-        const order = await Order.findById(orderId)
-
-            .populate(
-
-                "user",
-
-                "employeeId name email floor"
-
-            );
-
-        if (!order) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message: "Không tìm thấy Order."
-
-            });
-
-        }
-
-
-const todayStr = moment()
-    .tz("Asia/Ho_Chi_Minh")
-    .format("YYYY-MM-DD");
-
-const day = order.days.find(d =>
-
-    moment(d.date)
-        .tz("Asia/Ho_Chi_Minh")
-        .format("YYYY-MM-DD") === todayStr
-
-);
-
-        if (!day) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Đơn không có suất ăn hôm nay."
-
-            });
-
-        }
-
-        const hasMeal =
-    day.mains.length > 0 ||
-    !!day.drink ||
-    !!day.soup;
-
-if (!hasMeal) {
-
-    return res.status(400).json({
-
-        success: false,
-
-        message: "Hôm nay nhân viên không đăng ký suất ăn."
-
-    });
-
-}
-
-        if (day.received) {
-
-            return res.status(409).json({
-
-                success: false,
-
-                code: "ALREADY_RECEIVED",
-
-                message: "Nhân viên đã nhận suất ăn.",
-
-                receivedAt: day.receivedAt
-
-            });
-
-        }
-
-        day.received = true;
-
-        day.receivedAt = new Date();
-
-        await order.save();
-
-        return res.json({
-
-            success: true,
-
-            message: "Xác nhận nhận món thành công.",
-
-            data: {
-
-                employee: order.user,
-
-                date: day.date,
-
-                received: true,
-
-                receivedAt: day.receivedAt
-
-            }
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        return res.status(500).json({
-
-            success: false,
-
-            message: "Lỗi server."
 
         });
 

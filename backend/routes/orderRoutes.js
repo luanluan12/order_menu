@@ -57,16 +57,6 @@ router.get(
 );
 
 // ==========================
-// My QR
-// ==========================
-
-router.get(
-    "/my-qr",
-    auth,
-    orderController.getMyQr
-);
-
-// ==========================
 // Verify Invite
 // ==========================
 
@@ -82,26 +72,6 @@ router.post(
 router.post(
     "/invite",
     orderController.createOrderFromInvite
-);
-
-// ==========================
-// Preview QR
-// ==========================
-
-router.post(
-    "/preview",
-    auth,
-    orderController.previewQr
-);
-
-// ==========================
-// Confirm Receive
-// ==========================
-
-router.post(
-    "/receive",
-    auth,
-    orderController.confirmReceive
 );
 
 
