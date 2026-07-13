@@ -14,7 +14,7 @@ router.get(
 
     auth,
 
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
 
     dashboardController.getDashboard
 

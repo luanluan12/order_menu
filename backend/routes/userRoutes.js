@@ -24,7 +24,7 @@ const upload = multer({
 router.get(
     "/",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.getUsers
 );
 
@@ -32,7 +32,7 @@ router.get(
 router.post(
     "/",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.createUser
 );
 
@@ -40,7 +40,7 @@ router.post(
 router.put(
     "/:id",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.updateUser
 );
 
@@ -48,7 +48,7 @@ router.put(
 router.delete(
     "/:id",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.deleteUser
 );
 
@@ -67,7 +67,7 @@ router.put(
 router.put(
     "/reset-password/:id",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.resetPassword
 );
 
@@ -79,7 +79,7 @@ router.put(
 router.get(
     "/search",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn", "admin_nexon"),
     userController.searchUsers
 );
 
@@ -98,7 +98,7 @@ router.get(
 router.post(
     "/import",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     upload.single("file"),
     userController.importExcel
 );
@@ -106,7 +106,7 @@ router.post(
 router.get(
     "/template",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.downloadTemplate
 );
 
@@ -117,7 +117,7 @@ router.get(
 router.get(
     "/:id",
     auth,
-    admin("admin_eocmn"),
+    admin("admin_eocmn","admin_nexon"),
     userController.getUserById
 );
 
