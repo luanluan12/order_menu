@@ -34,6 +34,14 @@ const dishSchema = new mongoose.Schema({
 
     },
 
+    imagePublicId: {
+
+    type: String,
+
+    default: ""
+
+},
+
     type: {
 
         type: String,
@@ -63,6 +71,7 @@ subtitle: {
     default: "",
     trim: true
 },
+
 
 }, {
 

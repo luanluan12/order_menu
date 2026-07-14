@@ -1,45 +1,49 @@
 
 const express = require("express");
 const router = express.Router();
-
-const path = require("path");
 const multer = require("multer");
-
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 
-const menuController = require("../controllers/menuController");
+const storage = new CloudinaryStorage({
 
-// =======================
-// Multer Config
-// =======================
+    cloudinary,
 
-const storage = multer.diskStorage({
+    params: async (req, file) => ({
 
-    destination: function (req, file, cb) {
+        folder: "food-menu",
 
-        cb(null, "uploads/menus");
+        allowed_formats: [
 
-    },
+            "jpg",
 
-    filename: function (req, file, cb) {
+            "jpeg",
 
-        cb(
-            null,
+            "png",
+
+            "webp"
+
+        ],
+
+        public_id:
             Date.now() +
             "-" +
-            Math.round(Math.random() * 1000000) +
-            path.extname(file.originalname)
-        );
+            Math.round(Math.random() * 1000000)
 
-    }
+    })
 
 });
 
 const upload = multer({
+
     storage
+
 });
 
+
+const menuController = require("../controllers/menuController");
 // =======================
 // Routes
 // =======================

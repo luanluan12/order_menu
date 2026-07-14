@@ -5,202 +5,21 @@ const moment = require("moment-timezone");
 
 const sendMail = require("../utils/mail");
 const orderMailTemplate = require("../utils/orderMailTemplate");
-
+const cloudinary = require("../config/cloudinary");
 const {
     createOrderToken
 } = require("../utils/orderToken");
-
-const getImagePath = (req, file) => {
-
-    if (!file) {
-
-        return "";
-
-    }
-
-    return `/uploads/${file.filename}`;
-
-};
-
-const getFile = (
-
-    req,
-
-    name
-
-) => {
-
-    if (
-
-        !req.files ||
-
-        !req.files[name]
-
-    ) {
-
-        return null;
-
-    }
-
-    return req.files[name][0];
-
-};
-
-const buildDay = (
-
-    req,
-
-    index
-
-) => {
-
-    return {
-
-        date:
-
-            req.body.days[index].date,
-
-        mainNormal:
-
-            req.body.days[index].mainNormal,
-
-        mainNormalImage:
-
-            getImagePath(
-
-                req,
-
-                getFile(
-
-                    req,
-
-                    `mainNormalImage_${index}`
-
-                )
-
-            ),
-
-        mainVegetarian:
-
-            req.body.days[index].mainVegetarian,
-
-        mainVegetarianImage:
-
-            getImagePath(
-
-                req,
-
-                getFile(
-
-                    req,
-
-                    `mainVegetarianImage_${index}`
-
-                )
-
-            ),
-
-        drink:
-
-            req.body.days[index].drink,
-
-        drinkImage:
-
-            getImagePath(
-
-                req,
-
-                getFile(
-
-                    req,
-
-                    `drinkImage_${index}`
-
-                )
-
-            ),
-
-        soup:
-
-            req.body.days[index].soup,
-
-        soupImage:
-
-            getImagePath(
-
-                req,
-
-                getFile(
-
-                    req,
-
-                    `soupImage_${index}`
-
-                )
-
-            ),
-
-        dessert:
-
-            req.body.days[index].dessert,
-
-        dessertImage:
-
-            getImagePath(
-
-                req,
-
-                getFile(
-
-                    req,
-
-                    `dessertImage_${index}`
-
-                )
-
-            )
-
-    };
-
-};
-
-const buildWeek = (req) => {
-
-    const days = [];
-
-    for (
-
-        let i = 0;
-
-        i < 5;
-
-        i++
-
-    ) {
-
-        days.push(
-
-            buildDay(
-
-                req,
-
-                i
-
-            )
-
-        );
-
-    }
-
-    return days;
-
-};
 
 exports.createMenu = async (req, res) => {
 
     try {
 
-        const { week, year, openTime, deadline } = req.body;
+        const {
+            week,
+            year,
+            openTime,
+            deadline
+        } = req.body;
 
         if (!week) {
 
@@ -214,7 +33,11 @@ exports.createMenu = async (req, res) => {
 
         }
 
-        const existed = await Menu.findOne({ week });
+        const existed = await Menu.findOne({
+
+            week
+
+        });
 
         if (existed) {
 
@@ -234,7 +57,9 @@ exports.createMenu = async (req, res) => {
 
             days = JSON.parse(req.body.days || "[]");
 
-        } catch {
+        }
+
+        catch {
 
             return res.status(400).json({
 
@@ -272,92 +97,141 @@ exports.createMenu = async (req, res) => {
 
             const file = findFile(fieldName);
 
-            if (!file) return "";
+            if (!file) {
 
-            return `/uploads/menus/${file.filename}`;
+                return {
+
+                    image: "",
+
+                    imagePublicId: ""
+
+                };
+
+            }
+
+                console.log("========== CLOUDINARY ==========");
+    console.log("Field:", fieldName);
+    console.log("URL:", file.path);
+    console.log("Public ID:", file.filename);
+    console.log("===============================");
+
+            return {
+
+                image: file.path,
+
+                imagePublicId: file.filename
+
+            };
 
         };
 
-        const resultDays = days.map((day, dayIndex) => {
-const mains = (day.mains || []).map((dish, index) => ({
+        const resultDays = days.map( (day, dayIndex) => {
 
-    name: dish.name,
+            const mains = (day.mains || []).map((dish, index) => {
 
-    nameKo: dish.nameKo || "",
+                const imageInfo = getImage(
 
-    subtitle: dish.subtitle || "",
+                    `main_${dayIndex}_${index}_image`
 
-    vegetarian: dish.vegetarian || false,
+                );
 
-    type: dish.type,
+                return {
 
-    image:
-        getImage(`main_${dayIndex}_${index}_image`) ||
-        dish.image ||
-        ""
+                    name: dish.name,
 
-}));
+                    nameKo: dish.nameKo || "",
 
-            const drinks = (day.drinks || []).map((dish, index) => ({
+                    subtitle: dish.subtitle || "",
 
-                name: dish.name,
+                    vegetarian: dish.vegetarian || false,
 
-                nameKo: dish.nameKo || "",
+                    type: dish.type,
 
-                subtitle: dish.subtitle || "",
+                    image: imageInfo.image,
 
-                type: "drink",
+                    imagePublicId: imageInfo.imagePublicId
 
-                image:
+                };
 
-                    getImage(`drink_${dayIndex}_${index}_image`) ||
+            });
 
-                    dish.image ||
+            const drinks = (day.drinks || []).map((dish, index) => {
 
-                    ""
+                const imageInfo = getImage(
 
-            }));
+                    `drink_${dayIndex}_${index}_image`
 
-            const soups = (day.soups || []).map((dish, index) => ({
+                );
 
-                name: dish.name,
+                return {
 
-                nameKo: dish.nameKo || "",
+                    name: dish.name,
 
-                subtitle: dish.subtitle || "",
+                    nameKo: dish.nameKo || "",
 
+                    subtitle: dish.subtitle || "",
 
-                type: "soup",
+                    type: "drink",
 
-                image:
+                    image: imageInfo.image,
 
-                    getImage(`soup_${dayIndex}_${index}_image`) ||
+                    imagePublicId: imageInfo.imagePublicId
 
-                    dish.image ||
+                };
 
-                    ""
+            });
 
-            }));
+            const soups = (day.soups || []).map((dish, index) => {
 
-            const desserts = (day.desserts || []).map((dish, index) => ({
+                const imageInfo = getImage(
 
-                name: dish.name,
+                    `soup_${dayIndex}_${index}_image`
 
-                nameKo: dish.nameKo || "",
+                );
 
-                subtitle: dish.subtitle || "",
+                return {
 
-                type: "dessert",
+                    name: dish.name,
 
-                image:
+                    nameKo: dish.nameKo || "",
 
-                    getImage(`dessert_${dayIndex}_${index}_image`) ||
+                    subtitle: dish.subtitle || "",
 
-                    dish.image ||
+                    type: "soup",
 
-                    ""
+                    image: imageInfo.image,
 
-            }));
+                    imagePublicId: imageInfo.imagePublicId
+
+                };
+
+            });
+
+            const desserts = (day.desserts || []).map((dish, index) => {
+
+                const imageInfo = getImage(
+
+                    `dessert_${dayIndex}_${index}_image`
+
+                );
+
+                return {
+
+                    name: dish.name,
+
+                    nameKo: dish.nameKo || "",
+
+                    subtitle: dish.subtitle || "",
+
+                    type: "dessert",
+
+                    image: imageInfo.image,
+
+                    imagePublicId: imageInfo.imagePublicId
+
+                };
+
+            });
 
             return {
 
@@ -374,6 +248,10 @@ const mains = (day.mains || []).map((dish, index) => ({
             };
 
         });
+
+        console.log(
+    JSON.stringify(resultDays, null, 2)
+);
 
         const menu = await Menu.create({
 
@@ -635,119 +513,279 @@ exports.updateMenu = async (req, res) => {
             });
 
         }
+const findFile = (fieldName) => {
 
-        const findFile = (fieldName) => {
+    return req.files.find(
 
-            return req.files.find(
+        file => file.fieldname === fieldName
 
-                file => file.fieldname === fieldName
+    );
 
-            );
+};
+
+const destroyImage = async (publicId) => {
+
+    if (!publicId) return;
+
+    try {
+
+        await cloudinary.uploader.destroy(publicId);
+
+    }
+
+    catch (err) {
+
+        console.log(err.message);
+
+    }
+
+};
+
+const getImage = async (
+
+    fieldName,
+
+    oldImage = "",
+
+    oldPublicId = ""
+
+) => {
+    console.log(req.files.map(f => f.fieldname));
+    const file = findFile(fieldName);
+    console.log("Không đổi ảnh:", fieldName);
+
+    if (!file) {
+
+        return {
+
+            image: oldImage,
+
+            imagePublicId: oldPublicId
 
         };
 
-        const getImage = (fieldName, oldImage = "") => {
+    }
 
-            const file = findFile(fieldName);
+    // Có upload ảnh mới
 
-            if (!file) return oldImage || "";
+    if (oldPublicId) {
 
-            return `/uploads/menus/${file.filename}`;
+        await destroyImage(oldPublicId);
 
-        };
+    }
 
-        const resultDays = days.map((day, dayIndex) => {
+    return {
+
+        image: file.path,
+
+        imagePublicId: file.filename
+
+    };
+    console.log("Đổi ảnh:", fieldName);
+console.log("Old:", oldPublicId);
+console.log("New:", file.filename);
+
+};
+
+        const resultDays = await Promise.all( days.map(async (day, dayIndex) => {
 
             const oldDay = menu.days[dayIndex] || {};
-            const mains = (day.mains || []).map((dish, index) => ({
+const mains = await Promise.all(
 
-    name: dish.name,
+    (day.mains || []).map(async (dish, index) => {
 
-    nameKo: dish.nameKo || "",
+        const oldDish = oldDay?.mains?.[index] || {};
 
-    subtitle: dish.subtitle || "",
+        const imageInfo = await getImage(
 
-    vegetarian: dish.vegetarian || false,
+            `main_${dayIndex}_${index}_image`,
 
-    type: dish.type,
+            dish.image || oldDish.image || "",
 
-    image: getImage(
-        `main_${dayIndex}_${index}_image`,
-        dish.image ||
-        oldDay.mains?.[index]?.image ||
-        ""
-    )
+            dish.imagePublicId ||
 
-}));
-            const drinks = (day.drinks || []).map((dish, index) => ({
+            oldDish.imagePublicId ||
 
-                name: dish.name,
-                nameKo: dish.nameKo || "",
+            ""
 
-    subtitle: dish.subtitle || "",
+        );
 
-                type: "drink",
+        return {
 
-                image: getImage(
+            name: dish.name,
 
-                    `drink_${dayIndex}_${index}_image`,
+            nameKo: dish.nameKo || "",
 
-                    dish.image ||
+            subtitle: dish.subtitle || "",
 
-                    oldDay.drinks?.[index]?.image ||
+            vegetarian: dish.vegetarian || false,
 
-                    ""
+            type: dish.type,
 
-                )
+            image: imageInfo.image,
 
-            }));
+            imagePublicId: imageInfo.imagePublicId
 
-            const soups = (day.soups || []).map((dish, index) => ({
+        };
 
-                name: dish.name,
+    })
 
-                nameKo: dish.nameKo || "",
+);
+const drinks = await Promise.all(
 
-                subtitle: dish.subtitle || "",
+    (day.drinks || []).map(async (dish, index) => {
 
-                type: "soup",
+        const oldDish =
 
-                image: getImage(
+            oldDay?.drinks?.[index] || {};
 
-                    `soup_${dayIndex}_${index}_image`,
+        const imageInfo = await getImage(
 
-                    dish.image ||
+            `drink_${dayIndex}_${index}_image`,
 
-                    oldDay.soups?.[index]?.image ||
+            dish.image ||
 
-                    ""
+            oldDish.image ||
 
-                )
+            "",
 
-            }));
+            dish.imagePublicId ||
 
-            const desserts = (day.desserts || []).map((dish, index) => ({
+            oldDish.imagePublicId ||
 
-                name: dish.name,
-                    nameKo: dish.nameKo || "",
+            ""
 
-    subtitle: dish.subtitle || "",
+        );
 
-                type: "dessert",
+        return {
 
-                image: getImage(
+            name: dish.name,
 
-                    `dessert_${dayIndex}_${index}_image`,
+            nameKo: dish.nameKo || "",
 
-                    dish.image ||
+            subtitle: dish.subtitle || "",
 
-                    oldDay.desserts?.[index]?.image ||
+            type: "drink",
 
-                    ""
+            image:
+    imageInfo.image ||
+    oldDish.image ||
+    "",
 
-                )
+            imagePublicId:
 
-            }));
+                imageInfo.imagePublicId
+
+        };
+
+    })
+
+);
+
+const soups = await Promise.all(
+
+    (day.soups || []).map(async (dish, index) => {
+
+        const oldDish =
+
+            oldDay?.soups?.[index] || {};
+
+        const imageInfo = await getImage(
+
+            `soup_${dayIndex}_${index}_image`,
+
+            dish.image ||
+
+            oldDish.image ||
+
+            "",
+
+            dish.imagePublicId ||
+
+            oldDish.imagePublicId ||
+
+            ""
+
+        );
+
+        return {
+
+            name: dish.name,
+
+            nameKo: dish.nameKo || "",
+
+            subtitle: dish.subtitle || "",
+
+            type: "soup",
+
+            image:
+
+    imageInfo.image ||
+
+    oldDish.image ||
+
+    "",
+
+            imagePublicId:
+
+                imageInfo.imagePublicId
+
+        };
+
+    })
+
+);
+
+const desserts = await Promise.all(
+
+    (day.desserts || []).map(async (dish, index) => {
+
+        const oldDish =
+
+            oldDay?.desserts?.[index] || {};
+
+        const imageInfo = await getImage(
+
+            `dessert_${dayIndex}_${index}_image`,
+
+            dish.image ||
+
+            oldDish.image ||
+
+            "",
+
+            dish.imagePublicId ||
+
+            oldDish.imagePublicId ||
+
+            ""
+
+        );
+
+        return {
+
+            name: dish.name,
+
+            nameKo: dish.nameKo || "",
+
+            subtitle: dish.subtitle || "",
+
+            type: "dessert",
+
+            image:
+    imageInfo.image ||
+    oldDish.image ||
+    "",
+
+            imagePublicId:
+
+                imageInfo.imagePublicId
+
+        };
+
+    })
+
+);
 
             return {
 
@@ -763,7 +801,7 @@ exports.updateMenu = async (req, res) => {
 
             };
 
-        });
+        }));
 
         menu.week = week || menu.week;
 
@@ -772,6 +810,9 @@ exports.updateMenu = async (req, res) => {
         menu.status = status || menu.status;
 
         menu.days = resultDays;
+        menu.openTime = req.body.openTime || menu.openTime;
+
+menu.deadline = req.body.deadline || menu.deadline;
 
         await menu.save();
 
@@ -818,15 +859,67 @@ exports.deleteMenu = async (req, res) => {
 
                 success: false,
 
-                message: "Menu not found."
+                message: "Không tìm thấy Menu."
 
             });
 
         }
 
-        await Menu.findByIdAndDelete(req.params.id);
+        // Xóa toàn bộ ảnh trên Cloudinary
 
-        res.json({
+        for (const day of menu.days) {
+
+            const dishes = [
+
+                ...(day.mains || []),
+
+                ...(day.drinks || []),
+
+                ...(day.soups || []),
+
+                ...(day.desserts || [])
+
+            ];
+
+            for (const dish of dishes) {
+
+                if (!dish.imagePublicId) continue;
+
+                try {
+
+                    await cloudinary.uploader.destroy(
+
+                        dish.imagePublicId
+
+                    );
+                    console.log(
+    "Deleted:",
+    dish.imagePublicId
+);
+
+                }
+
+                catch (err) {
+
+                    console.log(
+
+                        "Delete Cloudinary:",
+
+                        err.message
+
+                    );
+
+                }
+
+            }
+
+        }
+
+        // Xóa Menu
+
+        await menu.deleteOne();
+
+        return res.json({
 
             success: true,
 
@@ -838,7 +931,9 @@ exports.deleteMenu = async (req, res) => {
 
     catch (err) {
 
-        res.status(500).json({
+        console.log(err);
+
+        return res.status(500).json({
 
             success: false,
 

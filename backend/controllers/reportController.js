@@ -176,8 +176,8 @@ exports.exportDailyExcel = async (req, res) => {
         // Lấy Order
         // ==================================================
 
-        let orderFilter = {
-    menu: selectedMenu._id,
+let orderFilter = {
+    week: selectedMenu.week,
     status: "ordered"
 };
 
@@ -389,6 +389,7 @@ const orders = await Order.find(orderFilter)
         rowIndex++;
 
         for (const order of orders) {
+            if (!order.user) continue;
 
             const day = order.days.find(
 
@@ -804,11 +805,10 @@ exports.getDailyReport = async (req, res) => {
         // Orders
         // =====================================
 
-        let orderFilter = {
-    menu: selectedMenu._id,
+let orderFilter = {
+    week: selectedMenu.week,
     status: "ordered"
 };
-
 if (req.user.role === "admin_floor") {
 
     const users = await User.find({
@@ -826,15 +826,6 @@ const orders = await Order.find(orderFilter)
     path: "user",
     select: "employeeId name email floor"
 })
-
-        .populate({
-
-            path: "user",
-
-            select: "employeeId name email floor"
-
-        });
-
         const totals = {};
 
         const floors = {};
@@ -848,6 +839,7 @@ const orders = await Order.find(orderFilter)
         const rows = [];
 
         for (const order of orders) {
+            if (!order.user) continue;
 
             const day = order.days.find(d =>
 
@@ -860,8 +852,14 @@ const orders = await Order.find(orderFilter)
             );
 
             if (!day) continue;
+            const hasFood =
+    day.mains.some(item => item.quantity > 0) ||
+    day.drink ||
+    day.soup;
 
-            const floor = String(order.user.floor);
+if (!hasFood) continue;
+
+            const floor = String(order.user?.floor ?? 0);
 
             if (!floors[floor]) {
 
@@ -1097,6 +1095,7 @@ const orders = await Order.find(orderFilter)
         const companySummary = {};
 
         for (const order of orders) {
+            if (!order.user) continue;
 
             for (const day of order.days) {
 
@@ -1295,6 +1294,7 @@ const orders = await Order.find(orderFilter)
         const companySummary = {};
 
         for (const order of orders) {
+            if (!order.user) continue;
 
             for (const day of order.days) {
 
