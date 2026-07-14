@@ -1,5 +1,3 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 function DishCard({
     dish,
     onClick,
@@ -9,9 +7,7 @@ function DishCard({
     const imageUrl =
     dish?.image instanceof File
         ? URL.createObjectURL(dish.image)
-        : dish?.image
-            ? `${API_URL}${dish.image}`
-            : null;
+        : dish?.image || null;
 
     return (
 

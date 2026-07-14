@@ -1,8 +1,6 @@
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 function DrinkCard({
     food,
     checked,
@@ -75,10 +73,10 @@ function DrinkCard({
             <img
 
                 src={
-                    food.image
-                        ? API_URL + food.image
-                        : "https://placehold.co/300"
-                }
+    food.image
+        ? food.image
+        : "https://placehold.co/300"
+}
 
                 alt={displayName}
 

@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import QuantitySelector from "./QuantitySelector";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 function FoodCard({
     food,
     type,
@@ -114,10 +112,10 @@ const displayName =
                 <img
 
                     src={
-                        food.image
-                            ? API_URL + food.image
-                            : "https://placehold.co/600"
-                    }
+    food.image
+        ? food.image
+        : "https://placehold.co/600"
+}
 
                     alt={displayName}
 
