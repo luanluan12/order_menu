@@ -7,26 +7,38 @@ exports.getDashboard = async (req, res) => {
     try {
 
         // Tổng user
+        let userFilter = {
+    role: "guest"
+};
 
-        const totalUsers = await User.countDocuments({
+if (req.user.role === "admin_floor") {
+    userFilter.floor = req.user.floor;
+}
 
-            role: "guest"
-
-        });
+        const totalUsers = await User.countDocuments(userFilter);
 
         // Order đang đặt
 
-        const orders = await Order.find({
+        let orderFilter = {
+    status: "ordered"
+};
 
-            status: "ordered"
+if (req.user.role === "admin_floor") {
 
-        }).populate(
+    const users = await User.find({
+        role: "guest",
+        floor: req.user.floor
+    }).select("_id");
 
-            "user",
+    orderFilter.user = {
+        $in: users.map(u => u._id)
+    };
+}
 
-            "floor"
-
-        );
+const orders = await Order.find(orderFilter).populate(
+    "user",
+    "floor"
+);
 
         let todayOrders = 0;
 
@@ -99,13 +111,14 @@ if (d !== today) continue;
 
         }
 
-        const floors = Object.values(floorMap)
+        let floors = Object.values(floorMap)
+    .sort((a, b) => a.floor - b.floor);
 
-            .sort(
-
-                (a, b) => a.floor - b.floor
-
-            );
+if (req.user.role === "admin_floor") {
+    floors = floors.filter(
+        f => f.floor === req.user.floor
+    );
+}
 
         res.json({
 

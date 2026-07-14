@@ -10,7 +10,17 @@ exports.getUsers = async (req, res) => {
 
     try {
 
-        const users = await User.find()
+        let filter = {};
+
+if (req.user.role === "admin_floor") {
+
+    filter.floor = req.user.floor;
+
+}
+
+const users = await User.find(filter)
+    .select("-password")
+    .sort({ createdAt: -1 })
             .select("-password")
             .sort({ createdAt: -1 });
 
@@ -82,6 +92,17 @@ exports.createUser = async (req, res) => {
             role
         } = req.body;
 
+        let userFloor = floor;
+let userRole = role || "guest";
+
+if (req.user.role === "admin_floor") {
+
+    userFloor = req.user.floor;
+
+    userRole = "guest";
+
+}
+
         if (!name || !email) {
 
             return res.status(400).json({
@@ -134,9 +155,9 @@ exports.createUser = async (req, res) => {
 
             password: hashPassword,
 
-            floor,
+            floor: userFloor,
 
-            role: role || "guest"
+            role: userRole
 
         });
 
@@ -176,6 +197,20 @@ exports.updateUser = async (req, res) => {
     try {
 
         const user = await User.findById(req.params.id);
+        if (
+    req.user.role === "admin_floor" &&
+    user.floor !== req.user.floor
+) {
+
+    return res.status(403).json({
+
+        success: false,
+
+        message: "Không có quyền."
+
+    });
+
+}
 
         if (!user) {
 
@@ -241,9 +276,19 @@ exports.updateUser = async (req, res) => {
 
         user.name = req.body.name ?? user.name;
 
-        user.floor = req.body.floor ?? user.floor;
+        if (req.user.role === "admin_floor") {
 
-        user.role = req.body.role ?? user.role;
+    user.floor = req.user.floor;
+
+    user.role = "guest";
+
+} else {
+
+    user.floor = req.body.floor ?? user.floor;
+
+    user.role = req.body.role ?? user.role;
+
+}
 
         await user.save();
 
@@ -283,6 +328,21 @@ exports.deleteUser = async (req, res) => {
     try {
 
         const user = await User.findById(req.params.id);
+
+        if (
+    req.user.role === "admin_floor" &&
+    user.floor !== req.user.floor
+) {
+
+    return res.status(403).json({
+
+        success: false,
+
+        message: "Không có quyền."
+
+    });
+
+}
 
         if (!user) {
 
@@ -407,6 +467,21 @@ exports.resetPassword = async (req, res) => {
     try {
 
         const user = await User.findById(req.params.id);
+
+        if (
+    req.user.role === "admin_floor" &&
+    user.floor !== req.user.floor
+) {
+
+    return res.status(403).json({
+
+        success: false,
+
+        message: "Không có quyền."
+
+    });
+
+}
 
         if (!user) {
 
@@ -655,17 +730,29 @@ exports.importExcel = async (req, res) => {
 
                 const email = row.Email?.toString().trim().toLowerCase();
 
-                const floor = Number(row.Floor) || 0;
+                let floor = Number(row.Floor) || 0;
+                if (req.user.role === "admin_floor") {
 
-                const roles = [
-    "guest",
-    "admin_eocmn",
-    "admin_nexon"
-];
+    floor = req.user.floor;
 
-const role = roles.includes(row.Role)
-    ? row.Role
-    : "guest";
+}
+
+let role = "guest";
+
+if (req.user.role !== "admin_floor") {
+
+    const roles = [
+        "guest",
+        "admin_eocmn",
+        "admin_nexon",
+        "admin_floor"
+    ];
+
+    role = roles.includes(row.Role)
+        ? row.Role
+        : "guest";
+
+}
 
                 if (!employeeId || !name || !email) {
 

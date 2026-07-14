@@ -3,6 +3,7 @@ const moment = require("moment-timezone");
 
 const Menu = require("../models/Menu");
 const Order = require("../models/Order");
+const User = require("../models/User");
 
 // ======================================================
 // Helpers
@@ -175,27 +176,31 @@ exports.exportDailyExcel = async (req, res) => {
         // Lấy Order
         // ==================================================
 
-        const orders = await Order.find({
+        let orderFilter = {
+    menu: selectedMenu._id,
+    status: "ordered"
+};
 
-            menu: selectedMenu._id,
+if (req.user.role === "admin_floor") {
 
-            status: "ordered"
+    const users = await User.find({
+        role: "guest",
+        floor: req.user.floor
+    }).select("_id");
 
-        })
+    orderFilter.user = {
+        $in: users.map(u => u._id)
+    };
+}
 
-        .populate({
-
-            path: "user",
-
-            select: "employeeId name email floor"
-
-        })
-
-        .sort({
-
-            "user.employeeId": 1
-
-        });
+const orders = await Order.find(orderFilter)
+.populate({
+    path: "user",
+    select: "employeeId name email floor"
+})
+.sort({
+    "user.employeeId": 1
+});
 
         // ==================================================
         // Workbook
@@ -799,13 +804,28 @@ exports.getDailyReport = async (req, res) => {
         // Orders
         // =====================================
 
-        const orders = await Order.find({
+        let orderFilter = {
+    menu: selectedMenu._id,
+    status: "ordered"
+};
 
-            menu: selectedMenu._id,
+if (req.user.role === "admin_floor") {
 
-            status: "ordered"
+    const users = await User.find({
+        role: "guest",
+        floor: req.user.floor
+    }).select("_id");
 
-        })
+    orderFilter.user = {
+        $in: users.map(u => u._id)
+    };
+}
+
+const orders = await Order.find(orderFilter)
+.populate({
+    path: "user",
+    select: "employeeId name email floor"
+})
 
         .populate({
 
@@ -1047,25 +1067,30 @@ exports.getInvoiceReport = async (req, res) => {
 
             .endOf("day");
 
-        const orders = await Order.find({
+        let orderFilter = {
+    status: "ordered"
+};
 
-            status: "ordered"
+if (req.user.role === "admin_floor") {
 
-        })
+    const users = await User.find({
+        role: "guest",
+        floor: req.user.floor
+    }).select("_id");
 
-        .populate({
+    orderFilter.user = {
+        $in: users.map(u => u._id)
+    };
+}
 
-            path: "user",
-
-            select: "employeeId name email floor"
-
-        })
-
-        .sort({
-
-            "user.employeeId": 1
-
-        });
+const orders = await Order.find(orderFilter)
+.populate({
+    path: "user",
+    select: "employeeId name email floor"
+})
+.sort({
+    "user.employeeId": 1
+});
 
         const rows = [];
 
@@ -1236,25 +1261,30 @@ exports.exportInvoiceExcel = async (req, res) => {
 
             .endOf("day");
 
-        const orders = await Order.find({
+       let orderFilter = {
+    status: "ordered"
+};
 
-            status: "ordered"
+if (req.user.role === "admin_floor") {
 
-        })
+    const users = await User.find({
+        role: "guest",
+        floor: req.user.floor
+    }).select("_id");
 
-        .populate({
+    orderFilter.user = {
+        $in: users.map(u => u._id)
+    };
+}
 
-            path: "user",
-
-            select: "employeeId name email floor"
-
-        })
-
-        .sort({
-
-            "user.employeeId": 1
-
-        });
+const orders = await Order.find(orderFilter)
+.populate({
+    path: "user",
+    select: "employeeId name email floor"
+})
+.sort({
+    "user.employeeId": 1
+});
 
         // ==========================================
         // Chuẩn bị dữ liệu

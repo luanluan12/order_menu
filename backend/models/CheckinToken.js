@@ -4,7 +4,11 @@ const checkinTokenSchema = new mongoose.Schema(
     {
         date: {
             type: String,
-            unique: true,
+            required: true
+        },
+
+        floor: {
+            type: Number,
             required: true
         },
 
@@ -20,6 +24,15 @@ const checkinTokenSchema = new mongoose.Schema(
     },
     {
         timestamps: true
+    }
+);
+checkinTokenSchema.index(
+    {
+        date: 1,
+        floor: 1
+    },
+    {
+        unique: true
     }
 );
 

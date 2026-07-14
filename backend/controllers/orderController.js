@@ -1027,22 +1027,14 @@ exports.getOrderById = async (req, res) => {
         // User chỉ xem được đơn của mình
 
         if (
-
-            req.user.role !== "admin" &&
-
-            String(order.user._id) !== String(req.user.id)
-
-        ) {
-
-            return res.status(403).json({
-
-                success: false,
-
-                message: "Không có quyền."
-
-            });
-
-        }
+    req.user.role === "guest" &&
+    String(order.user._id) !== String(req.user.id)
+) {
+    return res.status(403).json({
+        success: false,
+        message: "Không có quyền."
+    });
+}
 
         return res.json({
 
@@ -1078,6 +1070,12 @@ exports.getAllOrders = async (req, res) => {
 
         const filter = {};
 
+        const userFilter = {};
+
+if (req.user.role === "admin_floor") {
+    userFilter.floor = req.user.floor;
+}
+
         if (week) {
 
             filter.week = week;
@@ -1090,7 +1088,15 @@ exports.getAllOrders = async (req, res) => {
 
         }
 
-        const orders = await Order.find(filter)
+        const users = await User.find(userFilter).select("_id");
+
+const userIds = users.map(u => u._id);
+
+if (req.user.role === "admin_floor") {
+    filter.user = { $in: userIds };
+}
+
+const orders = await Order.find(filter)
 
     .populate(
 

@@ -283,6 +283,8 @@ const mains = (day.mains || []).map((dish, index) => ({
 
     name: dish.name,
 
+    nameKo: dish.nameKo || "",
+
     subtitle: dish.subtitle || "",
 
     vegetarian: dish.vegetarian || false,
@@ -300,6 +302,10 @@ const mains = (day.mains || []).map((dish, index) => ({
 
                 name: dish.name,
 
+                nameKo: dish.nameKo || "",
+
+                subtitle: dish.subtitle || "",
+
                 type: "drink",
 
                 image:
@@ -316,6 +322,11 @@ const mains = (day.mains || []).map((dish, index) => ({
 
                 name: dish.name,
 
+                nameKo: dish.nameKo || "",
+
+                subtitle: dish.subtitle || "",
+
+
                 type: "soup",
 
                 image:
@@ -331,6 +342,10 @@ const mains = (day.mains || []).map((dish, index) => ({
             const desserts = (day.desserts || []).map((dish, index) => ({
 
                 name: dish.name,
+
+                nameKo: dish.nameKo || "",
+
+                subtitle: dish.subtitle || "",
 
                 type: "dessert",
 
@@ -648,6 +663,8 @@ exports.updateMenu = async (req, res) => {
 
     name: dish.name,
 
+    nameKo: dish.nameKo || "",
+
     subtitle: dish.subtitle || "",
 
     vegetarian: dish.vegetarian || false,
@@ -665,6 +682,9 @@ exports.updateMenu = async (req, res) => {
             const drinks = (day.drinks || []).map((dish, index) => ({
 
                 name: dish.name,
+                nameKo: dish.nameKo || "",
+
+    subtitle: dish.subtitle || "",
 
                 type: "drink",
 
@@ -686,6 +706,10 @@ exports.updateMenu = async (req, res) => {
 
                 name: dish.name,
 
+                nameKo: dish.nameKo || "",
+
+                subtitle: dish.subtitle || "",
+
                 type: "soup",
 
                 image: getImage(
@@ -705,6 +729,9 @@ exports.updateMenu = async (req, res) => {
             const desserts = (day.desserts || []).map((dish, index) => ({
 
                 name: dish.name,
+                    nameKo: dish.nameKo || "",
+
+    subtitle: dish.subtitle || "",
 
                 type: "dessert",
 

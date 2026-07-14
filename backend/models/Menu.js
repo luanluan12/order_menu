@@ -16,6 +16,16 @@ const dishSchema = new mongoose.Schema({
 
     },
 
+    nameKo: {
+
+    type: String,
+
+    default: "",
+
+    trim: true
+
+},
+
     image: {
 
         type: String,

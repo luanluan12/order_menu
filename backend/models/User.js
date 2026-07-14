@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
         enum: [
             "admin_eocmn",
             "admin_nexon",
+            "admin_floor",
             "guest"
         ],
         default: "guest"

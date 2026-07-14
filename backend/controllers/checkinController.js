@@ -14,7 +14,8 @@ exports.getTodayQr = async (req, res) => {
             .format("YYYY-MM-DD");
 
         let checkin = await CheckinToken.findOne({
-            date: today
+            date: today,
+            floor: req.user.floor
         });
 
         if (!checkin) {
@@ -22,6 +23,8 @@ exports.getTodayQr = async (req, res) => {
             checkin = await CheckinToken.create({
 
                 date: today,
+
+                floor: req.user.floor,
 
                 token: crypto.randomUUID(),
 
@@ -45,13 +48,6 @@ exports.getTodayQr = async (req, res) => {
             })
         );
 
-        console.log("===== QR INFO =====");
-        console.log({
-            date: checkin.date,
-            token: checkin.token,
-            active: checkin.active
-        });
-
         return res.json({
 
             success: true,
@@ -59,6 +55,8 @@ exports.getTodayQr = async (req, res) => {
             data: {
 
                 date: today,
+
+                floor: req.user.floor,
 
                 token: checkin.token,
 
@@ -146,6 +144,18 @@ exports.checkIn = async (req, res) => {
             "user",
             "name email floor employeeId"
         );
+
+        if (checkin.floor !== order.user.floor) {
+
+    return res.status(403).json({
+
+        success: false,
+
+        message: "QR không thuộc tầng của bạn."
+
+    });
+
+}
 
         if (!order) {
 
