@@ -341,6 +341,28 @@ if (unselectedDays.length > 0) {
         const hasDrink = !!day.drink;
 
         const hasSoup = !!day.soup;
+        // Nếu chọn món cơm thì bắt buộc đủ 2 phần
+if (hasMain) {
+
+    const totalMain = day.mains.reduce(
+
+        (sum, item) => sum + item.quantity,
+
+        0
+
+    );
+
+    if (totalMain !== 2) {
+
+        toast.warning(
+            t("warning_main_exactly_2")
+        );
+
+        return;
+
+    }
+
+}
 
         // Không chọn gì => nghỉ ăn
         if (!hasMain && !hasDrink && !hasSoup) {
@@ -355,7 +377,7 @@ if (unselectedDays.length > 0) {
         if (groupCount > 1) {
 
             toast.warning(
-                "Mỗi ngày chỉ được chọn 1 nhóm món."
+                t("warning_one_group_only")
             );
 
             return;

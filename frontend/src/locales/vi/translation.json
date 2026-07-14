@@ -60,6 +60,8 @@
   "order_deadline_remaining": "Thời hạn đặt món còn",
     "day": "ngày",
     "hour": "giờ",
-    "minute": "phút"
+    "minute": "phút",
+      "warning_main_exactly_2": "Nếu chọn món cơm, vui lòng chọn đủ 2 phần.",
+  "warning_one_group_only": "Mỗi ngày chỉ được chọn 1 nhóm món."
 
 }

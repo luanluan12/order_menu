@@ -213,19 +213,47 @@ useEffect(() => {
 
                                 <>
 
-                                    <div className="flex justify-center">
+                                    <div className="flex flex-col items-center">
 
-                                        <img
+    <img
+        src={qr.qrImage}
+        alt="QR Check-in"
+        className="h-44 w-44 rounded-2xl border border-gray-200 bg-white p-2 shadow"
+    />
 
-                                            src={qr.qrImage}
+    <div className="mt-5 w-full rounded-2xl border border-orange-100 bg-orange-50 p-4">
 
-                                            alt="QR Check-in"
+        <div className="grid grid-cols-2 gap-4">
 
-                                            className="h-36 w-36 rounded-2xl border"
+            <div className="rounded-xl bg-white p-3 text-center shadow-sm">
 
-                                        />
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    📅 Ngày
+                </div>
 
-                                    </div>
+                <div className="mt-1 text-base font-bold text-gray-800">
+                    {new Date(qr.date).toLocaleDateString("vi-VN")}
+                </div>
+
+            </div>
+
+            <div className="rounded-xl bg-white p-3 text-center shadow-sm">
+
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    🏢 Tầng
+                </div>
+
+                <div className="mt-1 text-xl font-bold text-orange-600">
+                    {qr.floor}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                                     <div className="mt-8">

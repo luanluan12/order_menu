@@ -134,6 +134,7 @@ function UserModal({
                             <option value="guest">Guest</option>
                             <option value="admin_eocmn">Admin EOCMN</option>
                             <option value="admin_nexon">Admin Nexon</option>
+                            <option value="admin_floor">Admin Floor</option>
                         </select>
                     </div>
 

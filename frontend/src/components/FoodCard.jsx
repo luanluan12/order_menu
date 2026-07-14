@@ -15,10 +15,13 @@ function FoodCard({
     onSelect,
 }) {
 
-    console.log(food);
-    console.log("subtitle =", food.subtitle);
+    const { t, i18n } = useTranslation();
 
-    const { t } = useTranslation();
+
+const displayName =
+    i18n.language === "ko"
+        ? (food.nameKo || food.name)
+        : food.name;
 
     const selected =
         type === "main"
@@ -116,7 +119,7 @@ function FoodCard({
                             : "https://placehold.co/600"
                     }
 
-                    alt={food.name}
+                    alt={displayName}
 
                     className="
                         h-28
@@ -152,7 +155,7 @@ function FoodCard({
         "
     >
 
-        {food.name}
+        {displayName}
 
     </h3>
 

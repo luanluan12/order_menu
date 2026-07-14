@@ -408,6 +408,8 @@ const submit = () => {
 
             name: dish.name,
 
+            nameKo: dish.nameKo || "",
+
             subtitle: dish.subtitle || "",
 
             vegetarian: dish.vegetarian || false,
@@ -434,6 +436,11 @@ const submit = () => {
 
                         name: day.drink.name,
 
+                        nameKo: day.drink.nameKo || "",
+
+                        subtitle: day.drink.subtitle || "",
+
+
                         type: "drink",
 
                         image:
@@ -459,6 +466,10 @@ const submit = () => {
                     {
 
                         name: day.soup.name,
+
+                        nameKo: day.soup.nameKo || "",
+
+                        subtitle: day.soup.subtitle || "",
 
                         type: "soup",
 

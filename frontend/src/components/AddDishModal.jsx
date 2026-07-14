@@ -16,12 +16,15 @@ function AddDishModal({
     const [subtitle, setSubtitle] = useState("");
     const [image, setImage] = useState(null);
     const [vegetarian, setVegetarian] = useState(false);
+    const [nameKo, setNameKo] = useState("");
 
     useEffect(() => {
 
     if (!open) return;
 
     setName(dish?.name || "");
+
+    setNameKo(dish?.nameKo || "");
 
     setSubtitle(dish?.subtitle || "");
 
@@ -69,6 +72,8 @@ const preview =
     onSave({
 
     name: name.trim(),
+
+    nameKo: nameKo.trim(),
 
     subtitle: subtitle.trim(),
 
@@ -174,28 +179,34 @@ const preview =
                 <div className="mt-5">
 
                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Tên món
-                    </label>
 
-                    <input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Nhập tên món..."
-                        className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            px-4
-                            py-3
-                            text-[15px]
-                            outline-none
-                            transition
-                            focus:border-orange-500
-                            focus:ring-2
-                            focus:ring-orange-100
-                        "
-                    />
+    Tên món (Tiếng Việt)
+
+</label>
+
+<input
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    placeholder="Ví dụ: Cơm gà..."
+    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+/>
+
+<div className="mt-4">
+
+    <label className="mb-2 block text-sm font-semibold text-slate-700">
+
+        Tên món (한국어)
+
+    </label>
+
+    <input
+        value={nameKo}
+        onChange={(e) => setNameKo(e.target.value)}
+        placeholder="예: 치킨 덮밥"
+        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-[15px] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+    />
+
+</div>
                     <div className="mt-4">
 
     <label className="mb-2 block text-sm font-semibold text-slate-700">

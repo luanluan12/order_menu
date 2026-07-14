@@ -10,7 +10,13 @@ function DrinkCard({
     onSelect,
 }) {
 
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+
+    const displayName =
+        i18n.language === "ko"
+            ? (food.nameKo || food.name)
+            : food.name;
+    const displaySubtitle = food.subtitle;
 
     return (
 
@@ -74,7 +80,7 @@ function DrinkCard({
                         : "https://placehold.co/300"
                 }
 
-                alt={food.name}
+                alt={displayName}
 
                 className="
                     h-44
@@ -97,9 +103,19 @@ function DrinkCard({
 
                 <h3 className="text-lg font-semibold text-slate-800 sm:text-xl">
 
-                    {food.name}
+                    {displayName}
 
                 </h3>
+
+                {displaySubtitle && (
+
+                    <p className="mt-2 text-sm text-gray-500">
+
+                        {displaySubtitle}
+
+                    </p>
+
+                )}
 
                 <button
 

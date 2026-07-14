@@ -51,6 +51,10 @@ function Login() {
 
         navigate("/home");
         break;
+        case "admin_floor":
+
+        navigate("/admin/dashboard");
+        break;
 
     case "admin_eocmn":
         navigate("/admin/dashboard");
