@@ -908,10 +908,6 @@ exports.deleteMenu = async (req, res) => {
                         dish.imagePublicId
 
                     );
-                    console.log(
-    "Deleted:",
-    dish.imagePublicId
-);
 
                 }
 

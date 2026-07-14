@@ -21,10 +21,13 @@ const reportRoutes = require("./routes/reportRoutes");
 const userRoutes = require("./routes/userRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const checkinRoutes = require("./routes/checkinRoutes");
+const startReminderCron = require("./cron/reminderCron");
 
 const app = express();
 
 connectDB();
+
+startReminderCron();
 
 app.use(cors());
 
