@@ -143,6 +143,8 @@ exports.createMenu = async (req, res) => {
 
                     subtitle: dish.subtitle || "",
 
+                    subtitleKo: dish.subtitleKo || "",
+
                     vegetarian: dish.vegetarian || false,
 
                     type: dish.type,
@@ -171,6 +173,8 @@ exports.createMenu = async (req, res) => {
 
                     subtitle: dish.subtitle || "",
 
+                    subtitleKo: dish.subtitleKo || "",
+
                     type: "drink",
 
                     image: imageInfo.image,
@@ -197,6 +201,8 @@ exports.createMenu = async (req, res) => {
 
                     subtitle: dish.subtitle || "",
 
+                    subtitleKo: dish.subtitleKo || "",
+
                     type: "soup",
 
                     image: imageInfo.image,
@@ -222,6 +228,8 @@ exports.createMenu = async (req, res) => {
                     nameKo: dish.nameKo || "",
 
                     subtitle: dish.subtitle || "",
+
+                    subtitleKo: dish.subtitleKo || "",
 
                     type: "dessert",
 
@@ -618,6 +626,8 @@ const mains = await Promise.all(
 
             subtitle: dish.subtitle || "",
 
+            subtitleKo: dish.subtitleKo || "",
+
             vegetarian: dish.vegetarian || false,
 
             type: dish.type,
@@ -664,6 +674,8 @@ const drinks = await Promise.all(
             nameKo: dish.nameKo || "",
 
             subtitle: dish.subtitle || "",
+
+            subtitleKo: dish.subtitleKo || "",
 
             type: "drink",
 
@@ -715,6 +727,8 @@ const soups = await Promise.all(
             nameKo: dish.nameKo || "",
 
             subtitle: dish.subtitle || "",
+
+            subtitleKo: dish.subtitleKo || "",
 
             type: "soup",
 
@@ -769,6 +783,8 @@ const desserts = await Promise.all(
             nameKo: dish.nameKo || "",
 
             subtitle: dish.subtitle || "",
+
+            subtitleKo: dish.subtitleKo || "",
 
             type: "dessert",
 

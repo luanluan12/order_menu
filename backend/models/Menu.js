@@ -71,6 +71,15 @@ subtitle: {
     default: "",
     trim: true
 },
+subtitleKo: {
+
+    type: String,
+
+    default: "",
+
+    trim: true
+
+},
 
 
 }, {
