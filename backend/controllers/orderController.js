@@ -774,23 +774,23 @@ exports.updateOrder = async (req, res) => {
 
         );
 
-        if (
+//         if (
 
-    new Date() >
+//     new Date() >
 
-    new Date(menu.deadline)
+//     new Date(menu.deadline)
 
-) {
+// ) {
 
-    return res.status(400).json({
+//     return res.status(400).json({
 
-        success:false,
+//         success:false,
 
-        message:"Đã hết thời gian chỉnh sửa."
+//         message:"Đã hết thời gian chỉnh sửa."
 
-    });
+//     });
 
-}
+// }
 
         if (!menu) {
 
