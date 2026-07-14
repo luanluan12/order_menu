@@ -279,10 +279,11 @@ exports.createMenu = async (req, res) => {
         };
 
         const resultDays = days.map((day, dayIndex) => {
-
-            const mains = (day.mains || []).map((dish, index) => ({
+const mains = (day.mains || []).map((dish, index) => ({
 
     name: dish.name,
+
+    subtitle: dish.subtitle || "",
 
     vegetarian: dish.vegetarian || false,
 
@@ -574,6 +575,18 @@ exports.updateMenu = async (req, res) => {
 
         }
 
+        if (menu.status === "published") {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message: "Không thể chỉnh sửa Menu đã Publish."
+
+    });
+
+}
+
         const { week, year, status } = req.body;
 
         let days = [];
@@ -631,10 +644,11 @@ exports.updateMenu = async (req, res) => {
         const resultDays = days.map((day, dayIndex) => {
 
             const oldDay = menu.days[dayIndex] || {};
-
             const mains = (day.mains || []).map((dish, index) => ({
 
     name: dish.name,
+
+    subtitle: dish.subtitle || "",
 
     vegetarian: dish.vegetarian || false,
 
@@ -648,7 +662,6 @@ exports.updateMenu = async (req, res) => {
     )
 
 }));
-
             const drinks = (day.drinks || []).map((dish, index) => ({
 
                 name: dish.name,
@@ -779,18 +792,6 @@ exports.deleteMenu = async (req, res) => {
                 success: false,
 
                 message: "Menu not found."
-
-            });
-
-        }
-
-        if (menu.status === "published") {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Không thể xóa Menu đã Publish."
 
             });
 

@@ -48,10 +48,11 @@ const dishSchema = new mongoose.Schema({
     type: Boolean,
     default: false
 },
-    vegetarian: {
-    type: Boolean,
-    default: false
-}
+subtitle: {
+    type: String,
+    default: "",
+    trim: true
+},
 
 }, {
 
