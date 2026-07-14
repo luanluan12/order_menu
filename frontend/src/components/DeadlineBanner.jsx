@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function DeadlineBanner() {
 
     const [text, setText] = useState("");
 
     const [expired, setExpired] = useState(false);
+
+    const { t , i18n} = useTranslation();
 
     useEffect(() => {
 
@@ -32,7 +35,7 @@ function DeadlineBanner() {
 
                 setExpired(true);
 
-                setText("Đã hết thời gian đặt món");
+                setText(t("order_closed"));
 
                 return;
 
@@ -53,12 +56,10 @@ function DeadlineBanner() {
             let value = "";
 
             if (days > 0) {
+    value += `${days} ${t("day")} `;
+}
 
-                value += `${days} ngày `;
-
-            }
-
-            value += `${hours} giờ ${minutes} phút`;
+value += `${hours} ${t("hour")} ${minutes} ${t("minute")}`;
 
             setText(value);
 
@@ -70,7 +71,7 @@ function DeadlineBanner() {
 
         return () => clearInterval(timer);
 
-    }, []);
+    }, [i18n.language]);
 
     return (
 
@@ -88,7 +89,7 @@ function DeadlineBanner() {
 
             <div className="text-sm text-gray-500">
 
-                ⏰ Thời hạn đặt món còn
+                ⏰ {t("order_deadline_remaining")}
 
             </div>
 

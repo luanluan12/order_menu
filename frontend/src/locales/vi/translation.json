@@ -56,6 +56,10 @@
   "wednesday": "Thứ 4",
   "thursday": "Thứ 5",
   "friday": "Thứ 6",
-  "vegetarian": "Chay"
+  "vegetarian": "Chay",
+  "order_deadline_remaining": "Thời hạn đặt món còn",
+    "day": "ngày",
+    "hour": "giờ",
+    "minute": "phút"
 
 }

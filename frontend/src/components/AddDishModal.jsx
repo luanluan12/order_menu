@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 
+
 function AddDishModal({
     open,
     dish = null,
@@ -12,16 +13,17 @@ function AddDishModal({
     onRemove,
 }) {
     const [name, setName] = useState("");
+    const [subtitle, setSubtitle] = useState("");
     const [image, setImage] = useState(null);
     const [vegetarian, setVegetarian] = useState(false);
-
-    console.log("MODE:", mode);
 
     useEffect(() => {
 
     if (!open) return;
 
     setName(dish?.name || "");
+
+    setSubtitle(dish?.subtitle || "");
 
     setImage(dish?.image || null);
 
@@ -31,10 +33,14 @@ function AddDishModal({
 
     if (!open) return null;
 
-    const preview =
-        image instanceof File
-            ? URL.createObjectURL(image)
-            : image || null;
+    const API_URL = import.meta.env.VITE_API_URL;
+
+const preview =
+    image instanceof File
+        ? URL.createObjectURL(image)
+        : image
+            ? `${API_URL}${image}`
+            : null;
 
     const submit = () => {
 
@@ -54,9 +60,17 @@ function AddDishModal({
 
     }
 
+    console.log({
+    name,
+    subtitle,
+    vegetarian
+});
+
     onSave({
 
     name: name.trim(),
+
+    subtitle: subtitle.trim(),
 
     vegetarian,
 
@@ -69,10 +83,6 @@ function AddDishModal({
 
     image,
 
-});
-console.log({
-    name,
-    vegetarian
 });
 
     onClose();
@@ -186,6 +196,40 @@ console.log({
                             focus:ring-orange-100
                         "
                     />
+                    <div className="mt-4">
+
+    <label className="mb-2 block text-sm font-semibold text-slate-700">
+
+        Định lượng
+
+    </label>
+
+    <input
+
+        value={subtitle}
+
+        onChange={(e) => setSubtitle(e.target.value)}
+
+        placeholder="VD: 🔥 520 kcal • 180g"
+
+        className="
+            w-full
+            rounded-xl
+            border
+            border-gray-300
+            px-4
+            py-3
+            text-[15px]
+            outline-none
+            transition
+            focus:border-orange-500
+            focus:ring-2
+            focus:ring-orange-100
+        "
+
+    />
+
+</div>
 
                 </div>
                 {/*Chay*/}

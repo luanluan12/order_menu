@@ -62,5 +62,8 @@
   "wednesday": "수요일",
   "thursday": "목요일",
   "friday": "금요일",
-  "vegetarian": "채식"
+  "vegetarian": "채식","order_deadline_remaining": "주문 마감까지",
+    "day": "일",
+    "hour": "시간",
+    "minute": "분"
 }

@@ -17,7 +17,7 @@ import {
     createMenu,
     updateMenu,
     deleteMenu,
-    publishMenu
+    publishMenu as publishMenuApi
 } from "../../api/menuApi";
 
 function MenuManagement() {
@@ -26,6 +26,8 @@ function MenuManagement() {
     const [keyword, setKeyword] = useState("");
     const navigate = useNavigate();
     const [publishingId, setPublishingId] = useState(null);
+    const [publishMenu, setPublishMenu] = useState(null);
+    const [publishing, setPublishing] = useState(false);
 
     const loadMenus = async () => {
 
@@ -97,57 +99,96 @@ function MenuManagement() {
 
     };
 
-    const handlePublish = async (menu) => {
+    // const handlePublish = async (menu) => {
 
-        const confirmPublish = window.confirm(
+    //     const confirmPublish = window.confirm(
 
-            `Bạn có chắc muốn Gửi Menu tuần ${menu.week}?\n\n` +
+    //         `Bạn có chắc muốn Gửi Menu tuần ${menu.week}?\n\n` +
 
-            `Sau khi Publish sẽ gửi Email cho toàn bộ nhân viên.`
+    //         `Sau khi Publish sẽ gửi Email cho toàn bộ nhân viên.`
 
+    //     );
+
+    //     if (!confirmPublish) {
+
+    //         return;
+
+    //     }
+
+    //     try {
+
+    //         setPublishingId(menu._id);
+
+    //         const res = await publishMenu(menu._id);
+
+    //         toast.success(
+    //             `${res.data.message} (${res.data.sent} email)`
+    //         );
+
+    //         await loadMenus();
+
+    //     }
+
+
+    //     catch (err) {
+
+    //         toast.error(
+
+    //             err.response?.data?.message ||
+
+    //             err.message ||
+
+    //             "Publish thất bại"
+
+    //         );
+
+    //     }
+    //     finally {
+
+    //         setPublishingId(null);
+
+    //     }
+
+    // };
+    const handlePublish = (menu) => {
+    setPublishMenu(menu);
+};
+const confirmPublish = async () => {
+
+    if (!publishMenu) return;
+
+    try {
+
+        setPublishing(true);
+
+        setPublishingId(publishMenu._id);
+
+        const res = await publishMenuApi(publishMenu._id);
+
+        toast.success(
+            `${res.data.message} (${res.data.sent} email)`
         );
 
-        if (!confirmPublish) {
+        setPublishMenu(null);
 
-            return;
+        await loadMenus();
 
-        }
+    } catch (err) {
 
-        try {
+        toast.error(
+            err.response?.data?.message ||
+            "Publish thất bại"
+        );
 
-            setPublishingId(menu._id);
+    } finally {
 
-            const res = await publishMenu(menu._id);
+        setPublishing(false);
 
-            toast.success(
-                `${res.data.message} (${res.data.sent} email)`
-            );
+        setPublishingId(null);
 
-            await loadMenus();
+    }
 
-        }
-
-
-        catch (err) {
-
-            toast.error(
-
-                err.response?.data?.message ||
-
-                err.message ||
-
-                "Publish thất bại"
-
-            );
-
-        }
-        finally {
-
-            setPublishingId(null);
-
-        }
-
-    };
+};
 
     useEffect(() => {
         loadMenus();
@@ -309,7 +350,7 @@ function MenuManagement() {
 
                                                     <span className="rounded bg-green-100 px-3 py-1 text-green-700">
 
-                                                        Published
+                                                        Đã Gửi
 
                                                     </span>
 
@@ -317,7 +358,7 @@ function MenuManagement() {
 
                                                     <span className="rounded bg-yellow-100 px-3 py-1 text-yellow-700">
 
-                                                        Draft
+                                                        Chưa Gửi
 
                                                     </span>
 
@@ -431,7 +472,7 @@ function MenuManagement() {
 
                                 <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
 
-                                    Published
+                                    Đã gửi
 
                                 </span>
 
@@ -439,7 +480,7 @@ function MenuManagement() {
 
                                 <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
 
-                                    Draft
+                                    Chưa Gửi
 
                                 </span>
 
@@ -542,6 +583,51 @@ function MenuManagement() {
 
 </div>
 
+        {publishMenu && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="w-[420px] rounded-2xl bg-white p-6 shadow-xl">
+
+            <h2 className="text-xl font-bold">
+                Publish Menu
+            </h2>
+
+            <p className="mt-4 text-gray-700">
+                Bạn có chắc muốn gửi menu{" "}
+                <strong>{publishMenu.week}</strong>?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+
+                <button
+                    disabled={publishing}
+                    onClick={() => setPublishMenu(null)}
+                    className="rounded-lg border px-5 py-2 hover:bg-gray-50"
+                >
+                    Hủy
+                </button>
+
+                <button
+                    disabled={publishing}
+                    onClick={confirmPublish}
+                    className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2 text-white hover:bg-green-700 disabled:opacity-70"
+                >
+                    {publishing ? (
+                        <>
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                            Đang Gửi...
+                        </>
+                    ) : (
+                        <>
+                            <FaPaperPlane />
+                            Gửi
+                        </>
+                    )}
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+)}
         </div>
 
     );

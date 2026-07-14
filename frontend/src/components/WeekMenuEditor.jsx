@@ -408,6 +408,8 @@ const submit = () => {
 
             name: dish.name,
 
+            subtitle: dish.subtitle || "",
+
             vegetarian: dish.vegetarian || false,
 
             type: dish.type || "normal",
@@ -477,6 +479,8 @@ const submit = () => {
         desserts: []
 
     }));
+
+    console.log("DAYS", JSON.stringify(days, null, 2));
 
     formData.append(
 

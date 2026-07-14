@@ -16,6 +16,7 @@ function FoodCard({
 }) {
 
     console.log(food);
+    console.log("subtitle =", food.subtitle);
 
     const { t } = useTranslation();
 
@@ -135,26 +136,52 @@ function FoodCard({
 
             <div className="px-3 pb-4 pt-3">
 
-                <h3
-                    className="
-                        flex
-                        min-h-[42px]
-                        items-center
-                        justify-center
-                        text-center
-                        text-sm
-                        font-medium
-                        leading-5
-                        text-gray-800
+                <div className="min-h-[56px]">
 
-                        sm:min-h-[48px]
-                        sm:text-lg
-                    "
-                >
+    <h3
+        className="
+             text-center
+            text-sm
+            font-semibold
+            leading-5
+            text-gray-800
+            break-words
+            whitespace-normal
 
-                    {food.name}
+            sm:text-lg
+        "
+    >
 
-                </h3>
+        {food.name}
+
+    </h3>
+
+    {
+
+        food.subtitle && (
+
+            <p
+                className="
+                    mt-1
+                text-center
+                text-xs
+                text-gray-500
+                break-words
+                whitespace-normal
+
+                sm:text-sm
+                "
+            >
+
+                {food.subtitle}
+
+            </p>
+
+        )
+
+    }
+
+</div>
 
                 <div className="mt-3">
 
