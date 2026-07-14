@@ -21,6 +21,11 @@ const displayName =
         ? (food.nameKo || food.name)
         : food.name;
 
+const displaySubtitle =
+    i18n.language === "ko"
+        ? (food.subtitleKo || food.subtitle)
+        : food.subtitle;
+
     const selected =
         type === "main"
             ? quantity > 0
@@ -158,29 +163,25 @@ const displayName =
     </h3>
 
     {
+    displaySubtitle && (
 
-        food.subtitle && (
-
-            <p
-                className="
-                    mt-1
+        <p
+            className="
+                mt-1
                 text-center
                 text-xs
                 text-gray-500
                 break-words
                 whitespace-normal
-
                 sm:text-sm
-                "
-            >
+            "
+        >
+            {displaySubtitle}
+        </p>
 
-                {food.subtitle}
+    )
 
-            </p>
-
-        )
-
-    }
+}
 
 </div>
 

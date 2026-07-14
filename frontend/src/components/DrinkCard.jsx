@@ -14,7 +14,10 @@ function DrinkCard({
         i18n.language === "ko"
             ? (food.nameKo || food.name)
             : food.name;
-    const displaySubtitle = food.subtitle;
+        const displaySubtitle =
+        i18n.language === "ko"
+            ? (food.subtitleKo || food.subtitle)
+            : food.subtitle;
 
     return (
 

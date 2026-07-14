@@ -412,6 +412,8 @@ const submit = () => {
 
             subtitle: dish.subtitle || "",
 
+            subtitleKo: dish.subtitleKo || "",
+
             vegetarian: dish.vegetarian || false,
 
             type: dish.type || "normal",
@@ -439,6 +441,8 @@ const submit = () => {
                         nameKo: day.drink.nameKo || "",
 
                         subtitle: day.drink.subtitle || "",
+
+                        subtitleKo: day.drink.subtitleKo || "",
 
 
                         type: "drink",
@@ -470,6 +474,8 @@ const submit = () => {
                         nameKo: day.soup.nameKo || "",
 
                         subtitle: day.soup.subtitle || "",
+
+                        subtitleKo: day.soup.subtitleKo || "",
 
                         type: "soup",
 

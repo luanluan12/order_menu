@@ -17,6 +17,7 @@ function AddDishModal({
     const [image, setImage] = useState(null);
     const [vegetarian, setVegetarian] = useState(false);
     const [nameKo, setNameKo] = useState("");
+    const [subtitleKo, setSubtitleKo] = useState("");
 
     useEffect(() => {
 
@@ -27,6 +28,8 @@ function AddDishModal({
     setNameKo(dish?.nameKo || "");
 
     setSubtitle(dish?.subtitle || "");
+
+    setSubtitleKo(dish?.subtitleKo || "");
 
     setImage(dish?.image || null);
 
@@ -63,12 +66,6 @@ const preview =
 
     }
 
-    console.log({
-    name,
-    subtitle,
-    vegetarian
-});
-
     onSave({
 
     name: name.trim(),
@@ -76,6 +73,8 @@ const preview =
     nameKo: nameKo.trim(),
 
     subtitle: subtitle.trim(),
+
+    subtitleKo: subtitleKo.trim(),
 
     vegetarian,
 
@@ -238,6 +237,35 @@ const preview =
             focus:ring-orange-100
         "
 
+    />
+
+</div>
+<div className="mt-4">
+
+    <label className="mb-2 block text-sm font-semibold text-slate-700">
+
+        Định lượng (한국어)
+
+    </label>
+
+    <input
+        value={subtitleKo}
+        onChange={(e) => setSubtitleKo(e.target.value)}
+        placeholder="예: 🔥 520 kcal • 180g"
+        className="
+            w-full
+            rounded-xl
+            border
+            border-gray-300
+            px-4
+            py-3
+            text-[15px]
+            outline-none
+            transition
+            focus:border-orange-500
+            focus:ring-2
+            focus:ring-orange-100
+        "
     />
 
 </div>
