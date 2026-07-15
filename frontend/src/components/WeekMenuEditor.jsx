@@ -66,59 +66,12 @@ function WeekMenuEditor({
 
 }, [initialData]);
 
-// useEffect(() => {
-
-//     const now = new Date();
-
-//     // Luôn tạo menu cho tuần sau
-//     now.setDate(now.getDate() + 7);
-
-//     const getISOWeek = (date) => {
-
-//         const d = new Date(Date.UTC(
-//             date.getFullYear(),
-//             date.getMonth(),
-//             date.getDate()
-//         ));
-
-//         d.setUTCDate(
-//             d.getUTCDate() + 4 - (d.getUTCDay() || 7)
-//         );
-
-//         const yearStart = new Date(Date.UTC(
-//             d.getUTCFullYear(),
-//             0,
-//             1
-//         ));
-
-//         const week = Math.ceil(
-//             (((d - yearStart) / 86400000) + 1) / 7
-//         );
-
-//         return {
-
-//             year: d.getUTCFullYear(),
-
-//             week
-
-//         };
-
-//     };
-
-//     const { year, week } = getISOWeek(now);
-
-//     const value =
-//         `${year}-W${String(week).padStart(2, "0")}`;
-//     setAllowedWeek(value);
-//     setWeek(value);
-
-// }, []);
 useEffect(() => {
 
     const now = new Date();
 
-    // Demo: tạo menu tuần hiện tại
-    // now.setDate(now.getDate() + 7);
+    // Luôn tạo menu cho tuần sau
+    now.setDate(now.getDate() + 7);
 
     const getISOWeek = (date) => {
 
@@ -143,8 +96,11 @@ useEffect(() => {
         );
 
         return {
+
             year: d.getUTCFullYear(),
+
             week
+
         };
 
     };
@@ -153,12 +109,56 @@ useEffect(() => {
 
     const value =
         `${year}-W${String(week).padStart(2, "0")}`;
-
     setAllowedWeek(value);
-
     setWeek(value);
 
 }, []);
+// useEffect(() => {
+
+//     const now = new Date();
+
+//     // Demo: tạo menu tuần hiện tại
+//     // now.setDate(now.getDate() + 7);
+
+//     const getISOWeek = (date) => {
+
+//         const d = new Date(Date.UTC(
+//             date.getFullYear(),
+//             date.getMonth(),
+//             date.getDate()
+//         ));
+
+//         d.setUTCDate(
+//             d.getUTCDate() + 4 - (d.getUTCDay() || 7)
+//         );
+
+//         const yearStart = new Date(Date.UTC(
+//             d.getUTCFullYear(),
+//             0,
+//             1
+//         ));
+
+//         const week = Math.ceil(
+//             (((d - yearStart) / 86400000) + 1) / 7
+//         );
+
+//         return {
+//             year: d.getUTCFullYear(),
+//             week
+//         };
+
+//     };
+
+//     const { year, week } = getISOWeek(now);
+
+//     const value =
+//         `${year}-W${String(week).padStart(2, "0")}`;
+
+//     setAllowedWeek(value);
+
+//     setWeek(value);
+
+// }, []);
     useEffect(() => {
 
     if (initialData) return;

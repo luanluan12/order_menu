@@ -5,12 +5,29 @@ import { getHistory } from "../../api/orderApi";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-const API_URL = import.meta.env.VITE_API_URL;
 
 function History() {
     const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+
+    const getImageUrl = (image) => {
+
+    if (!image) {
+
+        return "https://placehold.co/600";
+
+    }
+
+    if (image.startsWith("http")) {
+
+        return image;
+
+    }
+
+    return API_URL + image;
+
+};
 
     useEffect(() => {
         loadHistory();
@@ -46,14 +63,10 @@ function History() {
             <div className="p-2">
 
                 <img
-                    src={
-                        dish.image
-                            ? API_URL + dish.image
-                            : "https://placehold.co/600"
-                    }
-                    alt={dish.name}
-                    className="h-[125px] w-full rounded-[16px] object-cover"
-                />
+    src={getImageUrl(dish.image)}
+    alt={dish.name}
+    className="h-[125px] w-full rounded-[16px] object-cover"
+/>
 
             </div>
 
