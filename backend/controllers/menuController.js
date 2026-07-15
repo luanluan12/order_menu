@@ -109,12 +109,6 @@ exports.createMenu = async (req, res) => {
 
             }
 
-                console.log("========== CLOUDINARY ==========");
-    console.log("Field:", fieldName);
-    console.log("URL:", file.path);
-    console.log("Public ID:", file.filename);
-    console.log("===============================");
-
             return {
 
                 image: file.path,
@@ -256,10 +250,6 @@ exports.createMenu = async (req, res) => {
             };
 
         });
-
-        console.log(
-    JSON.stringify(resultDays, null, 2)
-);
 
         const menu = await Menu.create({
 
@@ -558,9 +548,7 @@ const getImage = async (
     oldPublicId = ""
 
 ) => {
-    console.log(req.files.map(f => f.fieldname));
     const file = findFile(fieldName);
-    console.log("Không đổi ảnh:", fieldName);
 
     if (!file) {
 
@@ -589,9 +577,6 @@ const getImage = async (
         imagePublicId: file.filename
 
     };
-    console.log("Đổi ảnh:", fieldName);
-console.log("Old:", oldPublicId);
-console.log("New:", file.filename);
 
 };
 

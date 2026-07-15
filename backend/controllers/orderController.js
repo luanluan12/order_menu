@@ -18,38 +18,33 @@ const {
 // Có được phép đặt món?
 // ===========================================
 
-// const canOrder = () => {
-
-//     const now = moment().tz("Asia/Ho_Chi_Minh");
-
-//     const day = now.isoWeekday(); // 1 = Thứ 2 ... 7 = Chủ nhật
-
-//     const hour = now.hour();
-
-//     // Trước Thứ 4
-//     if (day < 3) {
-//         return false;
-//     }
-
-//     // Thứ 4 trước 09:00
-//     if (day === 3 && hour < 9) {
-//         return false;
-//     }
-
-//     // Sau 17:00 Thứ 6
-//     if (day === 5 && hour >= 17) {
-//         return false;
-//     }
-
-//     // Thứ 7 & Chủ nhật
-//     if (day > 5) {
-//         return false;
-//     }
-
-//     return true;
-
-// };
 const canOrder = () => {
+
+    const now = moment().tz("Asia/Ho_Chi_Minh");
+
+    const day = now.isoWeekday(); // 1 = Thứ 2 ... 7 = Chủ nhật
+
+    const hour = now.hour();
+
+    // Trước Thứ 4
+    if (day < 3) {
+        return false;
+    }
+
+    // Thứ 4 trước 09:00
+    if (day === 3 && hour < 9) {
+        return false;
+    }
+
+    // Sau 17:00 Thứ 6
+    if (day === 5 && hour >= 17) {
+        return false;
+    }
+
+    // Thứ 7 & Chủ nhật
+    if (day > 5) {
+        return false;
+    }
 
     return true;
 
@@ -420,23 +415,23 @@ exports.createOrder = async (req, res) => {
 
         const menu = await Menu.findById(menuId);
 
-//         if (
+        if (
 
-//     new Date() >
+    new Date() >
 
-//     new Date(menu.deadline)
+    new Date(menu.deadline)
 
-// ) {
+) {
 
-//     return res.status(400).json({
+    return res.status(400).json({
 
-//         success:false,
+        success:false,
 
-//         message:"Đã hết thời gian đặt món."
+        message:"Đã hết thời gian đặt món."
 
-//     });
+    });
 
-// }
+}
 
         if (!menu) {
 

@@ -31,12 +31,9 @@ module.exports = async () => {
         console.log("Không có thực đơn đã phát hành.");
         return;
     }
-
-    // Kiểm tra hạn đặt
-    // if (new Date() > menu.deadline) {
-    //     console.log("Đã quá thời hạn đặt món.");
-    //     return;
-    // }
+    if (new Date() > menu.deadline) {
+        return;
+    }
 
     // Danh sách nhân viên
     const users = await User.find({
@@ -110,8 +107,6 @@ module.exports = async () => {
                 `
             });
 
-            console.log("✔ Đã gửi:", user.email);
-
         } catch (err) {
 
             console.log("✘ Gửi thất bại:", user.email);
@@ -119,7 +114,5 @@ module.exports = async () => {
         }
 
     }
-
-    console.log("========== HOÀN THÀNH ==========");
 
 };

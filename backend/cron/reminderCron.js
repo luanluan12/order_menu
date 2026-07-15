@@ -5,11 +5,9 @@ module.exports = () => {
 
     cron.schedule(
 
-        "0 3 * * 3",
+        "0 12 * * 3,4,5",
 
         async () => {
-
-            console.log("Running Lunch Reminder...");
 
             try {
 

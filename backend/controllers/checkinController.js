@@ -31,14 +31,7 @@ exports.getTodayQr = async (req, res) => {
                 active: true
 
             });
-
-            console.log("===== CREATE NEW CHECKIN =====");
-            console.log(checkin);
-
         } else {
-
-            console.log("===== CHECKIN EXISTED =====");
-            console.log(checkin);
 
         }
 
