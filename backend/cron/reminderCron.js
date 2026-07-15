@@ -5,7 +5,7 @@ module.exports = () => {
 
     cron.schedule(
 
-        "0 12 * * 3,4,5",
+        "35 11 * * 3",
 
         async () => {
 
