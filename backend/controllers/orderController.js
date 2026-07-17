@@ -500,14 +500,15 @@ exports.createOrder = async (req, res) => {
         });
         const user = await User.findById(userId);
 
+const language = (user.language || "vi").toLowerCase();
+
 await sendMail({
-
     to: user.email,
-
-    subject: `🍱 Xác nhận đặt món ${menu.week}`,
-
-    html: orderSuccessTemplate(user, order)
-
+    subject:
+        language === "ko"
+            ? `🍱 ${menu.week} 식사 주문 완료`
+            : `🍱 Xác nhận đặt món ${menu.week}`,
+    html: orderSuccessTemplate(user, order, language)
 });
 
         return res.status(201).json({
@@ -669,14 +670,15 @@ exports.createOrderFromInvite = async (
 
         });
 
-        await sendMail({
+const language = (user.language || "vi").toLowerCase();
 
+await sendMail({
     to: user.email,
-
-    subject: `🍱 Xác nhận đặt món ${menu.week}`,
-
-    html: orderSuccessTemplate(user, order)
-
+    subject:
+        language === "ko"
+            ? `🍱 ${menu.week} 식사 주문 완료`
+            : `🍱 Xác nhận đặt món ${menu.week}`,
+    html: orderSuccessTemplate(user, order, language)
 });
 
         return res.status(201).json({

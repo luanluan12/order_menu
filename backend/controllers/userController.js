@@ -89,7 +89,8 @@ exports.createUser = async (req, res) => {
             email,
             password,
             floor,
-            role
+            role,
+            language
         } = req.body;
 
         let userFloor = floor;
@@ -157,7 +158,9 @@ if (req.user.role === "admin_floor") {
 
             floor: userFloor,
 
-            role: userRole
+            role: userRole,
+
+            language: language || "vi"
 
         });
 
@@ -275,6 +278,8 @@ exports.updateUser = async (req, res) => {
         }
 
         user.name = req.body.name ?? user.name;
+
+        user.language = req.body.language ?? user.language;
 
         if (req.user.role === "admin_floor") {
 
@@ -730,6 +735,11 @@ exports.importExcel = async (req, res) => {
 
                 const email = row.Email?.toString().trim().toLowerCase();
 
+                const language =
+    row.Language?.toString().trim().toLowerCase() === "ko"
+        ? "ko"
+        : "vi";
+
                 let floor = Number(row.Floor) || 0;
                 if (req.user.role === "admin_floor") {
 
@@ -901,7 +911,9 @@ exports.downloadTemplate = async (req, res) => {
 
             Floor: 3,
 
-            Role: "guest"
+            Role: "guest",
+
+            Language: "vi"
 
         }
 

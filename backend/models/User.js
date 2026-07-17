@@ -37,7 +37,16 @@ const userSchema = new mongoose.Schema({
             "guest"
         ],
         default: "guest"
-    }
+    },
+    language: {
+
+        type: String,
+
+        enum: ["vi", "ko"],
+
+        default: "vi"
+
+    },
 
 }, {
     timestamps: true

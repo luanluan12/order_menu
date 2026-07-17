@@ -993,13 +993,19 @@ exports.publishMenu = async (req, res) => {
         for (const user of users) {
 
             try {
-                await sendMail({
+const language = (user.language || "vi").toLowerCase();
+
+await sendMail({
     to: user.email,
-    subject: `🍱 Thực đơn tuần ${menu.week}`,
+    subject:
+        language === "ko"
+            ? `🍱 ${menu.week} 주간 식단`
+            : `🍱 Thực đơn tuần ${menu.week}`,
     html: orderMailTemplate(
         user,
         menu,
-        process.env.FRONTEND_URL
+        process.env.FRONTEND_URL,
+        language
     )
 });
 

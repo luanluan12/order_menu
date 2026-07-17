@@ -7,8 +7,6 @@ const sendMail = require("../utils/mail");
 module.exports = async () => {
 
     console.log("========== Nhắc nhở đặt cơm ==========");
-
-    // Menu đã publish
     const menu = await Menu.findOne({
 
     status: "published",
@@ -60,59 +58,111 @@ module.exports = async () => {
 
     for (const user of needReminder) {
 
-        try {
+    try {
 
-            await sendMail({
-                to: user.email,
-                subject: "🍱 Nhắc nhở đặt suất ăn",
+        let subject = "";
+        let html = "";
 
-                html: `
-                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                        <h2>Xin chào ${user.name},</h2>
+        if (user.language === "ko") {
 
-                        <p>
-                            Bạn vẫn chưa đặt suất ăn cho <strong>tuần tới</strong>.
-                        </p>
+            subject = "🍱 식사 주문 알림";
 
-                        <p>
-                            Vui lòng đăng nhập vào hệ thống và hoàn tất việc đặt món trước thời hạn để bộ phận bếp có thể chuẩn bị đầy đủ.
-                        </p>
+            html = `
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h2>${user.name}님, 안녕하세요.</h2>
 
-                        <p style="margin: 24px 0;">
-                            <a
-                                href="https://www.eocmenu.food/"
-                                style="
-                                    background: #2563eb;
-                                    color: white;
-                                    padding: 12px 20px;
-                                    text-decoration: none;
-                                    border-radius: 6px;
-                                    display: inline-block;
-                                "
-                            >
-                                Đặt món ngay
-                            </a>
-                        </p>
+                    <p>
+                        다음 주 식사 주문이 아직 완료되지 않았습니다.
+                    </p>
 
-                        <p>
-                            Xin cảm ơn!
-                        </p>
+                    <p>
+                        마감 시간 전에 시스템에 접속하여 식사 주문을 완료해 주세요.
+                    </p>
 
-                        <hr />
+                    <p style="margin:24px 0;">
+                        <a
+                            href="https://www.eocmenu.food/"
+                            style="
+                                background:#2563eb;
+                                color:white;
+                                padding:12px 20px;
+                                text-decoration:none;
+                                border-radius:6px;
+                                display:inline-block;
+                            "
+                        >
+                            식사 주문하기
+                        </a>
+                    </p>
 
-                        <p style="font-size: 12px; color: #777;">
-                            Đây là email được gửi tự động từ hệ thống đặt suất ăn.
-                        </p>
-                    </div>
-                `
-            });
+                    <p>감사합니다.</p>
 
-        } catch (err) {
+                    <hr>
 
-            console.log("✘ Gửi thất bại:", user.email);
+                    <p style="font-size:12px;color:#777;">
+                        본 메일은 식사 주문 시스템에서 자동으로 발송되었습니다.
+                    </p>
+                </div>
+            `;
+
+        } else {
+
+            subject = "🍱 Nhắc nhở đặt suất ăn";
+
+            html = `
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h2>Xin chào ${user.name},</h2>
+
+                    <p>
+                        Bạn vẫn chưa đặt suất ăn cho <strong>tuần tới</strong>.
+                    </p>
+
+                    <p>
+                        Vui lòng đăng nhập vào hệ thống và hoàn tất việc đặt món trước thời hạn để bộ phận bếp có thể chuẩn bị đầy đủ.
+                    </p>
+
+                    <p style="margin:24px 0;">
+                        <a
+                            href="https://www.eocmenu.food/"
+                            style="
+                                background:#2563eb;
+                                color:white;
+                                padding:12px 20px;
+                                text-decoration:none;
+                                border-radius:6px;
+                                display:inline-block;
+                            "
+                        >
+                            Đặt món ngay
+                        </a>
+                    </p>
+
+                    <p>Xin cảm ơn!</p>
+
+                    <hr>
+
+                    <p style="font-size:12px;color:#777;">
+                        Đây là email được gửi tự động từ hệ thống đặt suất ăn.
+                    </p>
+                </div>
+            `;
 
         }
 
+        await sendMail({
+            to: user.email,
+            subject,
+            html,
+        });
+
+        console.log("✔ Đã gửi:", user.email);
+
+    } catch (err) {
+
+        console.log("✘ Gửi thất bại:", user.email);
+
     }
+
+}
 
 };
