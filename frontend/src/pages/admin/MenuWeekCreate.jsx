@@ -71,8 +71,7 @@ function MenuWeekCreate() {
             </div>
 
             <WeekMenuEditor
-
-
+                loading={loading}
                 onSave={handleSave}
 
             />

@@ -62,6 +62,8 @@
     "hour": "giờ",
     "minute": "phút",
       "warning_main_exactly_2": "Nếu chọn món cơm, vui lòng chọn đủ 2 phần.",
-  "warning_one_group_only": "Mỗi ngày chỉ được chọn 1 nhóm món."
+  "warning_one_group_only": "Mỗi ngày chỉ được chọn 1 nhóm món.",
+    "submitting_order": "Đang gửi đơn đặt món...",
+  "please_wait": "Vui lòng chờ trong giây lát."
 
 }

@@ -1,7 +1,7 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-function DayTabs({ days, currentDay, onChange }) {
+function DayTabs({ days, currentDay, onChange, completed }) {
 
     const { t, i18n } = useTranslation();
 
@@ -78,6 +78,34 @@ function DayTabs({ days, currentDay, onChange }) {
                                 `}
 
                             >
+{completed?.(index) && (
+    <div
+        className="
+            absolute
+            top-0
+            right-0
+            z-30
+            translate-x-1/4
+            -translate-y-1/4
+            flex
+            h-8
+            w-8
+            items-center
+            justify-center
+            rounded-full
+            bg-orange-500
+            ring-2
+            ring-white
+            shadow-lg
+        "
+    >
+        <Check
+            size={15}
+            strokeWidth={3}
+            className="text-white"
+        />
+    </div>
+)}
 
                                 {/* Icon */}
 

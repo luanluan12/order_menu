@@ -7,7 +7,9 @@ function WeekMenuEditor({
 
     initialData = null,
 
-    onSave
+    onSave,
+
+    loading = false
 
 }) {
 
@@ -264,6 +266,9 @@ const openDate = new Date(monday);
 
 openDate.setDate(monday.getDate() - 5);
 
+// // Open Time: Thứ 4 tuần này
+// openDate.setDate(monday.getDate() + 2);
+
 
 openDate.setHours(9, 0, 0, 0);
 
@@ -339,6 +344,8 @@ setDeadline(
     // ===============================
 
 const submit = () => {
+
+    if (loading) return;
 
     if (!week) {
 
@@ -730,16 +737,17 @@ const submit = () => {
                     <div className="flex justify-center lg:justify-end">
 
                         <button
-
-                            onClick={submit}
-
-                            className="w-full rounded-xl bg-orange-600 px-8 py-4 font-semibold text-white transition hover:bg-orange-700 lg:w-auto"
-
-                        >
-
-                            💾 Lưu Menu Tuần
-
-                        </button>
+    onClick={submit}
+    disabled={loading}
+    className={`w-full rounded-xl px-8 py-4 font-semibold text-white transition lg:w-auto
+        ${
+            loading
+                ? "cursor-not-allowed bg-gray-400"
+                : "bg-orange-600 hover:bg-orange-700"
+        }`}
+>
+    {loading ? "Đang tạo menu..." : "💾 Lưu Menu Tuần"}
+</button>
 
                     </div>
 

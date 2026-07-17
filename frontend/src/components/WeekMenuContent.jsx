@@ -20,6 +20,19 @@ function WeekMenuContent({
     const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
     const { t, i18n} = useTranslation();
+    const [loading, setLoading] = useState(false);
+
+    const isDayCompleted = (index) => {
+    const order = orders[index];
+
+    if (!order) return false;
+
+    return (
+        order.mains.length > 0 ||
+        !!order.drink ||
+        !!order.soup
+    );
+};
 
     // =========================
     // Init Order
@@ -386,6 +399,9 @@ if (hasMain) {
 
     }
 
+    try {
+    setLoading(true);
+
     const success = await onSubmit(orders);
 
     if (!success) return;
@@ -400,6 +416,9 @@ if (hasMain) {
     });
 
     navigate("/history");
+} finally {
+    setLoading(false);
+}
 
 };
 
@@ -416,6 +435,22 @@ if (hasMain) {
 
     return (
     <div className="mx-auto w-full max-w-[1080px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+
+        {loading && (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="flex flex-col items-center rounded-2xl bg-white px-10 py-8 shadow-2xl">
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-orange-500 border-t-transparent"></div>
+
+            <h3 className="mt-6 text-xl font-bold">
+                {t("submitting_order")}
+            </h3>
+
+            <p className="mt-2 text-gray-500">
+                {t("please_wait")}
+            </p>
+        </div>
+    </div>
+)}
 
         {expired && (
             <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-center sm:p-5">
@@ -436,6 +471,7 @@ if (hasMain) {
                 days={menu.days}
                 currentDay={currentDay}
                 onChange={setCurrentDay}
+                completed={isDayCompleted}
             />
         </div>
         <div className="mb-10">
