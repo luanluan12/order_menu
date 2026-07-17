@@ -10,6 +10,7 @@ function History() {
     const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     const getImageUrl = (image) => {
 
