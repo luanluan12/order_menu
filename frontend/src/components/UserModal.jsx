@@ -12,6 +12,7 @@ function UserModal({
         email: "",
         floor: "",
         role: "guest",
+        language: "vi",
         password: "",
     });
 
@@ -23,6 +24,7 @@ function UserModal({
                 email: editingUser.email || "",
                 floor: editingUser.floor || "",
                 role: editingUser.role || "guest",
+                language: editingUser.language || "vi",
                 password: "",
             });
         } else {
@@ -32,6 +34,7 @@ function UserModal({
                 email: "",
                 floor: "",
                 role: "guest",
+                language: "vi",
                 password: "",
             });
         }
@@ -137,6 +140,20 @@ function UserModal({
                             <option value="admin_floor">Admin Floor</option>
                         </select>
                     </div>
+
+                    <div>
+    <label className="block mb-2">Language</label>
+
+    <select
+        name="language"
+        value={form.language}
+        onChange={handleChange}
+        className="w-full rounded-lg border p-3"
+    >
+        <option value="vi">Tiếng Việt</option>
+        <option value="ko">한국어</option>
+    </select>
+</div>
 
                     {!editingUser && (
                         <div>

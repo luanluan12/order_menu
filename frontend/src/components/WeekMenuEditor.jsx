@@ -260,7 +260,10 @@ useEffect(() => {
 
 const openDate = new Date(monday);
 
+
+
 openDate.setDate(monday.getDate() - 5);
+
 
 openDate.setHours(9, 0, 0, 0);
 
@@ -272,6 +275,9 @@ openDate.setHours(9, 0, 0, 0);
 const deadlineDate = new Date(monday);
 
 deadlineDate.setDate(monday.getDate() - 3);
+
+// // Deadline: Thứ 6 tuần này
+// deadlineDate.setDate(monday.getDate() + 4);
 
 deadlineDate.setHours(16, 0, 0, 0);
 
