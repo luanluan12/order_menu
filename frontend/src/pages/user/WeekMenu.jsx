@@ -10,6 +10,8 @@ import { useSearchParams } from "react-router-dom";
 
 import DeadlineBanner from "../../components/DeadlineBanner";
 
+import { useTranslation } from "react-i18next";
+
 
 
 import {
@@ -35,6 +37,8 @@ function WeekMenu() {
     const [order, setOrder] = useState(null);
 
     const [searchParams] = useSearchParams();
+
+    const { t } = useTranslation();
 
     const token = searchParams.get("token");
 
@@ -144,7 +148,7 @@ const submit = async (days) => {
 
             <div className="flex h-screen items-center justify-center">
 
-                Đang tải...
+                {t("loading")}
 
             </div>
 
@@ -158,13 +162,34 @@ const submit = async (days) => {
 
             <div className="flex h-screen items-center justify-center">
 
-                Chưa có thực đơn tuần.
-
+                {t("no_week_menu")}
             </div>
 
         );
 
     }
+
+    const expired = new Date() > new Date(menu.deadline);
+
+if (expired) {
+    return (
+        <div className="mx-auto mt-20 max-w-2xl rounded-3xl bg-white/90 p-12 text-center shadow-xl">
+            <div className="text-6xl">🍽️</div>
+
+            <h2 className="mt-6 text-3xl font-bold">
+                {t("order_closed")}
+            </h2>
+
+            <p className="mt-4 text-gray-500">
+                {t("order_closed_message")}
+            </p>
+
+            <p className="mt-2 text-gray-500">
+                {t("wait_next_menu")}
+            </p>
+        </div>
+    );
+}
 
     return (
 

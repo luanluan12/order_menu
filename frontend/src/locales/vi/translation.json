@@ -64,6 +64,9 @@
       "warning_main_exactly_2": "Nếu chọn món cơm, vui lòng chọn đủ 2 phần.",
   "warning_one_group_only": "Mỗi ngày chỉ được chọn 1 nhóm món.",
     "submitting_order": "Đang gửi đơn đặt món...",
-  "please_wait": "Vui lòng chờ trong giây lát."
+  "please_wait": "Vui lòng chờ trong giây lát.",
+  "order_closed_message": "Thời gian đặt món của tuần này đã hết.",
+  "wait_next_menu": "Vui lòng quay lại khi có thực đơn tuần mới.",
+  "no_week_menu": "Chưa có thực đơn tuần."
 
 }

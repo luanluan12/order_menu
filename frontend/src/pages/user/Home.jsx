@@ -4,7 +4,6 @@ import Header from "./components/Header";
 import bgFood from "../../assets/bgfood.png";
 
 function Home() {
-     console.log(bgFood);
 
     return (
 
