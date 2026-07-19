@@ -56,6 +56,13 @@ router.get(
     orderController.getHistory
 );
 
+router.post(
+    "/review",
+    auth,
+    orderController.submitReview
+);
+
+
 // ==========================
 // Verify Invite
 // ==========================
@@ -72,6 +79,16 @@ router.post(
 router.post(
     "/invite",
     orderController.createOrderFromInvite
+);
+
+// ==========================
+// Reviews (Admin)
+// ==========================
+
+router.get(
+    "/reviews",
+    auth,
+    orderController.getReviews
 );
 
 

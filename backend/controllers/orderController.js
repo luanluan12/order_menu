@@ -771,23 +771,23 @@ exports.updateOrder = async (req, res) => {
 
         );
 
-//         if (
+        if (
 
-//     new Date() >
+    new Date() >
 
-//     new Date(menu.deadline)
+    new Date(menu.deadline)
 
-// ) {
+) {
 
-//     return res.status(400).json({
+    return res.status(400).json({
 
-//         success:false,
+        success:false,
 
-//         message:"Đã hết thời gian chỉnh sửa."
+        message:"Đã hết thời gian chỉnh sửa."
 
-//     });
+    });
 
-// }
+}
 
         if (!menu) {
 
@@ -960,6 +960,282 @@ exports.getHistory = async (req, res) => {
             success: true,
 
             data: orders
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ===========================================
+// Đánh giá bữa ăn
+// ===========================================
+
+exports.submitReview = async (req, res) => {
+
+    try {
+
+        const { orderId, date, rating, comment } = req.body;
+
+        if (rating < 1 || rating > 10) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Điểm phải từ 1 đến 10."
+
+            });
+
+        }
+
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Không tìm thấy đơn."
+
+            });
+
+        }
+
+        if (String(order.user) !== String(req.user.id)) {
+
+            return res.status(403).json({
+
+                success: false,
+
+                message: "Không có quyền."
+
+            });
+
+        }
+
+        const day = order.days.find(
+
+            item =>
+
+                moment(item.date)
+
+                    .tz("Asia/Ho_Chi_Minh")
+
+                    .format("YYYY-MM-DD") === date
+
+        );
+
+        if (!day) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Không tìm thấy ngày."
+
+            });
+
+        }
+
+        if (!day.received) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Bạn chưa nhận suất ăn."
+
+            });
+
+        }
+
+        if (day.review) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Bạn đã đánh giá."
+
+            });
+
+        }
+
+        day.review = {
+
+            rating,
+
+            comment,
+
+            createdAt: new Date()
+
+        };
+
+        await order.save();
+
+        return res.json({
+
+            success: true,
+
+            message: "Đánh giá thành công."
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ===========================================
+// Danh sách đánh giá (Admin)
+// ===========================================
+
+exports.getReviews = async (req, res) => {
+
+    try {
+
+        const { week, date } = req.query;
+
+        const filter = {};
+
+        const userFilter = {};
+
+        if (week) {
+
+            filter.week = week;
+
+        }
+
+        if (req.user.role === "admin_floor") {
+
+            userFilter.floor = req.user.floor;
+
+        }
+
+        const users = await User.find(userFilter).select("_id");
+
+        if (req.user.role === "admin_floor") {
+
+            filter.user = {
+
+                $in: users.map(user => user._id)
+
+            };
+
+        }
+
+        const orders = await Order.find(filter)
+
+            .populate(
+
+                "user",
+
+                "employeeId name email floor"
+
+            )
+
+            .sort({
+
+                createdAt: -1
+
+            });
+
+        const reviews = [];
+
+        for (const order of orders) {
+
+            for (const day of order.days) {
+
+                if (!day.review) {
+
+                    continue;
+
+                }
+
+                const reviewDate = moment(day.date)
+
+                    .tz("Asia/Ho_Chi_Minh")
+
+                    .format("YYYY-MM-DD");
+
+                if (date && reviewDate !== date) {
+
+                    continue;
+
+                }
+
+                reviews.push({
+
+                    orderId: order._id,
+
+                    week: order.week,
+
+                    date: reviewDate,
+
+                    employeeId: order.user.employeeId,
+
+                    name: order.user.name,
+
+                    email: order.user.email,
+
+                    floor: order.user.floor,
+
+                    rating: day.review.rating,
+
+                    comment: day.review.comment,
+
+                    createdAt: day.review.createdAt
+
+                });
+
+            }
+
+        }
+
+        reviews.sort(
+
+            (a, b) =>
+
+                new Date(b.createdAt) -
+
+                new Date(a.createdAt)
+
+        );
+
+        return res.json({
+
+            success: true,
+
+            data: reviews
 
         });
 

@@ -85,6 +85,50 @@ const singleSelectionSchema = new mongoose.Schema({
 });
 
 // ==========================
+// Review
+// ==========================
+
+const reviewSchema = new mongoose.Schema({
+
+    rating: {
+
+        type: Number,
+
+        min: 1,
+
+        max: 10,
+
+        required: true
+
+    },
+
+    comment: {
+
+        type: String,
+
+        trim: true,
+
+        maxlength: 500,
+
+        default: ""
+
+    },
+
+    createdAt: {
+
+        type: Date,
+
+        default: Date.now
+
+    }
+
+}, {
+
+    _id: false
+
+});
+
+// ==========================
 // Order Day
 // ==========================
 
@@ -124,6 +168,14 @@ const orderDaySchema = new mongoose.Schema({
     received: {
     type: Boolean,
     default: false
+},
+
+review: {
+
+    type: reviewSchema,
+
+    default: null
+
 },
 
 receivedAt: {
