@@ -232,8 +232,8 @@ useEffect(() => {
                 </div>
 
                 <div className="mt-1 text-base font-bold text-gray-800">
-                    {new Date(qr.date).toLocaleDateString("vi-VN")}
-                </div>
+    {new Date().toLocaleDateString("vi-VN")}
+</div>
 
             </div>
 

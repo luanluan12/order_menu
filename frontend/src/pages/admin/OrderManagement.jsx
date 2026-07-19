@@ -245,8 +245,7 @@ setOrders(filteredOrders);
 
                             orders.map((order, index) => {
 
-                                const todayOrder =
-                                    getTodayOrder(order);
+                               const todayOrder = order.selectedDay;
 
                                 return (
 
@@ -294,8 +293,8 @@ setOrders(filteredOrders);
                                                 }`}
                                             >
                                                 {todayOrder?.received
-                                                    ? "✓ Đã nhận"
-                                                    : "⏳ Chưa nhận"}
+                                                    ? "Đã nhận"
+                                                    : "Chưa nhận"}
                                             </span>
 
                                         </td>
