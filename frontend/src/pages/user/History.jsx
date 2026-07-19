@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { ClipboardList, CalendarDays } from "lucide-react";
-import { getHistory } from "../../api/orderApi";
+import { ClipboardList, CalendarDays, Star, X } from "lucide-react";
+import { getHistory, submitReview } from "../../api/orderApi";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-
 function History() {
     const [orders, setOrders] = useState([]);
+    const [openReview, setOpenReview] = useState(false);
+
+const [selectedOrder, setSelectedOrder] = useState(null);
+
+const [selectedDay, setSelectedDay] = useState(null);
+
+const [rating, setRating] = useState(10);
+
+const [comment, setComment] = useState("");
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const API_URL = import.meta.env.VITE_API_URL;
@@ -57,9 +65,61 @@ function History() {
             month: "2-digit",
         }
     );
+    const handleReview = (orderId, day) => {
+
+    setSelectedOrder(orderId);
+
+    setSelectedDay(day);
+
+    setRating(10);
+
+    setComment("");
+
+    setOpenReview(true);
+
+};
+
+const saveReview = async () => {
+
+    try {
+
+        await submitReview({
+
+            orderId: selectedOrder,
+
+            date: selectedDay.date
+                .substring(0, 10),
+
+            rating,
+
+            comment
+
+        });
+
+        toast.success("Đánh giá thành công.");
+
+        setOpenReview(false);
+
+        loadHistory();
+
+    }
+
+    catch (err) {
+
+        toast.error(
+
+            err.response?.data?.message ||
+
+            "Không thể đánh giá."
+
+        );
+
+    }
+
+};
 
     const DishCard = ({ dish, type = "", quantity }) => (
-        <div className="w-[150px] overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+        <div className="w-[135px] sm:w-[150px] overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
             <div className="p-2">
 
@@ -95,7 +155,7 @@ function History() {
     );
 
     return (
-        <div className="mx-auto max-w-[1080px] px-8 py-8">
+       <div className="mx-auto max-w-[1080px] px-4 py-6 sm:px-6 lg:px-8">
 
             {/* Header */}
 
@@ -134,7 +194,7 @@ function History() {
 
                         <div
                             key={order._id}
-                            className="rounded-[30px] bg-white p-8 shadow"
+                            className="rounded-[30px] bg-white p-4 shadow sm:p-6 lg:p-8"
                         >
 
                             {/* Week */}
@@ -195,12 +255,40 @@ function History() {
                                         key={day._id || day.date}
                                         className="rounded-[24px] bg-orange-50 p-6"
                                     >
+                                        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                                        <h3 className="mb-5 text-xl font-bold text-slate-800">
-                                            {formatDay(day.date)}
-                                        </h3>
+    <h3 className="text-xl font-bold text-slate-800">
+        {formatDay(day.date)}
+    </h3>
 
-                                        <div className="flex flex-wrap gap-5">
+    <div className="flex flex-wrap items-center gap-2">
+
+        {day.received && (
+            <span className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+                ✓ Đã nhận
+            </span>
+        )}
+
+        {day.received && !day.review && (
+            <button
+                onClick={() => handleReview(order._id, day)}
+                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+            >
+                Đánh giá
+            </button>
+        )}
+
+        {day.review && (
+            <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-bold text-green-700">
+                 {day.review.rating}/10
+            </span>
+        )}
+
+    </div>
+
+</div>
+
+                                        <div className="flex flex-wrap justify-center gap-3 sm:justify-start sm:gap-5">
 
                                             {day.mains.map((dish) => (
 
@@ -232,8 +320,58 @@ function History() {
                                             )}
 
                                         </div>
+                                        {
 
+    day.review && (
+
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+
+            <div className="flex items-center gap-2 font-bold text-slate-800">
+
+                <Star
+
+                    size={18}
+
+                    className="text-yellow-500"
+
+                />
+
+                Đánh giá của bạn
+
+            </div>
+
+            <div className="mt-3">
+
+                <span className="rounded-full bg-orange-100 px-4 py-2 font-bold text-orange-600">
+
+                    {day.review.rating}/10
+
+                </span>
+
+            </div>
+
+            {
+
+                day.review.comment && (
+
+                    <p className="mt-4 whitespace-pre-wrap text-slate-600">
+
+                        {day.review.comment}
+
+                    </p>
+
+                )
+
+            }
+
+        </div>
+
+    )
+
+}
                                     </div>
+
+                                    
 
                                 ))}
 
@@ -247,7 +385,133 @@ function History() {
 
             )}
 
+        {
+
+    openReview && (
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+
+            <div className="mx-4 w-full max-w-md rounded-3xl bg-white p-5 sm:p-6 shadow-xl">
+
+                <div className="mb-5 flex items-center justify-between">
+
+                    <h2 className="text-2xl font-bold">
+
+                        Đánh giá bữa ăn
+
+                    </h2>
+
+                    <button
+
+                        onClick={() =>
+
+                            setOpenReview(false)
+
+                        }
+
+                    >
+
+                        <X />
+
+                    </button>
+
+                </div>
+
+                <div>
+
+                    <div className="mb-3 font-semibold">
+
+                        Chọn điểm
+
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-3">
+
+                        {
+
+                            Array.from(
+
+                                { length: 10 },
+
+                                (_, i) => i + 1
+
+                            ).map(score => (
+
+                                <button
+
+                                    key={score}
+
+                                    onClick={() =>
+
+                                        setRating(score)
+
+                                    }
+
+                                    className={`rounded-xl border py-3 font-bold transition
+
+                                    ${
+
+                                        rating === score
+
+                                            ? "bg-orange-500 text-white"
+
+                                            : "hover:bg-orange-50"
+
+                                    }`}
+
+                                >
+
+                                    {score}
+
+                                </button>
+
+                            ))
+
+                        }
+
+                    </div>
+
+                    <textarea
+
+                        value={comment}
+
+                        onChange={(e) =>
+
+                            setComment(e.target.value)
+
+                        }
+
+                        rows={4}
+
+                        placeholder="Nhận xét..."
+
+                        className="mt-5 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
+
+                    />
+
+                    <button
+
+                        onClick={saveReview}
+
+                        className="mt-5 w-full rounded-xl bg-orange-500 py-3 font-bold text-white transition hover:bg-orange-600"
+
+                    >
+
+                        Gửi đánh giá
+
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
+
+    )
+
+}
+        </div>
+        
     );
 }
 

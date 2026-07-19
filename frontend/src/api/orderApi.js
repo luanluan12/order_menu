@@ -63,6 +63,22 @@ export const getHistory = () => {
 };
 
 /**
+ * Đánh giá bữa ăn
+ */
+export const submitReview = (data) => {
+
+    return axios.post(
+
+        "/order/review",
+
+        data
+
+    );
+
+};
+
+
+/**
  * Chi tiết đơn đặt món
  */
 export const getOrderById = (id) => {
@@ -116,6 +132,25 @@ export const getOrders = (params = {}) => {
         {
             params
         }
+    );
+
+};
+
+/**
+ * Danh sách đánh giá
+ */
+export const getReviews = (params = {}) => {
+
+    return axios.get(
+
+        "/order/reviews",
+
+        {
+
+            params
+
+        }
+
     );
 
 };

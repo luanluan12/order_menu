@@ -14,7 +14,7 @@ import History from "../pages/user/History";
 import OrderEdit from "../pages/user/OrderEdit";
 import Checkin from "../pages/user/Checkin";
 import AdminLayout from "../layouts/AdminLayout";
-
+import ReviewManagement from "../pages/admin/ReviewManagement";
 import PrivateRoute from "../components/PrivateRoute";
 
 import MenuWeekCreate from "../pages/admin/MenuWeekCreate";
@@ -116,6 +116,11 @@ function AppRoutes() {
                     path="/admin/report"
                     element={<Report />}
                 />
+
+                <Route
+    path="/admin/review"
+    element={<ReviewManagement />}
+/>
 
                 <Route
                     path="admin/menu/edit/:id"

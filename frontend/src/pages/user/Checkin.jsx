@@ -5,6 +5,7 @@ import { Camera } from "lucide-react";
 import { toast } from "react-toastify";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { checkIn } from "../../api/checkinApi";
 
@@ -20,6 +21,7 @@ function Checkin() {
 
     const [success, setSuccess] = useState(false);
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     useEffect(() => {
 
@@ -194,13 +196,10 @@ function Checkin() {
 
         <button
             onClick={() => {
-                setSuccess(false);
 
-                intervalRef.current = setInterval(
-                    scanFrame,
-                    300
-                );
-            }}
+        navigate("/history");
+
+    }}
             className="
                 mt-12
                 h-16

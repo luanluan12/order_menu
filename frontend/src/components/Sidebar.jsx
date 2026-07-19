@@ -4,6 +4,7 @@ import {
     FaUsers,
     FaClipboardList,
     FaChartBar,
+    FaStar,
     FaSignOutAlt,
 } from "react-icons/fa";
 
@@ -61,6 +62,11 @@ function Sidebar({onClose}) {
             label: "Reports",
             icon: FaChartBar,
         },
+        {
+            to: "/admin/review",
+            label: "Reviews",
+            icon: FaStar,
+},
 
     ];
 
