@@ -73,6 +73,15 @@
   "checkin_success": "Check-in thành công!",
   "enjoy_meal": "Chúc bạn ngon miệng.",
   "checkin_failed": "Check-in thất bại.",
-  "close": "Đóng"
+  "close": "Đóng",
+    "received": "Đã nhận",
+  "review": "Đánh giá",
+  "your_review": "Đánh giá của bạn",
+  "meal_review": "Đánh giá bữa ăn",
+  "select_rating": "Chọn điểm",
+  "review_placeholder": "Nhận xét...",
+  "submit_review": "Gửi đánh giá",
+  "review_success": "Đánh giá thành công.",
+  "review_failed": "Không thể đánh giá."
 
 }

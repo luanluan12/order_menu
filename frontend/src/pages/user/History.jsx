@@ -96,7 +96,7 @@ const saveReview = async () => {
 
         });
 
-        toast.success("Đánh giá thành công.");
+        toast.success(t("review_success"));
 
         setOpenReview(false);
 
@@ -110,7 +110,7 @@ const saveReview = async () => {
 
             err.response?.data?.message ||
 
-            "Không thể đánh giá."
+            t("review_failed")
 
         );
 
@@ -265,7 +265,7 @@ const saveReview = async () => {
 
         {day.received && (
             <span className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-                ✓ Đã nhận
+                {t("received")}
             </span>
         )}
 
@@ -274,7 +274,7 @@ const saveReview = async () => {
                 onClick={() => handleReview(order._id, day)}
                 className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
             >
-                Đánh giá
+                {t("review")}
             </button>
         )}
 
@@ -336,7 +336,7 @@ const saveReview = async () => {
 
                 />
 
-                Đánh giá của bạn
+                {t("your_review")}
 
             </div>
 
@@ -397,7 +397,7 @@ const saveReview = async () => {
 
                     <h2 className="text-2xl font-bold">
 
-                        Đánh giá bữa ăn
+                         {t("meal_review")}
 
                     </h2>
 
@@ -421,7 +421,7 @@ const saveReview = async () => {
 
                     <div className="mb-3 font-semibold">
 
-                        Chọn điểm
+                        {t("select_rating")}
 
                     </div>
 
@@ -483,7 +483,7 @@ const saveReview = async () => {
 
                         rows={4}
 
-                        placeholder="Nhận xét..."
+                        placeholder={t("review_placeholder")}
 
                         className="mt-5 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
 
@@ -497,7 +497,7 @@ const saveReview = async () => {
 
                     >
 
-                        Gửi đánh giá
+                        {t("submit_review")}
 
                     </button>
 

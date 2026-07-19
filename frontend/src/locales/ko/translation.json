@@ -78,5 +78,14 @@
   "checkin_success": "체크인이 완료되었습니다!",
   "enjoy_meal": "맛있게 드세요.",
   "checkin_failed": "체크인에 실패했습니다.",
-  "close": "닫기"
+  "close": "닫기",
+  "received": "수령 완료",
+  "review": "평가하기",
+  "your_review": "내 평가",
+  "meal_review": "식사 평가",
+  "select_rating": "점수 선택",
+  "review_placeholder": "후기를 남겨 주세요...",
+  "submit_review": "평가 제출",
+  "review_success": "평가가 등록되었습니다.",
+  "review_failed": "평가를 등록할 수 없습니다."
 }
