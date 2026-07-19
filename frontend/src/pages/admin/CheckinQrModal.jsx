@@ -228,7 +228,7 @@ useEffect(() => {
             <div className="rounded-xl bg-white p-3 text-center shadow-sm">
 
                 <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                    📅 Ngày
+                    Ngày
                 </div>
 
                 <div className="mt-1 text-base font-bold text-gray-800">
@@ -240,7 +240,7 @@ useEffect(() => {
             <div className="rounded-xl bg-white p-3 text-center shadow-sm">
 
                 <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                    🏢 Tầng
+                    Tầng
                 </div>
 
                 <div className="mt-1 text-xl font-bold text-orange-600">
