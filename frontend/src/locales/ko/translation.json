@@ -72,5 +72,11 @@
   "please_wait": "잠시만 기다려 주세요.",
     "order_closed_message": "이번 주 주문 기간이 종료되었습니다.",
   "wait_next_menu": "다음 주 메뉴가 등록되면 다시 이용해 주세요.",
-  "no_week_menu": "이번 주 메뉴가 아직 등록되지 않았습니다."
+  "no_week_menu": "이번 주 메뉴가 아직 등록되지 않았습니다.",
+    "checkin_title": "식사 수령 체크인",
+  "checkin_instruction": "관리자의 QR 코드를 카메라에 비춰 식사를 수령하세요.",
+  "checkin_success": "체크인이 완료되었습니다!",
+  "enjoy_meal": "맛있게 드세요.",
+  "checkin_failed": "체크인에 실패했습니다.",
+  "close": "닫기"
 }

@@ -3,6 +3,8 @@ import Webcam from "react-webcam";
 import jsQR from "jsqr";
 import { Camera } from "lucide-react";
 import { toast } from "react-toastify";
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { checkIn } from "../../api/checkinApi";
 
@@ -17,6 +19,7 @@ function Checkin() {
     const [loading, setLoading] = useState(false);
 
     const [success, setSuccess] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
 
@@ -133,12 +136,9 @@ function Checkin() {
         catch (err) {
 
             toast.error(
-
-                err.response?.data?.message ||
-
-                "Check-in thất bại."
-
-            );
+    err.response?.data?.message ||
+    t("checkin_failed")
+);
 
             intervalRef.current = setInterval(
 
@@ -168,85 +168,77 @@ function Checkin() {
 
                 <h1 className="text-2xl font-bold">
 
-                    Check-in nhận suất ăn
+                    {t("checkin_title")}
 
                 </h1>
 
             </div>
 
-            {
+            {success ? (
+    <div className="mx-auto mt-6 max-w-lg rounded-[36px] bg-white px-8 py-12 text-center shadow-2xl">
+        <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-orange-500">
+            <Check
+                size={72}
+                strokeWidth={3.5}
+                className="text-white"
+            />
+        </div>
 
-                success ? (
+        <h2 className="mt-10 text-4xl font-extrabold text-[#132B6B]">
+            {t("checkin_success")}
+        </h2>
 
-                    <div className="rounded-3xl bg-green-50 p-10 text-center">
+        <p className="mt-5 text-2xl text-gray-500">
+            {t("enjoy_meal")}
+        </p>
 
-                        <div className="text-6xl">
+        <button
+            onClick={() => {
+                setSuccess(false);
 
-                            ✅
+                intervalRef.current = setInterval(
+                    scanFrame,
+                    300
+                );
+            }}
+            className="
+                mt-12
+                h-16
+                w-full
+                rounded-full
+                bg-orange-500
+                text-3xl
+                font-bold
+                text-white
+                transition
+                hover:bg-orange-600
+            "
+        >
+            {t("close")}
+        </button>
+    </div>
+) : (
+    <>
+        <Webcam
+            ref={webcamRef}
+            audio={false}
+            mirrored={false}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{
+                facingMode: {
+                    ideal: "environment",
+                },
+            }}
+            className="aspect-square w-full rounded-3xl bg-black object-cover"
+        />
 
-                        </div>
+        <canvas ref={canvasRef} hidden />
 
-                        <h2 className="mt-4 text-2xl font-bold text-green-700">
-
-                            Check-in thành công
-
-                        </h2>
-
-                        <p className="mt-3 text-gray-600">
-
-                            Chúc bạn ngon miệng!
-
-                        </p>
-
-                    </div>
-
-                ) : (
-
-                    <>
-
-                        <Webcam
-
-                            ref={webcamRef}
-
-                            audio={false}
-
-                            mirrored={false}
-
-                            screenshotFormat="image/jpeg"
-
-                            videoConstraints={{
-
-                                facingMode: {
-
-                                    ideal: "environment"
-
-                                }
-
-                            }}
-
-                            className="aspect-square w-full rounded-3xl bg-black object-cover"
-
-                        />
-
-                        <canvas
-
-                            ref={canvasRef}
-
-                            hidden
-
-                        />
-
-                        <p className="mt-5 text-center text-gray-500">
-
-                            Đưa QR của Admin vào khung hình để nhận suất ăn.
-
-                        </p>
-
-                    </>
-
-                )
-
-            }
+        <p className="mt-5 text-center text-gray-500">
+            {t("checkin_instruction")}
+        </p>
+    </>
+)}
 
         </div>
 
