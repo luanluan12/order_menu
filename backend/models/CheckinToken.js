@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 const checkinTokenSchema = new mongoose.Schema(
     {
-        date: {
-            type: String,
-            required: true
-        },
 
         floor: {
             type: Number,

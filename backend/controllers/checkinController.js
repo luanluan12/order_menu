@@ -9,20 +9,13 @@ exports.getTodayQr = async (req, res) => {
 
     try {
 
-        const today = moment()
-            .tz("Asia/Ho_Chi_Minh")
-            .format("YYYY-MM-DD");
-
         let checkin = await CheckinToken.findOne({
-            date: today,
             floor: req.user.floor
         });
 
         if (!checkin) {
 
             checkin = await CheckinToken.create({
-
-                date: today,
 
                 floor: req.user.floor,
 
@@ -46,8 +39,6 @@ exports.getTodayQr = async (req, res) => {
             success: true,
 
             data: {
-
-                date: today,
 
                 floor: req.user.floor,
 
@@ -105,8 +96,6 @@ exports.checkIn = async (req, res) => {
         const checkin = await CheckinToken.findOne({
 
             token,
-
-            date: today,
 
             active: true
 
