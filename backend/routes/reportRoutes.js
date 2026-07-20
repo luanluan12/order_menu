@@ -10,28 +10,16 @@ const reportController = require("../controllers/reportController");
 // Export Excel theo ngày
 // ======================================
 
-router.get(
-    "/export-daily",
-    auth,
-    reportController.exportDailyExcel
-);
+router.get("/export-daily", auth, reportController.exportDailyExcel);
 
-router.get(
-    "/daily",
-    auth,
-    reportController.getDailyReport
-);
+router.get("/daily", auth, reportController.getDailyReport);
 
-router.get(
-    "/invoice",
-    auth,
-    reportController.getInvoiceReport
-);
+router.get("/leftover", auth, reportController.getLeftoverReport);
 
-router.get(
-    "/invoice/export",
-    auth,
-    reportController.exportInvoiceExcel
-);
+router.get("/leftover/export", auth, reportController.exportLeftoverExcel);
+
+router.get("/invoice", auth, reportController.getInvoiceReport);
+
+router.get("/invoice/export", auth, reportController.exportInvoiceExcel);
 
 module.exports = router;
