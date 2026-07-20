@@ -10,6 +10,8 @@ const ResetPasswordToken = require("../models/ResetPasswordToken");
 
 const sendMail = require("../utils/mail");
 
+const resetPasswordMail = require("../utils/resetPasswordMail");
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -154,41 +156,8 @@ exports.forgotPassword = async (req, res) => {
 
     await sendMail({
       to: user.email,
-      subject: "Đặt lại mật khẩu",
-      html: `
-        <h2>Đặt lại mật khẩu</h2>
-
-        <p>Xin chào <b>${user.name}</b>,</p>
-
-        <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản EOC Menu.</p>
-
-        <p>Nhấn vào nút bên dưới để đặt lại mật khẩu:</p>
-
-        <p>
-            <a
-                href="${resetLink}"
-                style="
-                    display:inline-block;
-                    padding:12px 24px;
-                    background:#A44C15;
-                    color:#ffffff;
-                    text-decoration:none;
-                    border-radius:6px;
-                    font-weight:bold;
-                "
-            >
-                Đặt lại mật khẩu
-            </a>
-        </p>
-
-        <p>Nếu nút không hoạt động, hãy mở liên kết sau:</p>
-
-        <p>${resetLink}</p>
-
-        <p><b>Liên kết này sẽ hết hạn sau 15 phút.</b></p>
-
-        <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-      `,
+      subject: user.language === "ko" ? "비밀번호 재설정" : "Đặt lại mật khẩu",
+      html: resetPasswordMail(user, resetLink),
     });
 
     return res.json({
