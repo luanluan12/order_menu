@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { getOrders } from "../../api/orderApi";
+import { getOrders, manualCheckin } from "../../api/orderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import OrderDetailModal from "./OrderDetailModal";
 import CheckinQrModal from "./CheckinQrModal";
+import { Check } from "lucide-react";
 
 function OrderManagement() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -35,6 +36,25 @@ function OrderManagement() {
       date.setHours(0, 0, 0, 0);
       return date.getTime() === today.getTime();
     });
+  };
+
+  const handleManualCheckin = async (order) => {
+    const ok = window.confirm(`Xác nhận ${order.user.name} đã nhận suất ăn?`);
+
+    if (!ok) return;
+
+    try {
+      await manualCheckin({
+        orderId: order._id,
+        date: selectedDate,
+      });
+
+      await loadOrders();
+
+      alert("Check-in thành công.");
+    } catch (err) {
+      alert(err.response?.data?.message || "Check-in thất bại.");
+    }
   };
 
   const receivedCount = orders.filter(
@@ -159,6 +179,7 @@ function OrderManagement() {
               <th className="p-4 text-center">Tuần</th>
 
               <th className="p-4 text-center">Nhận hôm nay</th>
+              <th className="p-4 text-center">Check-in</th>
 
               <th className="p-4 text-center">Chi tiết</th>
             </tr>
@@ -167,7 +188,7 @@ function OrderManagement() {
           <tbody>
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-gray-400">
+                <td colSpan={8} className="py-12 text-center text-gray-400">
                   Chưa có đơn đặt món.
                 </td>
               </tr>
@@ -204,6 +225,22 @@ function OrderManagement() {
                       >
                         {todayOrder?.received ? "Đã nhận" : "Chưa nhận"}
                       </span>
+                    </td>
+
+                    <td className="p-4 text-center">
+                      {todayOrder?.received ? (
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-green-100 px-3 py-2 text-sm font-semibold text-green-700">
+                          <Check size={16} />
+                          Đã nhận
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleManualCheckin(order)}
+                          className="rounded-lg bg-orange-500 px-4 py-2 text-white transition hover:bg-orange-600"
+                        >
+                          Check-in
+                        </button>
+                      )}
                     </td>
 
                     <td className="p-4 text-center">
@@ -273,6 +310,14 @@ function OrderManagement() {
                     </div>
                   )}
                 </div>
+                {!day?.received && (
+                  <button
+                    onClick={() => handleManualCheckin(order)}
+                    className="mt-4 w-full rounded-lg bg-orange-500 py-2 font-semibold text-white hover:bg-orange-600"
+                  >
+                    Check-in
+                  </button>
+                )}
 
                 <button
                   onClick={() => setSelectedOrder(order)}

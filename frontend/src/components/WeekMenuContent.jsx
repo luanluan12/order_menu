@@ -10,294 +10,236 @@ import { useTranslation } from "react-i18next";
 import bgFood from "../assets/bgfood.png";
 
 function WeekMenuContent({
-    menu,
-    initialOrder = null,
-    onSubmit,
-    submitText = "submit_order",
-    editable = true,
+  menu,
+  initialOrder = null,
+  onSubmit,
+  submitText = "submit_order",
+  editable = true,
 }) {
-    const [currentDay, setCurrentDay] = useState(0);
-    const [orders, setOrders] = useState([]);
-    const navigate = useNavigate();
-    const { t, i18n} = useTranslation();
-    const [loading, setLoading] = useState(false);
+  const [currentDay, setCurrentDay] = useState(0);
+  const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const [loading, setLoading] = useState(false);
 
-    const isDayCompleted = (index) => {
+  const isDayCompleted = (index) => {
     const order = orders[index];
 
     if (!order) return false;
 
-    return (
-        order.mains.length > 0 ||
-        !!order.drink ||
-        !!order.soup
+    return order.mains.length > 0 || !!order.drink || !!order.soup;
+  };
+
+  // =========================
+  // Init Order
+  // =========================
+
+  useEffect(() => {
+    if (!menu) return;
+
+    if (initialOrder?.days) {
+      setOrders(initialOrder.days);
+      return;
+    }
+
+    setOrders(
+      menu.days.map((day) => ({
+        date: day.date,
+        mains: [],
+        drink: null,
+        soup: null,
+      })),
     );
-};
+  }, [menu, initialOrder]);
 
-    // =========================
-    // Init Order
-    // =========================
+  if (!menu) return null;
 
-    useEffect(() => {
-        if (!menu) return;
+  const day = menu.days[currentDay];
 
-        if (initialOrder?.days) {
-            setOrders(initialOrder.days);
-            return;
+  // =========================
+  // MAIN
+  // =========================
+
+  const changeMainQuantity = (dish, quantity) => {
+    if (!editable) return;
+
+    const clone = [...orders];
+    const current = { ...clone[currentDay] };
+
+    if (current.drink || current.soup) {
+      toast.warning(t("warning_other_group"));
+      return;
+    }
+
+    let mains = [...current.mains];
+
+    const index = mains.findIndex(
+      (item) => String(item.dishId) === String(dish._id),
+    );
+
+    if (index === -1) {
+      if (quantity <= 0) return;
+
+      const total = mains.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (total + quantity > 2) {
+        toast.warning(t("warning_max_main"));
+        return;
+      }
+
+      mains.push({
+        dishId: dish._id,
+        name: dish.name,
+        image: dish.image,
+        quantity,
+      });
+    } else {
+      const totalWithoutCurrent = mains.reduce(
+        (sum, item, i) => (i === index ? sum : sum + item.quantity),
+        0,
+      );
+
+      if (quantity <= 0) {
+        mains.splice(index, 1);
+      } else {
+        if (totalWithoutCurrent + quantity > 2) {
+          toast.warning(t("warning_max_main"));
+          return;
         }
 
-        setOrders(
-            menu.days.map((day) => ({
-                date: day.date,
-                mains: [],
-                drink: null,
-                soup: null,
-            }))
-        );
-    }, [menu, initialOrder]);
+        mains[index] = {
+          ...mains[index],
+          quantity,
+        };
+      }
+    }
 
-    if (!menu) return null;
+    current.mains = mains;
+    clone[currentDay] = current;
+    setOrders(clone);
+  };
 
-    const day = menu.days[currentDay];
+  // =========================
+  // DRINK
+  // =========================
 
-    // =========================
-    // MAIN
-    // =========================
+  const toggleDrink = (dish) => {
+    if (!editable) return;
 
-    const changeMainQuantity = (dish, quantity) => {
-        if (!editable) return;
+    const clone = [...orders];
+    const current = { ...clone[currentDay] };
 
-        const clone = [...orders];
-        const current = { ...clone[currentDay] };
+    if (current.mains.length > 0 || current.soup) {
+      toast.warning(t("warning_other_group"));
+      return;
+    }
 
-        if (current.drink || current.soup) {
-            toast.warning(
-                t("warning_other_group")
-            );
-            return;
-        }
+    if (current.drink && String(current.drink.dishId) === String(dish._id)) {
+      current.drink = null;
+    } else {
+      current.drink = {
+        dishId: dish._id,
+        name: dish.name,
+        image: dish.image,
+      };
+    }
 
-        let mains = [...current.mains];
+    clone[currentDay] = current;
+    setOrders(clone);
+  };
 
-        const index = mains.findIndex(
-            (item) => String(item.dishId) === String(dish._id)
-        );
+  // =========================
+  // SOUP
+  // =========================
 
-        if (index === -1) {
-            if (quantity <= 0) return;
+  const toggleSoup = (dish) => {
+    if (!editable) return;
 
-            const total = mains.reduce(
-                (sum, item) => sum + item.quantity,
-                0
-            );
+    const clone = [...orders];
+    const current = { ...clone[currentDay] };
 
-            if (total + quantity > 2) {
-                toast.warning(
+    if (current.mains.length > 0 || current.drink) {
+      toast.warning(t("warning_other_group"));
+      return;
+    }
 
-                t("warning_max_main")
+    if (current.soup && String(current.soup.dishId) === String(dish._id)) {
+      current.soup = null;
+    } else {
+      current.soup = {
+        dishId: dish._id,
+        name: dish.name,
+        image: dish.image,
+      };
+    }
 
-            );
-                return;
-            }
+    clone[currentDay] = current;
+    setOrders(clone);
+  };
 
-            mains.push({
-                dishId: dish._id,
-                name: dish.name,
-                image: dish.image,
-                quantity,
-            });
-        } else {
-            const totalWithoutCurrent = mains.reduce(
-                (sum, item, i) =>
-                    i === index ? sum : sum + item.quantity,
-                0
-            );
+  // =========================
+  // Helpers
+  // =========================
 
-            if (quantity <= 0) {
-                mains.splice(index, 1);
-            } else {
-                if (totalWithoutCurrent + quantity > 2) {
-                    toast.warning(
-
-                    t("warning_max_main")
-
-                );
-                    return;
-                }
-
-                mains[index] = {
-                    ...mains[index],
-                    quantity,
-                };
-            }
-        }
-
-        current.mains = mains;
-        clone[currentDay] = current;
-        setOrders(clone);
-    };
-
-    // =========================
-    // DRINK
-    // =========================
-
-    const toggleDrink = (dish) => {
-        if (!editable) return;
-
-        const clone = [...orders];
-        const current = { ...clone[currentDay] };
-
-        if (current.mains.length > 0 || current.soup) {
-            toast.warning(
-
-            t("warning_other_group")
-
-        );
-            return;
-        }
-
-        if (
-            current.drink &&
-            String(current.drink.dishId) === String(dish._id)
-        ) {
-            current.drink = null;
-        } else {
-            current.drink = {
-                dishId: dish._id,
-                name: dish.name,
-                image: dish.image,
-            };
-        }
-
-        clone[currentDay] = current;
-        setOrders(clone);
-    };
-
-    // =========================
-    // SOUP
-    // =========================
-
-    const toggleSoup = (dish) => {
-        if (!editable) return;
-
-        const clone = [...orders];
-        const current = { ...clone[currentDay] };
-
-        if (current.mains.length > 0 || current.drink) {
-            toast.warning(
-
-            t("warning_other_group")
-
-        );
-            return;
-        }
-
-        if (
-            current.soup &&
-            String(current.soup.dishId) === String(dish._id)
-        ) {
-            current.soup = null;
-        } else {
-            current.soup = {
-                dishId: dish._id,
-                name: dish.name,
-                image: dish.image,
-            };
-        }
-
-        clone[currentDay] = current;
-        setOrders(clone);
-    };
-
-    // =========================
-    // Helpers
-    // =========================
-
-    const formatDateTime = (date) => {
-
+  const formatDateTime = (date) => {
     if (!date) return "";
 
-    const locale =
-
-        i18n.language === "ko"
-
-            ? "ko-KR"
-
-            : "vi-VN";
+    const locale = i18n.language === "ko" ? "ko-KR" : "vi-VN";
 
     return new Date(date).toLocaleString(locale);
+  };
 
-};
+  const getMainQuantity = (dishId) => {
+    const item = orders[currentDay]?.mains.find(
+      (m) => String(m.dishId) === String(dishId),
+    );
 
-    const getMainQuantity = (dishId) => {
-        const item = orders[currentDay]?.mains.find(
-            (m) => String(m.dishId) === String(dishId)
-        );
+    return item ? item.quantity : 0;
+  };
 
-        return item ? item.quantity : 0;
-    };
+  const isDrinkSelected = (dishId) =>
+    String(orders[currentDay]?.drink?.dishId || "") === String(dishId);
 
-    const isDrinkSelected = (dishId) =>
-        String(orders[currentDay]?.drink?.dishId || "") ===
-        String(dishId);
+  const isSoupSelected = (dishId) =>
+    String(orders[currentDay]?.soup?.dishId || "") === String(dishId);
 
-    const isSoupSelected = (dishId) =>
-        String(orders[currentDay]?.soup?.dishId || "") ===
-        String(dishId);
+  const disableMain = () =>
+    !!orders[currentDay]?.drink || !!orders[currentDay]?.soup;
 
-    const disableMain = () =>
-        !!orders[currentDay]?.drink ||
-        !!orders[currentDay]?.soup;
+  const disableDrink = () =>
+    orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.soup;
 
-    const disableDrink = () =>
-        orders[currentDay]?.mains.length > 0 ||
-        !!orders[currentDay]?.soup;
+  const disableSoup = () =>
+    orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.drink;
+  // =========================
 
-    const disableSoup = () =>
-        orders[currentDay]?.mains.length > 0 ||
-        !!orders[currentDay]?.drink;
-            // =========================
-
-    const getUnselectedDays = () => {
-
-    const dayKeys = [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday"
-    ];
+  const getUnselectedDays = () => {
+    const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
     return orders
-        .map((order, index) => {
+      .map((order, index) => {
+        const hasMain = order.mains.length > 0;
+        const hasDrink = !!order.drink;
+        const hasSoup = !!order.soup;
 
-            const hasMain = order.mains.length > 0;
-            const hasDrink = !!order.drink;
-            const hasSoup = !!order.soup;
+        if (hasMain || hasDrink || hasSoup) {
+          return null;
+        }
 
-            if (hasMain || hasDrink || hasSoup) {
-                return null;
-            }
-
-            return t(dayKeys[index]);
-
-        })
-        .filter(Boolean);
-
-};
-    // Submit
-    // =========================
-    const handleSubmit = async () => {
-
+        return t(dayKeys[index]);
+      })
+      .filter(Boolean);
+  };
+  // Submit
+  // =========================
+  const handleSubmit = async () => {
     if (!editable) return;
 
     if (!onSubmit) return;
     const unselectedDays = getUnselectedDays();
 
-if (unselectedDays.length > 0) {
-
-    const result = await Swal.fire({
-
+    if (unselectedDays.length > 0) {
+      const result = await Swal.fire({
         icon: "warning",
 
         title: t("confirm_order_title"),
@@ -310,8 +252,8 @@ if (unselectedDays.length > 0) {
                 <ul style="margin-top:10px">
 
                     ${unselectedDays
-                        .map(day => `<li style="margin:6px 0">• ${day}</li>`)
-                        .join("")}
+                      .map((day) => `<li style="margin:6px 0">• ${day}</li>`)
+                      .join("")}
 
                 </ul>
 
@@ -334,231 +276,189 @@ if (unselectedDays.length > 0) {
 
         cancelButtonColor: "#6b7280",
 
-        reverseButtons: true
+        reverseButtons: true,
+      });
 
-    });
-
-    if (!result.isConfirmed) {
-
+      if (!result.isConfirmed) {
         return;
-
+      }
     }
-
-}
 
     // Validate
     for (const day of orders) {
+      const hasMain = day.mains.length > 0;
 
-        const hasMain = day.mains.length > 0;
+      const hasDrink = !!day.drink;
 
-        const hasDrink = !!day.drink;
+      const hasSoup = !!day.soup;
+      // Nếu chọn món cơm thì bắt buộc đủ 2 phần
+      if (hasMain) {
+        const totalMain = day.mains.reduce(
+          (sum, item) => sum + item.quantity,
 
-        const hasSoup = !!day.soup;
-        // Nếu chọn món cơm thì bắt buộc đủ 2 phần
-if (hasMain) {
-
-    const totalMain = day.mains.reduce(
-
-        (sum, item) => sum + item.quantity,
-
-        0
-
-    );
-
-    if (totalMain !== 2) {
-
-        toast.warning(
-            t("warning_main_exactly_2")
+          0,
         );
 
+        if (totalMain !== 2) {
+          toast.warning(t("warning_main_exactly_2"));
+
+          return;
+        }
+      }
+
+      // Không chọn gì => nghỉ ăn
+      if (!hasMain && !hasDrink && !hasSoup) {
+        continue;
+      }
+
+      const groupCount = Number(hasMain) + Number(hasDrink) + Number(hasSoup);
+
+      if (groupCount > 1) {
+        toast.warning(t("warning_one_group_only"));
+
         return;
-
-    }
-
-}
-
-        // Không chọn gì => nghỉ ăn
-        if (!hasMain && !hasDrink && !hasSoup) {
-            continue;
-        }
-
-        const groupCount =
-            Number(hasMain) +
-            Number(hasDrink) +
-            Number(hasSoup);
-
-        if (groupCount > 1) {
-
-            toast.warning(
-                t("warning_one_group_only")
-            );
-
-            return;
-
-        }
-
+      }
     }
 
     try {
-    setLoading(true);
+      setLoading(true);
 
-    const success = await onSubmit(orders);
+      const success = await onSubmit(orders);
 
-    if (!success) return;
+      console.log("E");
 
-    await Swal.fire({
+      if (!success) return;
+
+      setLoading(false);
+
+      await Swal.fire({
         icon: "success",
         title: `🎉 ${t("order_success_title")}`,
         text: t("order_success_message"),
         confirmButtonText: t("view_history"),
         confirmButtonColor: "#f97316",
         allowOutsideClick: false,
-    });
+      });
+      console.log("F");
 
-    navigate("/history");
-} finally {
-    setLoading(false);
-}
-
-};
-
-    if (!menu) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                {t("no_menu")}
-            </div>
-        );
+      navigate("/history");
+    } finally {
+      if (loading) {
+        setLoading(false);
+      }
     }
+  };
 
-    // const expired = new Date() > new Date(menu.deadline);
-    const expired = false;
-
+  if (!menu) {
     return (
-    <div className="mx-auto w-full max-w-[1080px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      <div className="flex h-screen items-center justify-center">
+        {t("no_menu")}
+      </div>
+    );
+  }
 
-        {loading && (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="flex flex-col items-center rounded-2xl bg-white px-10 py-8 shadow-2xl">
+  // const expired = new Date() > new Date(menu.deadline);
+  const expired = false;
+
+  return (
+    <div className="mx-auto w-full max-w-[1080px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      {loading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center rounded-2xl bg-white px-10 py-8 shadow-2xl">
             <div className="h-14 w-14 animate-spin rounded-full border-4 border-orange-500 border-t-transparent"></div>
 
-            <h3 className="mt-6 text-xl font-bold">
-                {t("submitting_order")}
-            </h3>
+            <h3 className="mt-6 text-xl font-bold">{t("submitting_order")}</h3>
 
-            <p className="mt-2 text-gray-500">
-                {t("please_wait")}
-            </p>
+            <p className="mt-2 text-gray-500">{t("please_wait")}</p>
+          </div>
         </div>
-    </div>
-)}
+      )}
 
-        {expired && (
-            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-center sm:p-5">
-                <h2 className="text-lg font-bold text-red-600 sm:text-xl">
-                    ⛔ {t("order_closed")}
-                </h2>
+      {expired && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-center sm:p-5">
+          <h2 className="text-lg font-bold text-red-600 sm:text-xl">
+            ⛔ {t("order_closed")}
+          </h2>
 
-                <p className="mt-2 text-gray-600">
-                    {t("deadline")}: {formatDateTime(menu.deadline)}
-                </p>
-            </div>
-        )}
-
-        {/* Tabs */}
-
-        <div className="mb-10">
-            <DayTabs
-                days={menu.days}
-                currentDay={currentDay}
-                onChange={setCurrentDay}
-                completed={isDayCompleted}
-            />
+          <p className="mt-2 text-gray-600">
+            {t("deadline")}: {formatDateTime(menu.deadline)}
+          </p>
         </div>
-        <div className="mb-10">
-    <OrderNotice />
-</div>
+      )}
 
-        {/* Món cơm */}
+      {/* Tabs */}
 
-        <FoodGroup
-            title={t("main_dish")}
-
-            subtitle={t("max_2_portions")}
-
-            foods={day.mains || []}
-
-            type="main"
-
-            disabled={expired || disableMain()}
-
-            quantityOf={getMainQuantity}
-
-            onQuantityChange={changeMainQuantity}
+      <div className="mb-10">
+        <DayTabs
+          days={menu.days}
+          currentDay={currentDay}
+          onChange={setCurrentDay}
+          completed={isDayCompleted}
         />
+      </div>
+      <div className="mb-10">
+        <OrderNotice />
+      </div>
 
-        {/* Món nước */}
+      {/* Món cơm */}
 
+      <FoodGroup
+        title={t("main_dish")}
+        subtitle={t("max_2_portions")}
+        foods={day.mains || []}
+        type="main"
+        disabled={expired || disableMain()}
+        quantityOf={getMainQuantity}
+        onQuantityChange={changeMainQuantity}
+      />
+
+      {/* Món nước */}
+
+      <div className="mt-10">
+        <FoodGroup
+          title={t("drink")}
+          subtitle={t("choose_1")}
+          foods={day.drinks || []}
+          type="drink"
+          disabled={expired || disableDrink()}
+          selected={isDrinkSelected}
+          onSelect={toggleDrink}
+        />
+      </div>
+
+      {/* Cháo */}
+
+      <div className="mt-10">
+        <FoodGroup
+          title={t("soup")}
+          subtitle={t("choose_1")}
+          foods={day.soups || []}
+          type="soup"
+          disabled={expired || disableSoup()}
+          selected={isSoupSelected}
+          onSelect={toggleSoup}
+        />
+      </div>
+
+      {/* Tráng miệng */}
+
+      {day.desserts?.length > 0 && (
         <div className="mt-10">
-            <FoodGroup
-                title={t("drink")}
-
-                subtitle={t("choose_1")}
-
-                foods={day.drinks || []}
-
-                type="drink"
-
-                disabled={expired || disableDrink()}
-
-                selected={isDrinkSelected}
-
-                onSelect={toggleDrink}
-            />
+          <FoodGroup
+            title={t("dessert")}
+            subtitle={t("free_gift")}
+            foods={day.desserts}
+            type="dessert"
+            disabled
+          />
         </div>
+      )}
 
-        {/* Cháo */}
-
-        <div className="mt-10">
-            <FoodGroup
-                title={t("soup")}
-
-                subtitle={t("choose_1")}
-
-                foods={day.soups || []}
-
-                type="soup"
-
-                disabled={expired || disableSoup()}
-
-                selected={isSoupSelected}
-
-                onSelect={toggleSoup}
-            />
-        </div>
-
-        {/* Tráng miệng */}
-
-        {day.desserts?.length > 0 && (
-            <div className="mt-10">
-                <FoodGroup
-                    title={t("dessert")}
-
-                        subtitle={t("free_gift")}
-
-                        foods={day.desserts}
-
-                        type="dessert"
-
-                        disabled
-                />
-            </div>
-        )}
-
-        <div className="mt-14 flex justify-center">
-            <button
-    onClick={handleSubmit}
-    disabled={expired}
-    className={`
+      <div className="mt-14 flex justify-center">
+        <button
+          onClick={handleSubmit}
+          disabled={expired}
+          className={`
         rounded-2xl
         px-14
         py-4
@@ -570,18 +470,17 @@ if (hasMain) {
         duration-300
 
         ${
-            expired
-                ? "cursor-not-allowed bg-gray-400"
-                : "bg-orange-500 hover:bg-orange-600 hover:shadow-xl active:scale-95"
+          expired
+            ? "cursor-not-allowed bg-gray-400"
+            : "bg-orange-500 hover:bg-orange-600 hover:shadow-xl active:scale-95"
         }
     `}
->
-    {expired ? t("expired") : t(submitText)}
-</button>
-        </div>
-
+        >
+          {expired ? t("expired") : t(submitText)}
+        </button>
+      </div>
     </div>
-);
+  );
 }
 
 export default WeekMenuContent;

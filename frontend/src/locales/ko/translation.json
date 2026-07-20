@@ -112,5 +112,10 @@
   "resetPassword_submit": "비밀번호 변경",
   "resetPassword_updating": "변경 중...",
   "resetPassword_passwordNotMatch": "비밀번호가 일치하지 않습니다.",
-  "common_error": "오류가 발생했습니다. 다시 시도해 주세요."
+  "common_error": "오류가 발생했습니다. 다시 시도해 주세요.",
+  "meal_date": "식사 날짜",
+  "received_time": "수령 시간",
+  "meal_list": "식사 메뉴",
+  "quantity": "수량",
+  "checkin_saveScreen": "음식을 수령할 때 주방에 제시할 수 있도록 이 화면을 저장해 주세요."
 }

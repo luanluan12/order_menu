@@ -106,5 +106,10 @@
   "resetPassword_submit": "Đổi mật khẩu",
   "resetPassword_updating": "Đang cập nhật...",
   "resetPassword_passwordNotMatch": "Mật khẩu nhập lại không khớp.",
-  "common_error": "Đã xảy ra lỗi. Vui lòng thử lại."
+  "common_error": "Đã xảy ra lỗi. Vui lòng thử lại.",
+  "meal_date": "Ngày lấy món",
+  "received_time": "Thời gian nhận",
+  "meal_list": "Danh sách món",
+  "quantity": "Số lượng",
+  "checkin_saveScreen": "Vui lòng lưu màn hình này để xác nhận với bếp khi nhận món."
 }
