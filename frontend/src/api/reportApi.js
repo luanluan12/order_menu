@@ -1,78 +1,62 @@
 import axios from "./axios";
 
 export const exportDailyReport = (date) => {
+  return axios.get(
+    "/report/export-daily",
 
-    return axios.get(
+    {
+      params: {
+        date,
+      },
 
-        "/report/export-daily",
-
-        {
-
-            params: {
-
-                date
-
-            },
-
-            responseType: "blob"
-
-        }
-
-    );
-
+      responseType: "blob",
+    },
+  );
 };
 
 export const getDailyReport = (date) =>
+  axios.get(
+    "/report/daily",
 
-    axios.get(
-
-        "/report/daily",
-
-        {
-
-            params: {
-
-                date
-
-            }
-
-        }
-
-    );
+    {
+      params: {
+        date,
+      },
+    },
+  );
 // ======================================
 // Invoice Report
 // ======================================
 
 export const getInvoiceReport = (params) => {
+  return axios.get(
+    "/report/invoice",
 
-    return axios.get(
-
-        "/report/invoice",
-
-        {
-
-            params
-
-        }
-
-    );
-
+    {
+      params,
+    },
+  );
 };
 
 export const exportInvoiceReport = (params) => {
+  return axios.get(
+    "/report/invoice/export",
 
-    return axios.get(
+    {
+      params,
 
-        "/report/invoice/export",
-
-        {
-
-            params,
-
-            responseType: "blob"
-
-        }
-
-    );
-
+      responseType: "blob",
+    },
+  );
 };
+
+export const getLeftoverReport = (date) =>
+  axios.get("/report/leftover", {
+    params: { date },
+  });
+
+export const exportLeftoverReport = (date) =>
+  axios.get("/report/leftover/export", {
+    params: { date },
+    responseType: "blob",
+  });
