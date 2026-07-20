@@ -13,6 +13,8 @@ import Report from "../pages/admin/Report";
 import History from "../pages/user/History";
 import OrderEdit from "../pages/user/OrderEdit";
 import Checkin from "../pages/user/Checkin";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
 import AdminLayout from "../layouts/AdminLayout";
 import ReviewManagement from "../pages/admin/ReviewManagement";
 import PrivateRoute from "../components/PrivateRoute";
@@ -22,125 +24,76 @@ import MenuWeekCreate from "../pages/admin/MenuWeekCreate";
 import MenuWeekEdit from "../pages/admin/MenuWeekEdit";
 
 function AppRoutes() {
+  return (
+    <Routes>
+      {/* Login */}
+      <Route path="/" element={<Login />} />
 
-    return (
-
-        <Routes>
-
-            {/* Login */}
-            <Route
-                path="/"
-                element={<Login />}
-            />
-
-            {/* User */}
-            <Route
-                path="/home"
-                element={
-                    <PrivateRoute>
-                        <Home />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-    path="/order/edit/:id"
-    element={
-        <PrivateRoute>
+      {/* User */}
+      <Route
+        path="/home"
+        element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/order/edit/:id"
+        element={
+          <PrivateRoute>
             <OrderEdit />
-        </PrivateRoute>
-    }
-/>
-        <Route
-            
+          </PrivateRoute>
+        }
+      />
+      <Route path="/change-password" element={<ChangePassword />} />
+      <Route
+        path="/history"
+        element={
+          <PrivateRoute>
+            <History />
+          </PrivateRoute>
+        }
+      />
 
-    path="/change-password"
-
-    element={<ChangePassword />}
-
-/>
-            <Route
-
-                path="/history"
-
-                element={
-
-                    <PrivateRoute>
-
-                        <History />
-
-                    </PrivateRoute>
-
-                }
-
-            />
-
-            <Route
-    path="/checkin"
-    element={
-        <PrivateRoute>
+      <Route
+        path="/checkin"
+        element={
+          <PrivateRoute>
             <Checkin />
-        </PrivateRoute>
-    }
-/>
+          </PrivateRoute>
+        }
+      />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
-            {/* Admin */}
-            <Route
-                element={
-                    <PrivateRoute>
-                        <AdminLayout />
-                    </PrivateRoute>
-                }
-            >
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-                <Route
-                    path="/admin/dashboard"
-                    element={<Dashboard />}
-                />
+      {/* Admin */}
+      <Route
+        element={
+          <PrivateRoute>
+            <AdminLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route path="/admin/dashboard" element={<Dashboard />} />
 
-                <Route
-                    path="/admin/menu"
-                    element={<MenuManagement />}
-                />
+        <Route path="/admin/menu" element={<MenuManagement />} />
 
-                <Route
-                    path="/admin/user"
-                    element={<UserManagement />}
-                />
+        <Route path="/admin/user" element={<UserManagement />} />
 
-                <Route
-                    path="/admin/order"
-                    element={<OrderManagement />}
-                />
+        <Route path="/admin/order" element={<OrderManagement />} />
 
-                <Route
-                    path="/admin/report"
-                    element={<Report />}
-                />
+        <Route path="/admin/report" element={<Report />} />
 
-                <Route
-    path="/admin/review"
-    element={<ReviewManagement />}
-/>
+        <Route path="/admin/review" element={<ReviewManagement />} />
 
-                <Route
-                    path="admin/menu/edit/:id"
-                    element={<MenuWeekEdit />}
-                />
+        <Route path="admin/menu/edit/:id" element={<MenuWeekEdit />} />
 
-                <Route
-
-                    path="/admin/menu/create"
-
-                    element={<MenuWeekCreate />}
-
-                />
-
-            </Route>
-
-        </Routes>
-
-    );
-
+        <Route path="/admin/menu/create" element={<MenuWeekCreate />} />
+      </Route>
+    </Routes>
+  );
 }
 
 export default AppRoutes;
