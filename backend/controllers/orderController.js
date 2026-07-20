@@ -1010,3 +1010,105 @@ exports.getAllOrders = async (req, res) => {
     });
   }
 };
+
+exports.manualCheckin = async (req, res) => {
+  try {
+    const { orderId, date } = req.body;
+
+    if (!orderId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu thông tin.",
+      });
+    }
+
+    const order = await Order.findOne({
+      _id: orderId,
+      status: "ordered",
+    }).populate("user", "name email floor employeeId");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn.",
+      });
+    }
+
+    // Admin tầng chỉ được check-in người cùng tầng
+    if (
+      req.user.role === "admin_floor" &&
+      order.user.floor !== req.user.floor
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền check-in nhân viên tầng khác.",
+      });
+    }
+
+    const targetDate = moment(date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
+
+    const day = order.days.find(
+      (d) =>
+        moment(d.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD") ===
+        targetDate,
+    );
+
+    if (!day) {
+      return res.status(400).json({
+        success: false,
+        message: "Không tìm thấy suất ăn của ngày này.",
+      });
+    }
+
+    const hasMeal = day.mains.length > 0 || day.drink || day.soup;
+
+    if (!hasMeal) {
+      return res.status(400).json({
+        success: false,
+        message: "Nhân viên không đăng ký suất ăn.",
+      });
+    }
+
+    if (day.received) {
+      return res.status(409).json({
+        success: false,
+        message: "Nhân viên đã nhận suất ăn.",
+      });
+    }
+
+    day.received = true;
+    day.receivedAt = new Date();
+
+    await order.save();
+
+    const io = req.app.get("io");
+
+    io.emit("checkin-success", {
+      employee: {
+        name: order.user.name,
+        email: order.user.email,
+        floor: order.user.floor,
+        employeeId: order.user.employeeId,
+      },
+      receivedAt: day.receivedAt,
+      mains: day.mains,
+      drink: day.drink,
+      soup: day.soup,
+    });
+
+    return res.json({
+      success: true,
+      message: "Check-in thành công.",
+      data: {
+        receivedAt: day.receivedAt,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
