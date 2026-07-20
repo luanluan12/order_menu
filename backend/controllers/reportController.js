@@ -730,14 +730,32 @@ exports.getDailyReport = async (req, res) => {
     }
 
     const floorRows = Object.keys(floors)
-
       .sort((a, b) => Number(a) - Number(b))
+      .map((floor) => {
+        const items = floors[floor];
 
-      .map((floor) => ({
-        floor,
+        let mainTotal = 0;
+        let drinkTotal = 0;
+        let soupTotal = 0;
 
-        items: floors[floor],
-      }));
+        headers.forEach((header) => {
+          const qty = items[header.name] || 0;
+
+          if (header.type === "main") {
+            mainTotal += qty;
+          } else if (header.type === "drink") {
+            drinkTotal += qty;
+          } else if (header.type === "soup") {
+            soupTotal += qty;
+          }
+        });
+
+        return {
+          floor,
+          items,
+          total: mainTotal / 2 + drinkTotal + soupTotal,
+        };
+      });
 
     res.json({
       success: true,
@@ -1243,6 +1261,8 @@ exports.exportInvoiceExcel = async (req, res) => {
 
           email: order.user.email,
 
+          floor: order.user.floor,
+
           company,
 
           food,
@@ -1304,6 +1324,8 @@ exports.exportInvoiceExcel = async (req, res) => {
         width: 38,
       },
 
+      { width: 10 },
+
       {
         width: 30,
       },
@@ -1317,7 +1339,7 @@ exports.exportInvoiceExcel = async (req, res) => {
     // Title
     // ==========================================
 
-    sheet.mergeCells("A1:F1");
+    sheet.mergeCells("A1:G1");
 
     sheet.getCell("A1").value =
       `BÁO CÁO SUẤT ĂN (${moment(from).format("DD/MM/YYYY")} - ${moment(to).format("DD/MM/YYYY")})`;
@@ -1350,6 +1372,8 @@ exports.exportInvoiceExcel = async (req, res) => {
       "Tên nhân viên",
 
       "Email",
+
+      "Tầng",
 
       "Tên công ty",
 
@@ -1420,10 +1444,11 @@ exports.exportInvoiceExcel = async (req, res) => {
       sheet.getCell(rowIndex, 2).value = item.employeeId;
       sheet.getCell(rowIndex, 3).value = item.name;
       sheet.getCell(rowIndex, 4).value = item.email;
-      sheet.getCell(rowIndex, 5).value = item.company;
-      sheet.getCell(rowIndex, 6).value = item.food;
+      sheet.getCell(rowIndex, 5).value = item.floor;
+      sheet.getCell(rowIndex, 6).value = item.company;
+      sheet.getCell(rowIndex, 7).value = item.food;
 
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 7; i++) {
         const cell = sheet.getCell(rowIndex, i);
 
         cell.font = {
@@ -1435,7 +1460,7 @@ exports.exportInvoiceExcel = async (req, res) => {
         cell.alignment = {
           vertical: "middle",
 
-          horizontal: i === 6 ? "left" : "center",
+          horizontal: i === 7 ? "left" : "center",
 
           wrapText: true,
         };
@@ -1468,7 +1493,7 @@ exports.exportInvoiceExcel = async (req, res) => {
 
     rowIndex += 2;
 
-    sheet.mergeCells(`A${rowIndex}:F${rowIndex}`);
+    sheet.mergeCells(`A${rowIndex}:G${rowIndex}`);
 
     sheet.getCell(`A${rowIndex}`).value = "THỐNG KÊ THEO CÔNG TY";
 
