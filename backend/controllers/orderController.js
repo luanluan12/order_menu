@@ -1434,7 +1434,11 @@ const result = orders
         };
 
     })
-    .filter(Boolean);
+    .filter(Boolean).sort(
+        (a, b) =>
+            Number(b.selectedDay?.received) -
+            Number(a.selectedDay?.received)
+    );
 
         return res.json({
 
