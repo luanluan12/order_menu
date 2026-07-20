@@ -491,11 +491,7 @@ function Report() {
 
                   <tbody>
                     {report.floors.map((floor) => {
-                      const total = report.headers.reduce(
-                        (sum, h) => sum + (floor.items[h.name] || 0),
-
-                        0,
-                      );
+                      const total = floor.total;
 
                       return (
                         <tr
@@ -535,11 +531,7 @@ function Report() {
 
             <div className="space-y-4 lg:hidden">
               {report.floors.map((floor) => {
-                const total = report.headers.reduce(
-                  (sum, h) => sum + (floor.items[h.name] || 0),
-
-                  0,
-                );
+                const total = floor.total;
 
                 return (
                   <div
