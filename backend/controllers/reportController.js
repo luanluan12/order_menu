@@ -883,6 +883,7 @@ exports.getLeftoverReport = async (req, res) => {
 
     const leftovers = {};
     const floors = {};
+    const users = [];
 
     headers.forEach((h) => {
       leftovers[h.name] = {
@@ -915,6 +916,33 @@ exports.getLeftoverReport = async (req, res) => {
         day.mains.some((item) => item.quantity > 0) || day.drink || day.soup;
 
       if (!hasFood) continue;
+
+      const foods = [];
+
+      // Main
+      day.mains.forEach((item) => {
+        foods.push(
+          `${item.name}${item.quantity > 1 ? ` x${item.quantity}` : ""}`,
+        );
+      });
+
+      // Drink
+      if (day.drink) {
+        foods.push(day.drink.name);
+      }
+
+      // Soup
+      if (day.soup) {
+        foods.push(day.soup.name);
+      }
+
+      users.push({
+        employeeId: order.user.employeeId,
+        name: order.user.name,
+        email: order.user.email,
+        floor: order.user.floor,
+        foods,
+      });
 
       const floor = String(order.user.floor ?? 0);
 
@@ -1019,7 +1047,10 @@ exports.getLeftoverReport = async (req, res) => {
         leftovers: Object.values(leftovers)
           .filter((item) => item.quantity > 0)
           .sort((a, b) => b.quantity - a.quantity),
+
         floors: floorRows,
+
+        users,
       },
     });
   } catch (err) {
@@ -1733,6 +1764,7 @@ exports.exportLeftoverExcel = async (req, res) => {
 
     const leftovers = {};
     const floors = {};
+    const users = [];
 
     headers.forEach((h) => {
       leftovers[h.name] = {
@@ -1760,6 +1792,29 @@ exports.exportLeftoverExcel = async (req, res) => {
         day.mains.some((item) => item.quantity > 0) || day.drink || day.soup;
 
       if (!hasFood) continue;
+      const foods = [];
+
+      day.mains.forEach((item) => {
+        foods.push(
+          `${item.name}${item.quantity > 1 ? ` x${item.quantity}` : ""}`,
+        );
+      });
+
+      if (day.drink) {
+        foods.push(day.drink.name);
+      }
+
+      if (day.soup) {
+        foods.push(day.soup.name);
+      }
+
+      users.push({
+        employeeId: order.user.employeeId,
+        name: order.user.name,
+        email: order.user.email,
+        floor: order.user.floor,
+        foods,
+      });
 
       const floor = String(order.user.floor ?? 0);
 
@@ -1977,12 +2032,11 @@ exports.exportLeftoverExcel = async (req, res) => {
     // =====================================
 
     userSheet.columns = [
-      { header: "Món", width: 35 },
-      { header: "Mã NV", width: 18 },
-      { header: "Họ tên", width: 28 },
-      { header: "Email", width: 38 },
-      { header: "Tầng", width: 10 },
-      { header: "SL", width: 8 },
+      { header: "Mã NV", key: "employeeId", width: 18 },
+      { header: "Họ tên", key: "name", width: 28 },
+      { header: "Email", key: "email", width: 35 },
+      { header: "Tầng", key: "floor", width: 10 },
+      { header: "Đã đặt món", key: "foods", width: 70 },
     ];
 
     userSheet.getRow(1).font = {
@@ -1991,20 +2045,15 @@ exports.exportLeftoverExcel = async (req, res) => {
       size: 12,
     };
 
-    Object.values(leftovers)
-      .filter((item) => item.quantity > 0)
-      .forEach((item) => {
-        item.users.forEach((user) => {
-          userSheet.addRow({
-            Món: item.name,
-            "Mã NV": user.employeeId,
-            "Họ tên": user.name,
-            Email: user.email,
-            Tầng: user.floor,
-            SL: user.quantity || 1,
-          });
-        });
+    users.forEach((user) => {
+      userSheet.addRow({
+        employeeId: user.employeeId,
+        name: user.name,
+        email: user.email,
+        floor: user.floor,
+        foods: user.foods.join("\n"),
       });
+    });
 
     userSheet.eachRow((row) => {
       row.eachCell((cell) => {
