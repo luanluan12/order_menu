@@ -75,6 +75,8 @@ function Report() {
 
       const res = await getLeftoverReport(date);
 
+      console.log("LEFTOVER DATA:", res.data.data);
+
       setLeftover(res.data.data);
     } catch (err) {
       console.log(err);
@@ -660,6 +662,74 @@ function Report() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Danh sách nhân viên chưa nhận */}
+
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b px-6 py-5">
+                <h2 className="text-lg font-bold">
+                  Danh sách nhân viên chưa nhận
+                </h2>
+              </div>
+
+              <div className="overflow-auto">
+                <table className="min-w-full">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Mã NV</th>
+
+                      <th className="px-4 py-3 text-left">Tên</th>
+
+                      <th className="px-4 py-3 text-center">Tầng</th>
+
+                      <th className="px-4 py-3 text-left">Đã đặt món</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {leftover.users.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="py-8 text-center text-gray-400"
+                        >
+                          Không có nhân viên chưa nhận.
+                        </td>
+                      </tr>
+                    ) : (
+                      leftover.users.map((user, index) => (
+                        <tr key={index} className="border-b hover:bg-slate-50">
+                          <td className="px-4 py-3 font-semibold">
+                            {user.employeeId}
+                          </td>
+
+                          <td className="px-4 py-3">{user.name}</td>
+
+                          <td className="px-4 py-3 text-center">
+                            <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
+                              {user.floor}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-2">
+                              {user.foods.map((food, i) => (
+                                <span
+                                  key={i}
+                                  className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                                >
+                                  {food}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

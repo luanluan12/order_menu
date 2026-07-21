@@ -17,6 +17,7 @@ function OrderManagement() {
     return today.toISOString().split("T")[0];
   };
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
+  const [keyword, setKeyword] = useState("");
   const getTodayOrder = (order) => {
     let today = new Date();
 
@@ -62,6 +63,17 @@ function OrderManagement() {
   ).length;
 
   const notReceivedCount = orders.length - receivedCount;
+  const filteredOrders = orders.filter((order) => {
+    const key = keyword.trim().toLowerCase();
+
+    if (!key) return true;
+
+    return (
+      order.user?.name?.toLowerCase().includes(key) ||
+      order.user?.email?.toLowerCase().includes(key) ||
+      order.user?.employeeId?.toLowerCase().includes(key)
+    );
+  });
 
   const exportExcel = () => {
     const data = orders.map((order, index) => {
@@ -157,6 +169,13 @@ function OrderManagement() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
+          type="text"
+          placeholder="🔍 Tìm tên, email hoặc mã nhân viên..."
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          className="w-full rounded-xl border p-3 sm:max-w-md"
+        />
+        <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
@@ -186,14 +205,14 @@ function OrderManagement() {
           </thead>
 
           <tbody>
-            {orders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-12 text-center text-gray-400">
                   Chưa có đơn đặt món.
                 </td>
               </tr>
             ) : (
-              orders.map((order, index) => {
+              filteredOrders.map((order, index) => {
                 const todayOrder = order.selectedDay;
 
                 return (
@@ -265,12 +284,12 @@ function OrderManagement() {
         />
       </div>
       <div className="space-y-4 lg:hidden">
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="rounded-xl bg-white p-6 text-center shadow">
             Chưa có đơn đặt món.
           </div>
         ) : (
-          orders.map((order) => {
+          filteredOrders.map((order) => {
             const day = order.selectedDay;
 
             return (
