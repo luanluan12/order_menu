@@ -47,49 +47,12 @@ function WeekMenu() {
 
       setMenu(menuRes.data.data);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Không tải được thực đơn.");
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
 
-  //   const submit = async (days) => {
-  //     try {
-  //       if (token) {
-  //         const res = await createOrderFromInvite({
-  //           token,
-  //           days,
-  //         });
-
-  //         toast.success(res.data.message);
-
-  //         return true;
-  //       }
-
-  //       if (order) {
-  //         await updateOrder(order._id, {
-  //           days,
-  //         });
-
-  //         toast.success("Cập nhật thành công.");
-  //       } else {
-  //         await createOrder({
-  //           menuId: menu._id,
-  //           days,
-  //         });
-
-  //         toast.success("Đặt món thành công.");
-  //       }
-
-  //       await loadData();
-
-  //       return true;
-  //     } catch (err) {
-  //       toast.error(err.response?.data?.message || "Có lỗi xảy ra.");
-
-  //       return false;
-  //     }
-  //   };
   const submit = async (days) => {
     try {
       console.log("A");
