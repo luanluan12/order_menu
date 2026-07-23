@@ -1031,10 +1031,38 @@ exports.getLeftoverReport = async (req, res) => {
 
     const floorRows = Object.keys(floors)
       .sort((a, b) => Number(a) - Number(b))
-      .map((floor) => ({
-        floor,
-        items: floors[floor],
-      }));
+      .map((floor) => {
+        let mainTotal = 0;
+        let drinkTotal = 0;
+        let soupTotal = 0;
+
+        headers.forEach((header) => {
+          const value = floors[floor][header.name] || 0;
+
+          switch (header.type) {
+            case "main":
+              mainTotal += value;
+              break;
+
+            case "drink":
+              drinkTotal += value;
+              break;
+
+            case "soup":
+              soupTotal += value;
+              break;
+
+            default:
+              break;
+          }
+        });
+
+        return {
+          floor,
+          items: floors[floor],
+          total: Math.ceil(mainTotal / 2) + drinkTotal + soupTotal,
+        };
+      });
 
     // =====================================
     // Response
@@ -1996,17 +2024,34 @@ exports.exportLeftoverExcel = async (req, res) => {
           floor,
         };
 
-        let total = 0;
+        let mainTotal = 0;
+        let drinkTotal = 0;
+        let soupTotal = 0;
 
         headers.forEach((h) => {
           const value = floors[floor][h.name] || 0;
 
           row[h.name] = value;
 
-          total += value;
+          switch (h.type) {
+            case "main":
+              mainTotal += value;
+              break;
+
+            case "drink":
+              drinkTotal += value;
+              break;
+
+            case "soup":
+              soupTotal += value;
+              break;
+
+            default:
+              break;
+          }
         });
 
-        row.total = total;
+        row.total = Math.ceil(mainTotal / 2) + drinkTotal + soupTotal;
 
         floorSheet.addRow(row);
       });
