@@ -522,6 +522,7 @@ function LeftoverReport({ leftover }) {
                       {item.name}
                     </TableHeader>
                   ))}
+                  <TableHeader align="center">Tổng</TableHeader>
                 </tr>
               </thead>
 
@@ -537,6 +538,12 @@ function LeftoverReport({ leftover }) {
                         {floor.items[item.name] || 0}
                       </td>
                     ))}
+
+                    <td className="px-4 py-3 text-center">
+                      <span className="rounded-lg bg-emerald-100 px-3 py-2 font-bold text-emerald-700">
+                        {floor.total}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -553,6 +560,11 @@ function LeftoverReport({ leftover }) {
               <h3 className="mb-4 text-lg font-bold text-slate-800">
                 Tầng {floor.floor}
               </h3>
+              <div className="mb-4">
+                <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700">
+                  Tổng: {floor.total} suất
+                </span>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {leftover.leftovers.map((item) => (
