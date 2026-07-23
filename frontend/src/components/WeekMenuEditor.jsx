@@ -2,317 +2,233 @@ import { useEffect, useState } from "react";
 
 import DayMenuEditor from "./DayMenuEditor";
 
-
 function WeekMenuEditor({
+  initialData = null,
 
-    initialData = null,
+  onSave,
 
-    onSave,
-
-    loading = false
-
+  loading = false,
 }) {
+  const [week, setWeek] = useState("");
 
-    const [week, setWeek] = useState("");
+  const [days, setDays] = useState([]);
 
-    const [days, setDays] = useState([]);
+  const [currentDay, setCurrentDay] = useState(0);
 
-    const [currentDay, setCurrentDay] = useState(0);
+  const [openTime, setOpenTime] = useState("");
 
-    const [openTime, setOpenTime] = useState("");
+  const [deadline, setDeadline] = useState("");
 
-    const [deadline, setDeadline] = useState("");
-
-    const [allowedWeek, setAllowedWeek] = useState("");
-    useEffect(() => {
-
+  const [allowedWeek, setAllowedWeek] = useState("");
+  useEffect(() => {
     if (!initialData) return;
 
     setWeek(initialData.week);
 
-    setOpenTime(
-        initialData.openTime
-            ? initialData.openTime.slice(0, 16)
-            : ""
-    );
+    setOpenTime(initialData.openTime ? initialData.openTime.slice(0, 16) : "");
 
-    setDeadline(
-        initialData.deadline
-            ? initialData.deadline.slice(0, 16)
-            : ""
-    );
+    setDeadline(initialData.deadline ? initialData.deadline.slice(0, 16) : "");
 
     const loadedDays = initialData.days.map((day) => ({
+      ...day,
 
-        ...day,
+      date: new Date(day.date),
 
-        date: new Date(day.date),
+      drink: day.drinks?.[0] || {
+        name: "",
+        image: null,
+      },
 
-        drink: day.drinks?.[0] || {
-            name: "",
-            image: null,
-        },
+      soup: day.soups?.[0] || {
+        name: "",
+        image: null,
+      },
 
-        soup: day.soups?.[0] || {
-            name: "",
-            image: null,
-        },
-
-        mains: day.mains || [],
-
+      mains: day.mains || [],
     }));
 
     setDays(loadedDays);
 
     setCurrentDay(0);
+  }, [initialData]);
 
-}, [initialData]);
-
-useEffect(() => {
-
+  useEffect(() => {
     const now = new Date();
 
     // Luôn tạo menu cho tuần sau
     now.setDate(now.getDate() + 7);
 
     const getISOWeek = (date) => {
+      const d = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+      );
 
-        const d = new Date(Date.UTC(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate()
-        ));
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
 
-        d.setUTCDate(
-            d.getUTCDate() + 4 - (d.getUTCDay() || 7)
-        );
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
 
-        const yearStart = new Date(Date.UTC(
-            d.getUTCFullYear(),
-            0,
-            1
-        ));
+      const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 
-        const week = Math.ceil(
-            (((d - yearStart) / 86400000) + 1) / 7
-        );
+      return {
+        year: d.getUTCFullYear(),
 
-        return {
-
-            year: d.getUTCFullYear(),
-
-            week
-
-        };
-
+        week,
+      };
     };
 
     const { year, week } = getISOWeek(now);
 
-    const value =
-        `${year}-W${String(week).padStart(2, "0")}`;
+    const value = `${year}-W${String(week).padStart(2, "0")}`;
     setAllowedWeek(value);
     setWeek(value);
+  }, []);
+  // useEffect(() => {
 
-}, []);
-// useEffect(() => {
+  //     const now = new Date();
 
-//     const now = new Date();
+  //     // Demo: tạo menu tuần hiện tại
+  //     // now.setDate(now.getDate() + 7);
 
-//     // Demo: tạo menu tuần hiện tại
-//     // now.setDate(now.getDate() + 7);
+  //     const getISOWeek = (date) => {
 
-//     const getISOWeek = (date) => {
+  //         const d = new Date(Date.UTC(
+  //             date.getFullYear(),
+  //             date.getMonth(),
+  //             date.getDate()
+  //         ));
 
-//         const d = new Date(Date.UTC(
-//             date.getFullYear(),
-//             date.getMonth(),
-//             date.getDate()
-//         ));
+  //         d.setUTCDate(
+  //             d.getUTCDate() + 4 - (d.getUTCDay() || 7)
+  //         );
 
-//         d.setUTCDate(
-//             d.getUTCDate() + 4 - (d.getUTCDay() || 7)
-//         );
+  //         const yearStart = new Date(Date.UTC(
+  //             d.getUTCFullYear(),
+  //             0,
+  //             1
+  //         ));
 
-//         const yearStart = new Date(Date.UTC(
-//             d.getUTCFullYear(),
-//             0,
-//             1
-//         ));
+  //         const week = Math.ceil(
+  //             (((d - yearStart) / 86400000) + 1) / 7
+  //         );
 
-//         const week = Math.ceil(
-//             (((d - yearStart) / 86400000) + 1) / 7
-//         );
+  //         return {
+  //             year: d.getUTCFullYear(),
+  //             week
+  //         };
 
-//         return {
-//             year: d.getUTCFullYear(),
-//             week
-//         };
+  //     };
 
-//     };
+  //     const { year, week } = getISOWeek(now);
 
-//     const { year, week } = getISOWeek(now);
+  //     const value =
+  //         `${year}-W${String(week).padStart(2, "0")}`;
 
-//     const value =
-//         `${year}-W${String(week).padStart(2, "0")}`;
+  //     setAllowedWeek(value);
 
-//     setAllowedWeek(value);
+  //     setWeek(value);
 
-//     setWeek(value);
-
-// }, []);
-    useEffect(() => {
-
+  // }, []);
+  useEffect(() => {
     if (initialData) return;
 
     if (!week) {
+      setDays([]);
 
-        setDays([]);
-
-        return;
-
+      return;
     }
 
     generateDays(week);
+  }, [week, initialData]);
 
-}, [week, initialData]);
+  const generateDays = (weekString) => {
+    const [year, weekNumber] = weekString.split("-W");
 
-    const generateDays = (weekString) => {
+    const monday = getMonday(
+      Number(year),
 
-        const [year, weekNumber] = weekString.split("-W");
+      Number(weekNumber),
+    );
 
-        const monday = getMonday(
+    const names = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
 
-            Number(year),
+    const list = [];
 
-            Number(weekNumber)
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(monday);
 
-        );
+      date.setDate(monday.getDate() + i);
 
-        const names = [
+      list.push({
+        name: names[i],
 
-            "Thứ Hai",
+        date,
 
-            "Thứ Ba",
+        mains: [],
 
-            "Thứ Tư",
+        drink: {
+          name: "",
 
-            "Thứ Năm",
+          image: null,
+        },
 
-            "Thứ Sáu"
+        soup: {
+          name: "",
 
-        ];
+          image: null,
+        },
+      });
+    }
 
-        const list = [];
+    setDays(list);
 
-        for (
+    setCurrentDay(0);
 
-            let i = 0;
+    // ========================
+    // Open Time
+    // Thứ 4 tuần trước 09:00
+    // ========================
 
-            i < 5;
+    const openDate = new Date(monday);
 
-            i++
+    openDate.setDate(monday.getDate() - 5);
 
-        ) {
+    // // Open Time: Thứ 4 tuần này
+    // openDate.setDate(monday.getDate() + 2);
 
-            const date = new Date(monday);
+    openDate.setHours(9, 0, 0, 0);
 
-            date.setDate(
+    // ========================
+    // Deadline
+    // Thứ 6 tuần trước 16:00
+    // ========================
 
-                monday.getDate() + i
+    const deadlineDate = new Date(monday);
 
-            );
+    deadlineDate.setDate(monday.getDate() - 3);
 
-            list.push({
+    // // Deadline: Thứ 6 tuần này
+    // deadlineDate.setDate(monday.getDate() + 4);
 
-                name: names[i],
+    deadlineDate.setHours(16, 0, 0, 0);
 
-                date,
+    const formatDateTime = (date) => {
+      const pad = (n) => String(n).padStart(2, "0");
 
-                mains: [],
-
-                drink: {
-
-                    name: "",
-
-                    image: null
-
-                },
-
-                soup: {
-
-                    name: "",
-
-                    image: null
-
-                }
-
-            });
-
-        }
-
-        setDays(list);
-
-        setCurrentDay(0);
-
-// ========================
-// Open Time
-// Thứ 4 tuần trước 09:00
-// ========================
-
-const openDate = new Date(monday);
-
-
-
-openDate.setDate(monday.getDate() - 5);
-
-// // Open Time: Thứ 4 tuần này
-// openDate.setDate(monday.getDate() + 2);
-
-
-openDate.setHours(9, 0, 0, 0);
-
-// ========================
-// Deadline
-// Thứ 6 tuần trước 16:00
-// ========================
-
-const deadlineDate = new Date(monday);
-
-deadlineDate.setDate(monday.getDate() - 3);
-
-// // Deadline: Thứ 6 tuần này
-// deadlineDate.setDate(monday.getDate() + 4);
-
-deadlineDate.setHours(16, 0, 0, 0);
-
-const formatDateTime = (date) => {
-
-    const pad = (n) => String(n).padStart(2, "0");
-
-    return (
+      return (
         `${date.getFullYear()}-` +
         `${pad(date.getMonth() + 1)}-` +
         `${pad(date.getDate())}T` +
         `${pad(date.getHours())}:` +
         `${pad(date.getMinutes())}`
-    );
-
-};
-
-setOpenTime(
-    formatDateTime(openDate)
-);
-
-setDeadline(
-    formatDateTime(deadlineDate)
-);
-
-
+      );
     };
 
-    const getMonday = (year, week) => {
+    setOpenTime(formatDateTime(openDate));
 
+    setDeadline(formatDateTime(deadlineDate));
+  };
+
+  const getMonday = (year, week) => {
     const simple = new Date(Date.UTC(year, 0, 4));
 
     const day = simple.getUTCDay() || 7;
@@ -322,64 +238,61 @@ setDeadline(
     simple.setUTCDate(simple.getUTCDate() + (week - 1) * 7);
 
     return new Date(simple);
+  };
 
-};
+  // ===============================
+  // Update day
+  // ===============================
 
-    // ===============================
-    // Update day
-    // ===============================
+  const updateDay = (newDay) => {
+    const clone = [...days];
 
-    const updateDay = (newDay) => {
+    clone[currentDay] = newDay;
 
-        const clone = [...days];
+    setDays(clone);
+  };
 
-        clone[currentDay] = newDay;
+  // ===============================
+  // Submit
+  // ===============================
 
-        setDays(clone);
-
-    };
-
-    // ===============================
-    // Submit
-    // ===============================
-
-const submit = () => {
-
+  const submit = () => {
     if (loading) return;
 
     if (!week) {
+      alert("Vui lòng chọn tuần");
 
-        alert("Vui lòng chọn tuần");
-
-        return;
-
+      return;
     }
     for (const day of days) {
-
-        if (day.mains.length === 0) {
-
-            alert(`${day.name}: Vui lòng thêm ít nhất 1 món cơm.`);
-
-            return;
-
+      // Main
+      for (const dish of day.mains) {
+        if (!dish.name?.trim()) {
+          alert(`${day.name}: Vui lòng nhập tên món.`);
+          return;
         }
 
-        if (!day.drink?.name?.trim()) {
-
-            alert(`${day.name}: Vui lòng thêm món nước.`);
-
-            return;
-
+        if (!dish.image) {
+          alert(`${day.name}: ${dish.name || "Món chính"} chưa có ảnh.`);
+          return;
         }
+      }
 
-        if (!day.soup?.name?.trim()) {
-
-            alert(`${day.name}: Vui lòng thêm món cháo / súp.`);
-
-            return;
-
+      // Drink
+      if (day.drink?.name?.trim()) {
+        if (!day.drink.image) {
+          alert(`${day.name}: ${day.drink.name} chưa có ảnh.`);
+          return;
         }
+      }
 
+      // Soup
+      if (day.soup?.name?.trim()) {
+        if (!day.soup.image) {
+          alert(`${day.name}: ${day.soup.name} chưa có ảnh.`);
+          return;
+        }
+      }
     }
 
     const formData = new FormData();
@@ -391,133 +304,84 @@ const submit = () => {
     formData.append("week", week);
 
     formData.append(
+      "year",
 
-        "year",
-
-        Number(
-
-            week.split("-W")[0]
-
-        )
-
+      Number(week.split("-W")[0]),
     );
 
     formData.append("openTime", openTime);
 
-    formData.append(
-    "deadline",
-    deadline
-);
+    formData.append("deadline", deadline);
 
     // ========================
     // JSON
     // ========================
 
     const jsonDays = days.map((day) => ({
+      date: day.date,
 
-        date: day.date,
+      mains: day.mains.map((dish) => ({
+        name: dish.name,
 
-        mains: day.mains.map((dish) => ({
+        nameKo: dish.nameKo || "",
 
-            name: dish.name,
+        subtitle: dish.subtitle || "",
 
-            nameKo: dish.nameKo || "",
+        subtitleKo: dish.subtitleKo || "",
 
-            subtitle: dish.subtitle || "",
+        vegetarian: dish.vegetarian || false,
 
-            subtitleKo: dish.subtitleKo || "",
+        type: dish.type || "normal",
 
-            vegetarian: dish.vegetarian || false,
+        image: dish.image instanceof File ? "" : dish.image || "",
+      })),
 
-            type: dish.type || "normal",
+      drinks: day.drink?.name
+        ? [
+            {
+              name: day.drink.name,
 
-            image:
+              nameKo: day.drink.nameKo || "",
 
-                dish.image instanceof File
+              subtitle: day.drink.subtitle || "",
 
-                    ? ""
+              subtitleKo: day.drink.subtitleKo || "",
 
-                    : dish.image || ""
+              type: "drink",
 
-        })),
+              image:
+                day.drink.image instanceof File ? "" : day.drink.image || "",
+            },
+          ]
+        : [],
 
-        drinks:
+      soups: day.soup?.name
+        ? [
+            {
+              name: day.soup.name,
 
-            day.drink?.name
+              nameKo: day.soup.nameKo || "",
 
-                ? [
+              subtitle: day.soup.subtitle || "",
 
-                    {
+              subtitleKo: day.soup.subtitleKo || "",
 
-                        name: day.drink.name,
+              type: "soup",
 
-                        nameKo: day.drink.nameKo || "",
+              image: day.soup.image instanceof File ? "" : day.soup.image || "",
+            },
+          ]
+        : [],
 
-                        subtitle: day.drink.subtitle || "",
-
-                        subtitleKo: day.drink.subtitleKo || "",
-
-
-                        type: "drink",
-
-                        image:
-
-                            day.drink.image instanceof File
-
-                                ? ""
-
-                                : day.drink.image || ""
-
-                    }
-
-                ]
-
-                : [],
-
-        soups:
-
-            day.soup?.name
-
-                ? [
-
-                    {
-
-                        name: day.soup.name,
-
-                        nameKo: day.soup.nameKo || "",
-
-                        subtitle: day.soup.subtitle || "",
-
-                        subtitleKo: day.soup.subtitleKo || "",
-
-                        type: "soup",
-
-                        image:
-
-                            day.soup.image instanceof File
-
-                                ? ""
-
-                                : day.soup.image || ""
-
-                    }
-
-                ]
-
-                : [],
-
-        desserts: []
-
+      desserts: [],
     }));
 
     console.log("DAYS", JSON.stringify(days, null, 2));
 
     formData.append(
+      "days",
 
-        "days",
-
-        JSON.stringify(jsonDays)
-
+      JSON.stringify(jsonDays),
     );
 
     // ========================
@@ -525,240 +389,126 @@ const submit = () => {
     // ========================
 
     days.forEach((day, dayIndex) => {
+      // Main
 
-        // Main
+      day.mains.forEach((dish, dishIndex) => {
+        if (dish.image instanceof File) {
+          formData.append(
+            `main_${dayIndex}_${dishIndex}_image`,
 
-        day.mains.forEach((dish, dishIndex) => {
-
-            if (dish.image instanceof File) {
-
-                formData.append(
-
-                    `main_${dayIndex}_${dishIndex}_image`,
-
-                    dish.image
-
-                );
-
-            }
-
-        });
-
-        // Drink
-
-        if (day.drink?.image instanceof File) {
-
-            formData.append(
-
-                `drink_${dayIndex}_0_image`,
-
-                day.drink.image
-
-            );
-
+            dish.image,
+          );
         }
+      });
 
-        // Soup
+      // Drink
 
-        if (day.soup?.image instanceof File) {
+      if (day.drink?.image instanceof File) {
+        formData.append(
+          `drink_${dayIndex}_0_image`,
 
-            formData.append(
+          day.drink.image,
+        );
+      }
 
-                `soup_${dayIndex}_0_image`,
+      // Soup
 
-                day.soup.image
+      if (day.soup?.image instanceof File) {
+        formData.append(
+          `soup_${dayIndex}_0_image`,
 
-            );
-
-        }
-
+          day.soup.image,
+        );
+      }
     });
 
-    console.log(
-
-        JSON.stringify(jsonDays, null, 2)
-
-    );
+    console.log(JSON.stringify(jsonDays, null, 2));
 
     onSave(formData);
+  };
 
-};
+  return (
+    <div className="space-y-8">
+      {/* Header */}
 
-    return (
+      <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
+        <input
+          type="week"
+          value={week}
+          min={allowedWeek}
+          max={allowedWeek}
+          disabled={!!initialData}
+          onChange={(e) => setWeek(e.target.value)}
+          className="w-full rounded-xl border p-3 sm:w-auto"
+        />
+      </div>
 
-        <div className="space-y-8">
+      <div className="mt-5">
+        <div className="mt-5 grid grid-cols-2 gap-6"></div>
+      </div>
 
-            {/* Header */}
+      {week && (
+        <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+          {/* LEFT */}
 
-            <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
+          <div className="overflow-x-auto rounded-2xl bg-white p-3 shadow">
+            <div className="flex gap-3 lg:block">
+              {days.map(
+                (
+                  day,
 
-                <input
-
-                    type="week"
-
-                    value={week}
-
-                    min={allowedWeek}
-
-                    max={allowedWeek}
-                    disabled={!!initialData}
-                    onChange={(e) => setWeek(e.target.value)}
-                    className="w-full rounded-xl border p-3 sm:w-auto"
-                />
-
-            </div>
-
-            <div className="mt-5">
-
-    <div className="mt-5 grid grid-cols-2 gap-6">
-
-</div>
-
-
-</div>
-
-            {
-
-                week && (
-
-                    <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-
-                        {/* LEFT */}
-
-                        <div className="overflow-x-auto rounded-2xl bg-white p-3 shadow">
-
-                            <div className="flex gap-3 lg:block">
-
-                            {
-
-                                days.map(
-
-                                    (
-
-                                        day,
-
-                                        index
-
-                                    )=>(
-
-                                        <button
-
-                                            key={index}
-
-                                            onClick={()=>
-
-                                                setCurrentDay(index)
-
-                                            }
-
-                                            className={`min-w-[150px] lg:mb-3 lg:w-full rounded-xl p-4 transition
+                  index,
+                ) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentDay(index)}
+                    className={`min-w-[150px] lg:mb-3 lg:w-full rounded-xl p-4 transition
 
                                             ${
-
-                                                currentDay===index
-
-                                                ?
-
-                                                "bg-orange-600 text-white"
-
-                                                :
-
-                                                "bg-gray-100"
-
+                                              currentDay === index
+                                                ? "bg-orange-600 text-white"
+                                                : "bg-gray-100"
                                             }`}
+                  >
+                    <div className="font-semibold">{day.name}</div>
 
-                                        >
-
-                                            <div className="font-semibold">
-
-                                                {
-
-                                                    day.name
-
-                                                }
-
-                                            </div>
-
-                                            <div className="text-sm">
-
-                                                {
-
-                                                    day.date.toLocaleDateString("vi-VN")
-
-                                                }
-
-                                            </div>
-
-                                        </button>
-
-                                    )
-
-                                )
-
-                            }
-                            </div>
-
-                        </div>
-
-                        {/* RIGHT */}
-
-                        <div className="rounded-2xl bg-white p-4 shadow sm:p-6 lg:p-8">
-
-                            <DayMenuEditor
-
-                                day={
-
-                                    days[currentDay]
-
-                                }
-
-                                onChange={
-
-                                    updateDay
-
-                                }
-
-                            />
-
-                        </div>
-
+                    <div className="text-sm">
+                      {day.date.toLocaleDateString("vi-VN")}
                     </div>
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
 
-                )
+          {/* RIGHT */}
 
-            }
-
-            {/* Submit */}
-
-            {
-
-                week && (
-
-                    <div className="flex justify-center lg:justify-end">
-
-                        <button
-    onClick={submit}
-    disabled={loading}
-    className={`w-full rounded-xl px-8 py-4 font-semibold text-white transition lg:w-auto
-        ${
-            loading
-                ? "cursor-not-allowed bg-gray-400"
-                : "bg-orange-600 hover:bg-orange-700"
-        }`}
->
-    {loading ? "Đang tạo menu..." : "💾 Lưu Menu Tuần"}
-</button>
-
-                    </div>
-
-                )
-
-            }
-
+          <div className="rounded-2xl bg-white p-4 shadow sm:p-6 lg:p-8">
+            <DayMenuEditor day={days[currentDay]} onChange={updateDay} />
+          </div>
         </div>
+      )}
 
-    );
+      {/* Submit */}
 
+      {week && (
+        <div className="flex justify-center lg:justify-end">
+          <button
+            onClick={submit}
+            disabled={loading}
+            className={`w-full rounded-xl px-8 py-4 font-semibold text-white transition lg:w-auto
+        ${
+          loading
+            ? "cursor-not-allowed bg-gray-400"
+            : "bg-orange-600 hover:bg-orange-700"
+        }`}
+          >
+            {loading ? "Đang tạo menu..." : "💾 Lưu Menu Tuần"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default WeekMenuEditor;
