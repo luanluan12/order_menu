@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/auth/Login";
 
@@ -27,7 +27,30 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Login */}
-      <Route path="/" element={<Login />} />
+      <Route
+        path="/"
+        element={(() => {
+          const token = localStorage.getItem("token");
+          const user = JSON.parse(localStorage.getItem("user"));
+
+          if (!token || !user) {
+            return <Login />;
+          }
+
+          switch (user.role) {
+            case "guest":
+              return <Navigate to="/home" replace />;
+
+            case "admin_floor":
+            case "admin_eocmn":
+            case "admin_nexon":
+              return <Navigate to="/admin/dashboard" replace />;
+
+            default:
+              return <Login />;
+          }
+        })()}
+      />
 
       {/* User */}
       <Route
