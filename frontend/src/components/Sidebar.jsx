@@ -74,13 +74,17 @@ function Sidebar({ onClose }) {
       {/* Logo */}
 
       <div className="flex justify-center border-b border-[#ECECF3] py-6">
-        <img src={logo} alt="Logo" className="h-20 w-auto object-contain" />
+        <img
+          src={logo}
+          alt="Logo"
+          className="h-14 w-auto object-contain lg:h-20"
+        />
       </div>
 
       {/* Menu */}
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
-        <div className="space-y-2">
+        <div className="space-y-1.5 lg:space-y-2">
           {menus.map((item) => {
             const Icon = item.icon;
 
@@ -88,7 +92,7 @@ function Sidebar({ onClose }) {
               <NavLink key={item.to} to={item.to} onClick={() => onClose?.()}>
                 {({ isActive }) => (
                   <div
-                    className={`flex h-12 items-center rounded-xl px-4 transition-all duration-300
+                    className={`flex h-11 lg:h-12 items-center rounded-xl px-4 transition-all duration-300
 
                                             ${
                                               isActive
@@ -123,7 +127,7 @@ function Sidebar({ onClose }) {
 
       {/* User */}
 
-      <div className="shrink-0 border-t border-[#ECECF3] bg-white p-5">
+      <div className="shrink-0 border-t border-[#ECECF3] bg-white p-4 lg:p-5">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100 text-lg font-bold text-orange-600">
             {user?.name?.charAt(0).toUpperCase() || "A"}
