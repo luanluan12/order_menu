@@ -15,6 +15,7 @@ function WeekMenuContent({
   onSubmit,
   submitText = "submit_order",
   editable = true,
+  isReadonly = false,
 }) {
   const [currentDay, setCurrentDay] = useState(0);
   const [orders, setOrders] = useState([]);
@@ -396,9 +397,11 @@ function WeekMenuContent({
           completed={isDayCompleted}
         />
       </div>
-      <div className="mb-10">
-        <OrderNotice />
-      </div>
+      {!isReadonly && (
+        <div className="mb-10">
+          <OrderNotice />
+        </div>
+      )}
 
       {/* Món cơm */}
 
@@ -454,31 +457,32 @@ function WeekMenuContent({
         </div>
       )}
 
-      <div className="mt-14 flex justify-center">
-        <button
-          onClick={handleSubmit}
-          disabled={expired}
-          className={`
-        rounded-2xl
-        px-14
-        py-4
-        text-lg
-        font-bold
-        text-white
-        shadow-lg
-        transition-all
-        duration-300
-
-        ${
-          expired
-            ? "cursor-not-allowed bg-gray-400"
-            : "bg-orange-500 hover:bg-orange-600 hover:shadow-xl active:scale-95"
-        }
-    `}
-        >
-          {expired ? t("expired") : t(submitText)}
-        </button>
-      </div>
+      {!isReadonly && (
+        <div className="mt-14 flex justify-center">
+          <button
+            onClick={handleSubmit}
+            disabled={expired}
+            className={`
+                rounded-2xl
+                px-14
+                py-4
+                text-lg
+                font-bold
+                text-white
+                shadow-lg
+                transition-all
+                duration-300
+                ${
+                  expired
+                    ? "cursor-not-allowed bg-gray-400"
+                    : "bg-orange-500 hover:bg-orange-600 hover:shadow-xl active:scale-95"
+                }
+            `}
+          >
+            {expired ? t("expired") : t(submitText)}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

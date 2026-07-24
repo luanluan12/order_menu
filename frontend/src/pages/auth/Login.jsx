@@ -54,6 +54,10 @@ function Login() {
           navigate("/admin/dashboard");
           break;
 
+        case "admin_nexon_order":
+          navigate("/home");
+          break;
+
         default:
           navigate("/");
       }

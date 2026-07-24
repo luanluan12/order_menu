@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCog, FaKey, FaSignOutAlt } from "react-icons/fa";
-import { useAuth } from "../context/AuthContext";
+import { user, useAuth } from "../context/AuthContext";
 
 function Header() {
-  const user = JSON.parse(localStorage.getItem("user"));
-
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
 
   const ref = useRef(null);
-
-  const { logout } = useAuth();
 
   useEffect(() => {
     const handleClick = (e) => {

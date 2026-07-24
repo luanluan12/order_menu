@@ -269,94 +269,7 @@ function DailyReport({ report }) {
         </div>
       </section>
 
-      <section className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
-        <SectionHeader
-          icon={<BarChart3 size={20} className="text-blue-600" />}
-          title="Danh sách nhân viên"
-          description="Chi tiết suất ăn của từng nhân viên"
-          badge={`${report.rows.length} nhân viên`}
-          badgeClass="bg-blue-50 text-blue-700"
-        />
-
-        <div className="max-h-[550px] overflow-auto">
-          <table className="min-w-full border-collapse">
-            <thead className="sticky top-0 z-10 bg-slate-100">
-              <tr>
-                <TableHeader>Mã NV</TableHeader>
-                <TableHeader>Email</TableHeader>
-                <TableHeader align="center">Tầng</TableHeader>
-
-                {report.headers.map((header) => (
-                  <TableHeader key={header.id} align="center">
-                    {header.name}
-                  </TableHeader>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {report.rows.map((row, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-slate-100 transition hover:bg-slate-50"
-                >
-                  <td className="px-4 py-3 font-semibold text-slate-800">
-                    {row.employeeId}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{row.email}</td>
-                  <td className="px-4 py-3 text-center">
-                    <FloorBadge floor={row.floor} />
-                  </td>
-
-                  {report.headers.map((header) => (
-                    <td key={header.id} className="px-4 py-3 text-center">
-                      <CountBadge value={row.items[header.name] || 0} />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="space-y-4 lg:hidden">
-        {report.rows.length === 0 ? (
-          <EmptyState text="Chưa có dữ liệu nhân viên." />
-        ) : (
-          report.rows.map((row, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-slate-800">
-                    {row.employeeId}
-                  </h3>
-
-                  <p className="mt-1 break-all text-xs text-slate-500">
-                    {row.email}
-                  </p>
-                </div>
-
-                <FloorBadge floor={row.floor} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 p-4 sm:p-5">
-                {report.headers.map((header) => (
-                  <FoodCard
-                    key={header.id}
-                    name={header.name}
-                    value={row.items[header.name] || 0}
-                  />
-                ))}
-              </div>
-            </div>
-          ))
-        )}
-      </section>
-
+      {/* Thống kê theo tầng - Desktop */}
       <section className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
         <SectionHeader
           icon={<BarChart3 size={20} className="text-blue-600" />}
@@ -410,6 +323,7 @@ function DailyReport({ report }) {
         </div>
       </section>
 
+      {/* Thống kê theo tầng - Mobile */}
       <section className="space-y-4 lg:hidden">
         {report.floors.map((floor) => (
           <div
@@ -421,6 +335,7 @@ function DailyReport({ report }) {
                 <h3 className="text-lg font-bold text-slate-800">
                   Tầng {floor.floor}
                 </h3>
+
                 <p className="mt-1 text-xs text-slate-500">Tổng số suất ăn</p>
               </div>
 
@@ -440,6 +355,98 @@ function DailyReport({ report }) {
             </div>
           </div>
         ))}
+      </section>
+
+      {/* Danh sách nhân viên - Desktop */}
+      <section className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
+        <SectionHeader
+          icon={<BarChart3 size={20} className="text-blue-600" />}
+          title="Danh sách nhân viên"
+          description="Chi tiết suất ăn của từng nhân viên"
+          badge={`${report.rows.length} nhân viên`}
+          badgeClass="bg-blue-50 text-blue-700"
+        />
+
+        <div className="max-h-[550px] overflow-auto">
+          <table className="min-w-full border-collapse">
+            <thead className="sticky top-0 z-10 bg-slate-100">
+              <tr>
+                <TableHeader>Mã NV</TableHeader>
+                <TableHeader>Email</TableHeader>
+                <TableHeader align="center">Tầng</TableHeader>
+
+                {report.headers.map((header) => (
+                  <TableHeader key={header.id} align="center">
+                    {header.name}
+                  </TableHeader>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {report.rows.map((row, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-slate-100 transition hover:bg-slate-50"
+                >
+                  <td className="px-4 py-3 font-semibold text-slate-800">
+                    {row.employeeId}
+                  </td>
+
+                  <td className="px-4 py-3 text-slate-600">{row.email}</td>
+
+                  <td className="px-4 py-3 text-center">
+                    <FloorBadge floor={row.floor} />
+                  </td>
+
+                  {report.headers.map((header) => (
+                    <td key={header.id} className="px-4 py-3 text-center">
+                      <CountBadge value={row.items[header.name] || 0} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Danh sách nhân viên - Mobile */}
+      <section className="space-y-4 lg:hidden">
+        {report.rows.length === 0 ? (
+          <EmptyState text="Chưa có dữ liệu nhân viên." />
+        ) : (
+          report.rows.map((row, index) => (
+            <div
+              key={index}
+              className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-slate-800">
+                    {row.employeeId}
+                  </h3>
+
+                  <p className="mt-1 break-all text-xs text-slate-500">
+                    {row.email}
+                  </p>
+                </div>
+
+                <FloorBadge floor={row.floor} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 p-4 sm:p-5">
+                {report.headers.map((header) => (
+                  <FoodCard
+                    key={header.id}
+                    name={header.name}
+                    value={row.items[header.name] || 0}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </section>
     </div>
   );

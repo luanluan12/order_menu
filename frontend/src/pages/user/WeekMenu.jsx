@@ -29,6 +29,10 @@ function WeekMenu() {
 
   const token = searchParams.get("token");
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const isReadonly = user?.role === "admin_nexon_order";
+
   useEffect(() => {
     loadData();
   }, [token]);
@@ -54,6 +58,9 @@ function WeekMenu() {
   };
 
   const submit = async (days) => {
+    if (isReadonly) {
+      return false;
+    }
     try {
       console.log("A");
 
@@ -127,7 +134,8 @@ function WeekMenu() {
       <WeekMenuContent
         menu={menu}
         initialOrder={order}
-        editable={!token || !order}
+        editable={!isReadonly && (!token || !order)}
+        isReadonly={isReadonly}
         submitText={
           token ? "submit_order" : order ? "update_order" : "submit_order"
         }
