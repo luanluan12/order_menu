@@ -84,24 +84,41 @@ exports.checkIn = async (req, res) => {
     // Tìm Order
     // ======================
 
+    const startOfToday = moment()
+      .tz("Asia/Ho_Chi_Minh")
+      .startOf("day")
+      .toDate();
+
+    const startOfTomorrow = moment()
+      .tz("Asia/Ho_Chi_Minh")
+      .add(1, "day")
+      .startOf("day")
+      .toDate();
+
     const order = await Order.findOne({
       user: req.user.id,
-
       status: "ordered",
+      days: {
+        $elemMatch: {
+          date: {
+            $gte: startOfToday,
+            $lt: startOfTomorrow,
+          },
+        },
+      },
     }).populate("user", "name email floor employeeId");
-
-    if (checkin.floor !== order.user.floor) {
-      return res.status(403).json({
-        success: false,
-
-        message: "QR không thuộc tầng của bạn.",
-      });
-    }
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy đơn.",
+        message: "Không tìm thấy đơn cho hôm nay.",
+      });
+    }
+
+    if (checkin.floor !== order.user.floor) {
+      return res.status(403).json({
+        success: false,
+        message: "QR không thuộc tầng của bạn.",
       });
     }
 
