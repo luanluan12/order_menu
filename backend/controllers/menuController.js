@@ -235,87 +235,42 @@ exports.getMenus = async (req, res) => {
 /**
  * Lấy Menu tuần
  */
-// exports.getWeekMenu = async (req,res)=>{
-
-//     try{
-
-//         const now = new Date();
-
-//         const menu = await Menu.findOne({
-
-//             status:"published",
-
-//             openTime:{
-//                 $lte:now
-//             },
-
-//             deadline:{
-//                 $gte:now
-//             }
-
-//         }).lean();
-
-//         if(!menu){
-
-//             return res.status(404).json({
-
-//                 success:false,
-
-//                 message:"Hiện chưa đến thời gian đặt món."
-
-//             });
-
-//         }
-
-//         res.json({
-
-//             success:true,
-
-//             data:menu
-
-//         });
-
-//     }
-
-//     catch(err){
-
-//         res.status(500).json({
-
-//             success:false,
-
-//             message:err.message
-
-//         });
-
-//     }
-
-// };
-
 exports.getWeekMenu = async (req, res) => {
   try {
-    const menu = await Menu.findOne({
-      status: "published",
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    let menu = null;
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
+    if (req.user.role === "admin_nexon_order") {
+      // Ưu tiên menu Draft
+      menu = await Menu.findOne({
+        status: "draft",
+      })
+        .sort({ createdAt: -1 })
+        .lean();
 
-        message: "Chưa có menu được Publish.",
-      });
+      // Nếu không có Draft thì lấy Published
+      if (!menu) {
+        menu = await Menu.findOne({
+          status: "published",
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+      }
+    } else {
+      // Guest + Admin Floor chỉ xem Published
+      menu = await Menu.findOne({
+        status: "published",
+      })
+        .sort({ createdAt: -1 })
+        .lean();
     }
 
     return res.json({
       success: true,
-
       data: menu,
     });
   } catch (err) {
     return res.status(500).json({
       success: false,
-
       message: err.message,
     });
   }
