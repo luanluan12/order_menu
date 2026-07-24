@@ -12,18 +12,20 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.png";
 
+import { useAuth } from "../context/AuthContext";
+
 function Sidebar({ onClose }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = () => {
+    logout();
 
     onClose?.();
 
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   const menus = [
@@ -68,7 +70,7 @@ function Sidebar({ onClose }) {
   ];
 
   return (
-    <aside className="flex h-full w-full flex-col bg-white">
+    <aside className="flex h-full min-h-0 w-full flex-col bg-white">
       {/* Logo */}
 
       <div className="flex justify-center border-b border-[#ECECF3] py-6">
@@ -77,7 +79,7 @@ function Sidebar({ onClose }) {
 
       {/* Menu */}
 
-      <nav className="flex-1 px-3 py-5">
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
         <div className="space-y-2">
           {menus.map((item) => {
             const Icon = item.icon;
@@ -121,7 +123,7 @@ function Sidebar({ onClose }) {
 
       {/* User */}
 
-      <div className="border-t border-[#ECECF3] p-5">
+      <div className="shrink-0 border-t border-[#ECECF3] bg-white p-5">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100 text-lg font-bold text-orange-600">
             {user?.name?.charAt(0).toUpperCase() || "A"}
@@ -137,7 +139,7 @@ function Sidebar({ onClose }) {
         </div>
 
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-500 text-sm font-medium text-white transition hover:bg-red-600"
         >
           <FaSignOutAlt />
