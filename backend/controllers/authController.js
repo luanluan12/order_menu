@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
     if (user.inactiveFrom) {
       if (user.status === "inactive") {
         return res.status(403).json({
-          message: "Tài khoản đã nghỉ việc.",
+          message: "Tài khoản đã bị vô hiệu hoá.",
         });
       }
     }

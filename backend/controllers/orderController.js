@@ -1038,6 +1038,8 @@ exports.getAvailableUsers = async (req, res) => {
   try {
     const menu = await Menu.findOne({
       status: "published",
+    }).sort({
+      createdAt: -1,
     });
 
     if (!menu) {
