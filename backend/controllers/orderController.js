@@ -1034,6 +1034,141 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
+exports.getAvailableUsers = async (req, res) => {
+  try {
+    const menu = await Menu.findOne({
+      status: "published",
+    });
+
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Chưa có Menu Publish.",
+      });
+    }
+
+    const userFilter = {
+      role: "guest",
+    };
+
+    // Admin tầng
+    if (req.user.role === "admin_floor") {
+      userFilter.floor = req.user.floor;
+    }
+
+    const users = await User.find(userFilter)
+      .select("employeeId name email floor")
+      .sort({
+        employeeId: 1,
+      });
+
+    const orderedUsers = await Order.find({
+      week: menu.week,
+      status: "ordered",
+    }).select("user");
+
+    const orderedIds = new Set(orderedUsers.map((item) => String(item.user)));
+
+    const result = users.filter((user) => !orderedIds.has(String(user._id)));
+
+    return res.json({
+      success: true,
+      data: {
+        menu,
+        users: result,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.createManualOrder = async (req, res) => {
+  try {
+    const { userId, menuId, days } = req.body;
+
+    if (!userId || !menuId || !days) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu dữ liệu.",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy User.",
+      });
+    }
+
+    // Admin tầng chỉ được đặt hộ cùng tầng
+    if (req.user.role === "admin_floor" && user.floor !== req.user.floor) {
+      return res.status(403).json({
+        success: false,
+        message: "Không có quyền.",
+      });
+    }
+
+    const menu = await Menu.findById(menuId);
+
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy Menu.",
+      });
+    }
+
+    if (menu.status !== "published") {
+      return res.status(400).json({
+        success: false,
+        message: "Menu chưa Publish.",
+      });
+    }
+
+    const existed = await Order.findOne({
+      user: user._id,
+      week: menu.week,
+    });
+
+    if (existed) {
+      return res.status(400).json({
+        success: false,
+        message: "Nhân viên đã đặt món.",
+      });
+    }
+
+    const orderDays = buildOrderDays(menu, days);
+
+    const order = await Order.create({
+      user: user._id,
+      menu: menu._id,
+      week: menu.week,
+      days: orderDays,
+      status: "ordered",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Đặt món thành công.",
+      data: order,
+    });
+  } catch (err) {
+    console.log(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 exports.manualCheckin = async (req, res) => {
   try {
     const { orderId, date } = req.body;

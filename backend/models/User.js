@@ -46,6 +46,16 @@ const userSchema = new mongoose.Schema(
 
       default: "vi",
     },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+
+    inactiveFrom: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

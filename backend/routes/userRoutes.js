@@ -13,7 +13,7 @@ const userController = require("../controllers/userController");
 // ==========================
 
 const upload = multer({
-    dest: "uploads/"
+  dest: "uploads/",
 });
 
 // ==========================
@@ -22,34 +22,42 @@ const upload = multer({
 
 // Danh sách User
 router.get(
-    "/",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.getUsers
+  "/",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.getUsers,
 );
 
 // Thêm User
 router.post(
-    "/",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.createUser
+  "/",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.createUser,
 );
 
 // Cập nhật User
 router.put(
-    "/:id",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.updateUser
+  "/:id",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.updateUser,
+);
+
+// Nghỉ việc
+router.put(
+  "/:id/resign",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.resignUser,
 );
 
 // Xóa User
 router.delete(
-    "/:id",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.deleteUser
+  "/:id",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.deleteUser,
 );
 
 // ==========================
@@ -57,18 +65,14 @@ router.delete(
 // ==========================
 
 // Đổi mật khẩu
-router.put(
-    "/change-password",
-    auth,
-    userController.changePassword
-);
+router.put("/change-password", auth, userController.changePassword);
 
 // Reset mật khẩu
 router.put(
-    "/reset-password/:id",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.resetPassword
+  "/reset-password/:id",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.resetPassword,
 );
 
 // ==========================
@@ -77,37 +81,32 @@ router.put(
 
 // Tìm kiếm User
 router.get(
-    "/search",
-    auth,
-    admin("admin_eocmn", "admin_nexon", "admin_floor"),
-    userController.searchUsers
+  "/search",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.searchUsers,
 );
 
 // Phân trang
-router.get(
-    "/page",
-    auth,
-    admin("admin_eocmn"),
-    userController.pagination
-);
+router.get("/page", auth, admin("admin_eocmn"), userController.pagination);
 
 // ==========================
 // IMPORT EXCEL
 // ==========================
 
 router.post(
-    "/import",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    upload.single("file"),
-    userController.importExcel
+  "/import",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  upload.single("file"),
+  userController.importExcel,
 );
 
 router.get(
-    "/template",
-    auth,
-    admin("admin_eocmn","admin_nexon","admin_floor"),
-    userController.downloadTemplate
+  "/template",
+  auth,
+  admin("admin_eocmn", "admin_nexon", "admin_floor"),
+  userController.downloadTemplate,
 );
 
 // ==========================
@@ -115,10 +114,10 @@ router.get(
 // ==========================
 
 router.get(
-    "/:id",
-    auth,
-    admin("admin_eocmn","admin_nexon"),
-    userController.getUserById
+  "/:id",
+  auth,
+  admin("admin_eocmn", "admin_nexon"),
+  userController.getUserById,
 );
 
 module.exports = router;

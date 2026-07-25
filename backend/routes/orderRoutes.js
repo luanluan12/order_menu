@@ -58,6 +58,14 @@ router.get("/reviews", auth, orderController.getReviews);
 
 router.put("/checkin/manual", auth, orderController.manualCheckin);
 
+// ==========================
+// Manual Order (Admin)
+// ==========================
+
+router.get("/manual/users", auth, orderController.getAvailableUsers);
+
+router.post("/manual", auth, orderController.createManualOrder);
+
 router.get("/:id", auth, orderController.getOrderById);
 
 module.exports = router;

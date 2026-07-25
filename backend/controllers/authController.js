@@ -24,6 +24,18 @@ exports.login = async (req, res) => {
       });
     }
 
+    // =====================================
+    // Nghỉ việc
+    // =====================================
+
+    if (user.inactiveFrom) {
+      if (user.status === "inactive") {
+        return res.status(403).json({
+          message: "Tài khoản đã nghỉ việc.",
+        });
+      }
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
