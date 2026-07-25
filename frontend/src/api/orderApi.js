@@ -132,3 +132,15 @@ export const confirmReceive = (data) => {
     data,
   );
 };
+
+// ===============================
+// Manual Order
+// ===============================
+
+export const getAvailableUsers = () => {
+  return axios.get("/order/manual/users");
+};
+
+export const createManualOrder = (data) => {
+  return axios.post("/order/manual", data);
+};

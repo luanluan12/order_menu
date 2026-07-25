@@ -11,6 +11,10 @@ import {
 import { toast } from "react-toastify";
 import UserModal from "../../components/UserModal";
 
+import { FaUserSlash } from "react-icons/fa";
+
+import ResignUserModal from "../../components/ResignUserModal";
+
 import {
   getUsers,
   createUser,
@@ -36,6 +40,10 @@ function UserManagement() {
   const [openModal, setOpenModal] = useState(false);
 
   const [editingUser, setEditingUser] = useState(null);
+
+  const [openResignModal, setOpenResignModal] = useState(false);
+
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleDownloadTemplate = async () => {
     try {
@@ -167,6 +175,12 @@ function UserManagement() {
     }
   };
 
+  const handleResign = (user) => {
+    setSelectedUser(user);
+
+    setOpenResignModal(true);
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -192,6 +206,40 @@ function UserManagement() {
 
     currentPage * pageSize,
   );
+
+  const getStatus = (user) => {
+    if (user.status === "inactive") {
+      return {
+        text: "Đã nghỉ việc",
+        className: "bg-red-500 text-white",
+      };
+    }
+
+    if (user.inactiveFrom) {
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+
+      const inactiveDate = new Date(user.inactiveFrom);
+
+      inactiveDate.setHours(0, 0, 0, 0);
+
+      if (inactiveDate > today) {
+        const day = String(inactiveDate.getDate()).padStart(2, "0");
+        const month = String(inactiveDate.getMonth() + 1).padStart(2, "0");
+
+        return {
+          text: `Nghỉ từ ${day}/${month}`,
+          className: "bg-yellow-500 text-white",
+        };
+      }
+    }
+
+    return {
+      text: "Còn hoạt động",
+      className: "bg-green-600 text-white",
+    };
+  };
 
   return (
     <div className="space-y-6">
@@ -258,6 +306,8 @@ function UserManagement() {
 
               <th className="px-4 py-3 text-center">Role</th>
 
+              <th className="px-4 py-3 text-center">Status</th>
+
               <th className="px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
@@ -265,13 +315,13 @@ function UserManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="text-center py-10">
+                <td colSpan={7} className="text-center py-10">
                   Loading...
                 </td>
               </tr>
             ) : displayUsers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-10">
+                <td colSpan={7} className="text-center py-10">
                   Không có dữ liệu
                 </td>
               </tr>
@@ -289,6 +339,14 @@ function UserManagement() {
                   <td className="px-4 py-3 text-center">
                     <span className="bg-blue-100 text-blue-700 rounded px-3 py-1">
                       {user.role}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-center">
+                    <span
+                      className={`rounded-full px-3 py-1 text-sm font-medium ${getStatus(user).className}`}
+                    >
+                      {getStatus(user).text}
                     </span>
                   </td>
 
@@ -312,6 +370,15 @@ function UserManagement() {
                         className="rounded bg-yellow-500 p-2 text-white"
                       >
                         <FaKey />
+                      </button>
+                      <button
+                        onClick={() => handleResign(user)}
+                        disabled={
+                          user.status === "inactive" || !!user.inactiveFrom
+                        }
+                        className="rounded bg-gray-700 p-2 text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <FaUserSlash />
                       </button>
                     </div>
                   </td>
@@ -357,9 +424,18 @@ function UserManagement() {
 
                   <span>{user.floor}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Trạng thái</span>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${getStatus(user).className}`}
+                  >
+                    {getStatus(user).text}
+                  </span>
+                </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
+              <div className="mt-5 grid grid-cols-4 gap-2">
                 <button
                   onClick={() => handleEdit(user)}
                   className="rounded-lg bg-blue-500 py-2 text-white"
@@ -379,6 +455,13 @@ function UserManagement() {
                   className="rounded-lg bg-yellow-500 py-2 text-white"
                 >
                   <FaKey className="mx-auto" />
+                </button>
+                <button
+                  onClick={() => handleResign(user)}
+                  disabled={user.status === "inactive" || !!user.inactiveFrom}
+                  className="rounded bg-gray-700 p-2 text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FaUserSlash />
                 </button>
               </div>
             </div>
@@ -419,6 +502,18 @@ function UserManagement() {
           setEditingUser(null);
         }}
         onSave={handleSave}
+      />
+      <ResignUserModal
+        open={openResignModal}
+        user={selectedUser}
+        onClose={() => {
+          setOpenResignModal(false);
+
+          setSelectedUser(null);
+        }}
+        onSuccess={() => {
+          loadUsers();
+        }}
       />
     </div>
   );

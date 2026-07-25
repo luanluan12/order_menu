@@ -22,34 +22,26 @@ import PrivateRoute from "../components/PrivateRoute";
 import MenuWeekCreate from "../pages/admin/MenuWeekCreate";
 
 import MenuWeekEdit from "../pages/admin/MenuWeekEdit";
+import { useAuth } from "../context/AuthContext";
 
 function AppRoutes() {
+  const { user } = useAuth();
   return (
     <Routes>
       {/* Login */}
       <Route
         path="/"
-        element={(() => {
-          const token = localStorage.getItem("token");
-          const user = JSON.parse(localStorage.getItem("user"));
-
-          if (!token || !user) {
-            return <Login />;
-          }
-
-          switch (user.role) {
-            case "guest":
-              return <Navigate to="/home" replace />;
-
-            case "admin_floor":
-            case "admin_eocmn":
-            case "admin_nexon":
-              return <Navigate to="/admin/dashboard" replace />;
-
-            default:
-              return <Login />;
-          }
-        })()}
+        element={
+          user ? (
+            user.role === "guest" || user.role === "admin_nexon_order" ? (
+              <Navigate to="/home" replace />
+            ) : (
+              <Navigate to="/admin/dashboard" replace />
+            )
+          ) : (
+            <Login />
+          )
+        }
       />
 
       {/* User */}

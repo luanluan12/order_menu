@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import OrderDetailModal from "./OrderDetailModal";
 import CheckinQrModal from "./CheckinQrModal";
 import { Check } from "lucide-react";
+import ManualOrderModal from "../../components/ManualOrderModal";
 
 function OrderManagement() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -18,6 +19,7 @@ function OrderManagement() {
   };
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [keyword, setKeyword] = useState("");
+  const [openManualOrder, setOpenManualOrder] = useState(false);
   const getTodayOrder = (order) => {
     let today = new Date();
 
@@ -134,13 +136,23 @@ function OrderManagement() {
     <div className="mx-auto max-w-7xl p-8">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div />
+
         {(user?.role === "admin_eocmn" || user?.role === "admin_floor") && (
-          <button
-            onClick={() => setOpenScanner(true)}
-            className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
-          >
-            QR Check-in
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setOpenManualOrder(true)}
+              className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+            >
+              + Đặt hộ
+            </button>
+
+            <button
+              onClick={() => setOpenScanner(true)}
+              className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
+            >
+              QR Check-in
+            </button>
+          </div>
         )}
       </div>
 
@@ -357,6 +369,13 @@ function OrderManagement() {
       <CheckinQrModal
         open={openScanner}
         onClose={() => setOpenScanner(false)}
+      />
+      <ManualOrderModal
+        open={openManualOrder}
+        onClose={() => setOpenManualOrder(false)}
+        onSuccess={() => {
+          loadOrders();
+        }}
       />
     </div>
   );

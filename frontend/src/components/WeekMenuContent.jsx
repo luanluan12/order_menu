@@ -16,6 +16,7 @@ function WeekMenuContent({
   submitText = "submit_order",
   editable = true,
   isReadonly = false,
+  isManualOrder = false,
 }) {
   const [currentDay, setCurrentDay] = useState(0);
   const [orders, setOrders] = useState([]);
@@ -239,7 +240,7 @@ function WeekMenuContent({
     if (!onSubmit) return;
     const unselectedDays = getUnselectedDays();
 
-    if (unselectedDays.length > 0) {
+    if (!isManualOrder && unselectedDays.length > 0) {
       const result = await Swal.fire({
         icon: "warning",
 
@@ -332,6 +333,18 @@ function WeekMenuContent({
 
       setLoading(false);
 
+      if (isManualOrder) {
+        await Swal.fire({
+          icon: "success",
+          title: "🎉 Đặt hộ thành công",
+          text: "Đã tạo đơn đặt món cho nhân viên.",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#f97316",
+        });
+
+        return;
+      }
+
       await Swal.fire({
         icon: "success",
         title: `🎉 ${t("order_success_title")}`,
@@ -340,7 +353,6 @@ function WeekMenuContent({
         confirmButtonColor: "#f97316",
         allowOutsideClick: false,
       });
-      console.log("F");
 
       navigate("/history");
     } finally {
