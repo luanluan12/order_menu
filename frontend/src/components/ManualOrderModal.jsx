@@ -1,27 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { X, Search } from "lucide-react";
-
 import { toast } from "react-toastify";
-
 import WeekMenuContent from "./WeekMenuContent";
-
 import { getAvailableUsers, createManualOrder } from "../api/orderApi";
 
 function ManualOrderModal({ open, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
-
   const [menu, setMenu] = useState(null);
-
   const [users, setUsers] = useState([]);
-
   const [keyword, setKeyword] = useState("");
-
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (!open) return;
 
+    setSelectedUser(null);
+    setKeyword("");
     loadUsers();
   }, [open]);
 
@@ -29,10 +23,10 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
     try {
       setLoading(true);
 
+      // Backend tự lấy menu Publish mới nhất
       const res = await getAvailableUsers();
 
       setUsers(res.data.data.users);
-
       setMenu(res.data.data.menu);
     } catch (err) {
       toast.error(
@@ -67,7 +61,6 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
       toast.success("Đặt hộ thành công.");
 
       onSuccess?.();
-
       onClose?.();
 
       return true;
@@ -83,8 +76,6 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[95vh] w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-        {/* Header */}
-
         <div className="flex items-center justify-between border-b px-8 py-5">
           <div>
             <h2 className="text-2xl font-bold">Đặt hộ</h2>
@@ -100,8 +91,6 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
 
         {!selectedUser ? (
           <div className="flex-1 overflow-hidden">
-            {/* Search */}
-
             <div className="border-b p-6">
               <div className="relative">
                 <Search
@@ -117,8 +106,6 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
                 />
               </div>
             </div>
-
-            {/* Users */}
 
             <div className="max-h-[65vh] overflow-y-auto p-6">
               {loading ? (
@@ -177,7 +164,7 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
               <WeekMenuContent
                 menu={menu}
                 isManualOrder
-                editable={true}
+                editable
                 submitText="Đặt hộ"
                 onSubmit={submitManual}
               />
