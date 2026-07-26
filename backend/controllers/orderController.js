@@ -13,39 +13,11 @@ const { verifyOrderToken } = require("../utils/orderToken");
 // Có được phép đặt món?
 // ===========================================
 
-// const canOrder = () => {
-//   const now = moment().tz("Asia/Ho_Chi_Minh");
-
-//   const day = now.isoWeekday();
-
-//   const hour = now.hour();
-
-//   // Trước Thứ 4
-//   if (day < 3) {
-//     return false;
-//   }
-
-//   // Thứ 4 trước 09:00
-//   if (day === 3 && hour < 9) {
-//     return false;
-//   }
-
-//   // Sau 17:00 Thứ 6
-//   if (day === 5 && hour >= 17) {
-//     return false;
-//   }
-
-//   // Thứ 7 & Chủ nhật
-//   if (day > 5) {
-//     return false;
-//   }
-
-//   return true;
-// };
 const canOrder = () => {
   const now = moment().tz("Asia/Ho_Chi_Minh");
 
-  const day = now.isoWeekday(); // 1 = Thứ 2 ... 7 = Chủ nhật
+  const day = now.isoWeekday();
+
   const hour = now.hour();
 
   // Trước Thứ 4
@@ -58,8 +30,13 @@ const canOrder = () => {
     return false;
   }
 
-  // Chỉ khóa vào Chủ nhật
-  if (day === 7) {
+  // Sau 17:00 Thứ 6
+  if (day === 5 && hour >= 17) {
+    return false;
+  }
+
+  // Thứ 7 & Chủ nhật
+  if (day > 5) {
     return false;
   }
 
@@ -1110,11 +1087,10 @@ exports.createManualOrder = async (req, res) => {
       });
     }
 
-    // Admin tầng chỉ được đặt hộ cùng tầng
-    if (req.user.role === "admin_floor" && user.floor !== req.user.floor) {
+    if (req.user.role === "admin_floor") {
       return res.status(403).json({
         success: false,
-        message: "Không có quyền.",
+        message: "Admin tầng không được phép đặt hộ.",
       });
     }
 
