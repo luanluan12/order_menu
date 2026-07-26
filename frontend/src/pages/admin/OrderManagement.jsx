@@ -137,7 +137,7 @@ function OrderManagement() {
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div />
 
-        {(user?.role === "admin_eocmn" || user?.role === "admin_floor") && (
+        {user?.role === "admin_eocmn" && (
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => setOpenManualOrder(true)}
