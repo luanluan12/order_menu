@@ -137,14 +137,16 @@ function OrderManagement() {
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div />
 
-        {user?.role === "admin_eocmn" && (
+        {(user?.role === "admin_eocmn" || user?.role === "admin_floor") && (
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setOpenManualOrder(true)}
-              className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-            >
-              + Đặt hộ
-            </button>
+            {user?.role === "admin_eocmn" && (
+              <button
+                onClick={() => setOpenManualOrder(true)}
+                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+              >
+                + Đặt hộ
+              </button>
+            )}
 
             <button
               onClick={() => setOpenScanner(true)}
