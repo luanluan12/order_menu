@@ -6,6 +6,8 @@ const generateToken = require("../config/jwt");
 
 const crypto = require("crypto");
 
+const moment = require("moment-timezone");
+
 const ResetPasswordToken = require("../models/ResetPasswordToken");
 
 const sendMail = require("../utils/mail");
@@ -28,12 +30,21 @@ exports.login = async (req, res) => {
     // Nghỉ việc
     // =====================================
 
-    if (user.inactiveFrom) {
-      if (user.status === "inactive") {
-        return res.status(403).json({
-          message: "Tài khoản đã bị vô hiệu hoá.",
-        });
+    const today = moment().tz("Asia/Ho_Chi_Minh").startOf("day");
+
+    const inactiveFrom = user.inactiveFrom
+      ? moment(user.inactiveFrom).tz("Asia/Ho_Chi_Minh").startOf("day")
+      : null;
+
+    if (inactiveFrom?.isSameOrBefore(today)) {
+      if (user.status !== "inactive") {
+        user.status = "inactive";
+        await user.save();
       }
+
+      return res.status(403).json({
+        message: "Tài khoản đã bị vô hiệu hoá.",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

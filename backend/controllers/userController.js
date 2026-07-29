@@ -302,17 +302,11 @@ exports.resignUser = async (req, res) => {
 
     user.inactiveFrom = resignDate.toDate();
 
-    console.log("Date từ FE:", date);
-    console.log("ResignDate:", resignDate.format("YYYY-MM-DD"));
-    console.log("Today:", today.format("YYYY-MM-DD"));
-
     if (resignDate.isSameOrBefore(today)) {
       user.status = "inactive";
     } else {
       user.status = "active";
     }
-
-    console.log("Status sẽ lưu:", user.status);
 
     await user.save();
 
