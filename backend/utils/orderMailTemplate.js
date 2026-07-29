@@ -1,13 +1,7 @@
-const orderMailTemplate = (
-    user,
-    menu,
-    inviteLink,
-    language = "vi"
-) => {
+const orderMailTemplate = (user, menu, inviteLink, language = "vi") => {
+  const isKo = language === "ko";
 
-    const isKo = language === "ko";
-
-    return `
+  return `
 
 <!DOCTYPE html>
 <html>
@@ -21,7 +15,7 @@ const orderMailTemplate = (
 <div style="max-width:600px;margin:auto;background:#fff;padding:40px;border-radius:10px;">
 
 <h2 style="color:#2563eb;">
-${isKo ? "🍱 주간 식단 안내" : "🍱 Thông báo mở đặt món"}
+${isKo ? "주간 식단 안내" : "Thông báo mở đặt món"}
 </h2>
 
 <p>
@@ -29,15 +23,19 @@ ${isKo ? "안녕하세요" : "Xin chào"} <strong>${user.name}</strong>,
 </p>
 
 <p>
-${isKo
+${
+  isKo
     ? `<strong>${menu.week}</strong> 주간 식단이 등록되었습니다.`
-    : `Thực đơn <strong>${menu.week}</strong> đã được mở để đặt món.`}
+    : `Thực đơn <strong>${menu.week}</strong> đã được mở để đặt món.`
+}
 </p>
 
 <p>
-${isKo
+${
+  isKo
     ? "아래 버튼을 눌러 이번 주 식단을 확인하고 원하는 메뉴를 선택해 주세요."
-    : "Vui lòng nhấn nút bên dưới để xem thực đơn và lựa chọn món ăn của bạn."}
+    : "Vui lòng nhấn nút bên dưới để xem thực đơn và lựa chọn món ăn của bạn."
+}
 </p>
 
 <div style="margin:40px 0;text-align:center;">
@@ -71,18 +69,22 @@ ${isKo ? "금요일 오후 5:00" : "17:00 Thứ Sáu"}
 </p>
 
 <p>
-${isKo
+${
+  isKo
     ? "마감 시간이 지나면 시스템에서 자동으로 주문이 종료됩니다."
-    : "Sau thời gian trên hệ thống sẽ tự động khóa việc đặt món."}
+    : "Sau thời gian trên hệ thống sẽ tự động khóa việc đặt món."
+}
 </p>
 
 <hr>
 
 <p style="font-size:12px;color:#888;">
 
-${isKo
+${
+  isKo
     ? "본 메일은 Food Ordering System에서 자동으로 발송되었습니다.<br>회신하지 말아 주세요."
-    : "Email được gửi tự động từ hệ thống Food Ordering.<br>Vui lòng không trả lời email này."}
+    : "Email được gửi tự động từ hệ thống Food Ordering.<br>Vui lòng không trả lời email này."
+}
 
 </p>
 
@@ -93,7 +95,6 @@ ${isKo
 </html>
 
 `;
-
 };
 
 module.exports = orderMailTemplate;

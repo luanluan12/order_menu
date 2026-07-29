@@ -343,8 +343,8 @@ exports.createOrder = async (req, res) => {
       to: user.email,
       subject:
         language === "ko"
-          ? `🍱 ${menu.week} 식사 주문 완료`
-          : `🍱 Xác nhận đặt món ${menu.week}`,
+          ? `${menu.week} 식사 주문 완료`
+          : `Xác nhận đặt món ${menu.week}`,
       html: orderSuccessTemplate(user, order, language),
     });
 
@@ -458,8 +458,8 @@ exports.createOrderFromInvite = async (
       to: user.email,
       subject:
         language === "ko"
-          ? `🍱 ${menu.week} 식사 주문 완료`
-          : `🍱 Xác nhận đặt món ${menu.week}`,
+          ? `${menu.week} 식사 주문 완료`
+          : `Xác nhận đặt món ${menu.week}`,
       html: orderSuccessTemplate(user, order, language),
     });
 
@@ -1220,6 +1220,7 @@ exports.manualCheckin = async (req, res) => {
     const io = req.app.get("io");
 
     io.emit("checkin-success", {
+      orderId: order._id,
       employee: {
         name: order.user.name,
         email: order.user.email,

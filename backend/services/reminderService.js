@@ -5,69 +5,56 @@ const User = require("../models/User");
 const sendMail = require("../utils/mail");
 
 module.exports = async () => {
-
-    console.log("========== Nhắc nhở đặt cơm ==========");
-    const menu = await Menu.findOne({
-
+  console.log("========== Nhắc nhở đặt cơm ==========");
+  const menu = await Menu.findOne({
     status: "published",
 
     deadline: {
+      $gte: new Date(),
+    },
+  })
 
-        $gte: new Date()
-
-    }
-
-})
-
-.sort({
-
-    deadline: 1
-
-});
-
-    if (!menu) {
-        console.log("Không có thực đơn đã phát hành.");
-        return;
-    }
-    if (new Date() > menu.deadline) {
-        return;
-    }
-
-    // Danh sách nhân viên
-    const users = await User.find({
-        role: "guest"
+    .sort({
+      deadline: 1,
     });
 
-    // Danh sách đã đặt
-    const orderedIds = await Order.find({
-        week: menu.week,
-        status: "ordered"
-    }).distinct("user");
+  if (!menu) {
+    console.log("Không có thực đơn đã phát hành.");
+    return;
+  }
+  if (new Date() > menu.deadline) {
+    return;
+  }
 
-    const needReminder = users.filter(
-        (user) =>
-            !orderedIds.some(
-                (id) => id.toString() === user._id.toString()
-            )
-    );
+  // Danh sách nhân viên
+  const users = await User.find({
+    role: "guest",
+  });
 
-    console.log("Tuần:", menu.week);
-    console.log("Tổng nhân viên:", users.length);
-    console.log("Đã đặt:", orderedIds.length);
-    console.log("Cần nhắc:", needReminder.length);
+  // Danh sách đã đặt
+  const orderedIds = await Order.find({
+    week: menu.week,
+    status: "ordered",
+  }).distinct("user");
 
-    for (const user of needReminder) {
+  const needReminder = users.filter(
+    (user) => !orderedIds.some((id) => id.toString() === user._id.toString()),
+  );
 
+  console.log("Tuần:", menu.week);
+  console.log("Tổng nhân viên:", users.length);
+  console.log("Đã đặt:", orderedIds.length);
+  console.log("Cần nhắc:", needReminder.length);
+
+  for (const user of needReminder) {
     try {
+      let subject = "";
+      let html = "";
 
-        let subject = "";
-        let html = "";
+      if (user.language === "ko") {
+        subject = "식사 주문 알림";
 
-        if (user.language === "ko") {
-
-            subject = "🍱 식사 주문 알림";
-
-            html = `
+        html = `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <h2>${user.name}님, 안녕하세요.</h2>
 
@@ -104,12 +91,10 @@ module.exports = async () => {
                     </p>
                 </div>
             `;
+      } else {
+        subject = "Nhắc nhở đặt suất ăn";
 
-        } else {
-
-            subject = "🍱 Nhắc nhở đặt suất ăn";
-
-            html = `
+        html = `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <h2>Xin chào ${user.name},</h2>
 
@@ -146,23 +131,17 @@ module.exports = async () => {
                     </p>
                 </div>
             `;
+      }
 
-        }
+      await sendMail({
+        to: user.email,
+        subject,
+        html,
+      });
 
-        await sendMail({
-            to: user.email,
-            subject,
-            html,
-        });
-
-        console.log("✔ Đã gửi:", user.email);
-
+      console.log("✔ Đã gửi:", user.email);
     } catch (err) {
-
-        console.log("✘ Gửi thất bại:", user.email);
-
+      console.log("✘ Gửi thất bại:", user.email);
     }
-
-}
-
+  }
 };

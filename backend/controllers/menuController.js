@@ -634,8 +634,8 @@ exports.publishMenu = async (req, res) => {
           to: user.email,
           subject:
             language === "ko"
-              ? `🍱 ${menu.week} 주간 식단`
-              : `🍱 Thực đơn tuần ${menu.week}`,
+              ? `${menu.week} 주간 식단`
+              : `Thực đơn tuần ${menu.week}`,
           html: orderMailTemplate(
             user,
             menu,

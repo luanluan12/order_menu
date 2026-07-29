@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const QRCode = require("qrcode");
 const moment = require("moment-timezone");
 const Order = require("../models/Order");
+const User = require("../models/User");
 
 const CheckinToken = require("../models/CheckinToken");
 
@@ -45,6 +46,70 @@ exports.getTodayQr = async (req, res) => {
     return res.status(500).json({
       success: false,
 
+      message: err.message,
+    });
+  }
+};
+
+exports.getTodayCheckins = async (req, res) => {
+  try {
+    const startOfDay = moment().tz("Asia/Ho_Chi_Minh").startOf("day");
+    const endOfDay = startOfDay.clone().add(1, "day");
+
+    const users = await User.find({
+      floor: req.user.floor,
+    }).select("_id");
+
+    const orders = await Order.find({
+      status: "ordered",
+      user: { $in: users.map((user) => user._id) },
+      days: {
+        $elemMatch: {
+          date: {
+            $gte: startOfDay.toDate(),
+            $lt: endOfDay.toDate(),
+          },
+          received: true,
+        },
+      },
+    }).populate("user", "name email floor employeeId");
+
+    const checkins = orders
+      .map((order) => {
+        const day = order.days.find(
+          (item) =>
+            item.received &&
+            moment(item.date).tz("Asia/Ho_Chi_Minh").isSame(startOfDay, "day"),
+        );
+
+        if (!day || !order.user) return null;
+
+        return {
+          orderId: order._id,
+          employee: {
+            name: order.user.name,
+            email: order.user.email,
+            floor: order.user.floor,
+            employeeId: order.user.employeeId,
+          },
+          receivedAt: day.receivedAt,
+          mains: day.mains,
+          drink: day.drink,
+          soup: day.soup,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+
+    return res.json({
+      success: true,
+      data: checkins,
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
       message: err.message,
     });
   }
@@ -166,6 +231,7 @@ exports.checkIn = async (req, res) => {
     const io = req.app.get("io");
 
     io.emit("checkin-success", {
+      orderId: order._id,
       employee: {
         name: order.user.name,
 

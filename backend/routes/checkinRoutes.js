@@ -9,25 +9,28 @@ const admin = require("../middleware/admin");
 const checkinController = require("../controllers/checkinController");
 
 router.get(
+  "/today",
 
-    "/today",
+  auth,
 
-    auth,
+  admin("admin_eocmn", "admin_floor"),
 
-    admin("admin_eocmn","admin_floor"),
+  checkinController.getTodayQr,
+);
 
-    checkinController.getTodayQr
-
+router.get(
+  "/today/checkins",
+  auth,
+  admin("admin_eocmn", "admin_floor"),
+  checkinController.getTodayCheckins,
 );
 
 router.post(
+  "/",
 
-    "/",
+  auth,
 
-    auth,
-
-    checkinController.checkIn
-
+  checkinController.checkIn,
 );
 
 module.exports = router;
