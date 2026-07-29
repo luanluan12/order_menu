@@ -230,11 +230,11 @@ function History() {
                       ))}
 
                       {day.drink && (
-                        <DishCard dish={day.drink} type={`🥤 ${t("drink")}`} />
+                        <DishCard dish={day.drink} type={`${t("drink")}`} />
                       )}
 
                       {day.soup && (
-                        <DishCard dish={day.soup} type={`🥣 ${t("soup")}`} />
+                        <DishCard dish={day.soup} type={`${t("soup")}`} />
                       )}
                     </div>
                     {day.review && (

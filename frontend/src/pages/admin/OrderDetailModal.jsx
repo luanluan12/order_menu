@@ -66,7 +66,7 @@ function OrderDetailModal({
 
             {day.mains.length > 0 && (
               <div className="mb-5">
-                <div className="mb-3 font-semibold">🍱 Món cơm</div>
+                <div className="mb-3 font-semibold">Món cơm</div>
 
                 {day.mains.map((dish, i) => (
                   <div key={i} className="mb-3 flex items-center gap-3">
@@ -94,7 +94,7 @@ function OrderDetailModal({
                   className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
                 />
 
-                <div className="text-sm sm:text-base">🥤 {day.drink.name}</div>
+                <div className="text-sm sm:text-base">{day.drink.name}</div>
               </div>
             )}
 
@@ -107,7 +107,7 @@ function OrderDetailModal({
                   className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
                 />
 
-                <div className="text-sm sm:text-base">🥣 {day.soup.name}</div>
+                <div className="text-sm sm:text-base">{day.soup.name}</div>
               </div>
             )}
           </div>
