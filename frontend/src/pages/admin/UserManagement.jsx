@@ -208,31 +208,33 @@ function UserManagement() {
   );
 
   const getStatus = (user) => {
-    if (user.status === "inactive") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const inactiveDate = user.inactiveFrom ? new Date(user.inactiveFrom) : null;
+
+    if (inactiveDate) {
+      inactiveDate.setHours(0, 0, 0, 0);
+    }
+
+    if (
+      user.status === "inactive" ||
+      inactiveDate?.getTime() <= today.getTime()
+    ) {
       return {
         text: "Đã nghỉ việc",
         className: "bg-red-500 text-white",
       };
     }
 
-    if (user.inactiveFrom) {
-      const today = new Date();
+    if (inactiveDate) {
+      const day = String(inactiveDate.getDate()).padStart(2, "0");
+      const month = String(inactiveDate.getMonth() + 1).padStart(2, "0");
 
-      today.setHours(0, 0, 0, 0);
-
-      const inactiveDate = new Date(user.inactiveFrom);
-
-      inactiveDate.setHours(0, 0, 0, 0);
-
-      if (inactiveDate > today) {
-        const day = String(inactiveDate.getDate()).padStart(2, "0");
-        const month = String(inactiveDate.getMonth() + 1).padStart(2, "0");
-
-        return {
-          text: `Nghỉ từ ${day}/${month}`,
-          className: "bg-yellow-500 text-white",
-        };
-      }
+      return {
+        text: `Nghỉ từ ${day}/${month}`,
+        className: "bg-yellow-500 text-white",
+      };
     }
 
     return {
