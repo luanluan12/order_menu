@@ -5,7 +5,7 @@ const moment = require("moment-timezone");
 
 const sendMail = require("../utils/mail");
 const orderMailTemplate = require("../utils/orderMailTemplate");
-const cloudinary = require("../config/cloudinary");
+const { deleteMenuImage } = require("../services/r2Storage");
 const Order = require("../models/Order");
 const { createOrderToken } = require("../utils/orderToken");
 
@@ -328,7 +328,7 @@ exports.updateMenu = async (req, res) => {
       if (!publicId) return;
 
       try {
-        await cloudinary.uploader.destroy(publicId);
+        await deleteMenuImage(publicId);
       } catch (err) {
         console.log(err.message);
       }
@@ -547,7 +547,7 @@ exports.deleteMenu = async (req, res) => {
       });
     }
 
-    // Xóa toàn bộ ảnh trên Cloudinary
+    // Xóa toàn bộ ảnh trên Cloudflare R2
 
     for (const day of menu.days) {
       const dishes = [
@@ -561,9 +561,9 @@ exports.deleteMenu = async (req, res) => {
         if (!dish.imagePublicId) continue;
 
         try {
-          await cloudinary.uploader.destroy(dish.imagePublicId);
+          await deleteMenuImage(dish.imagePublicId);
         } catch (err) {
-          console.log("Delete Cloudinary:", err.message);
+          console.log("Delete R2:", err.message);
         }
       }
     }

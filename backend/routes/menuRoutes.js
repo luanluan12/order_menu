@@ -1,112 +1,78 @@
-
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
-
-const storage = new CloudinaryStorage({
-
-    cloudinary,
-
-    params: async (req, file) => ({
-
-        folder: "food-menu",
-
-        allowed_formats: [
-
-            "jpg",
-
-            "jpeg",
-
-            "png",
-
-            "webp"
-
-        ],
-
-        public_id:
-            Date.now() +
-            "-" +
-            Math.round(Math.random() * 1000000)
-
-    })
-
-});
+const { uploadMenuImage } = require("../services/r2Storage");
+const menuController = require("../controllers/menuController");
 
 const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: (req, file, callback) => {
+    if (["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) {
+      return callback(null, true);
+    }
 
-    storage
-
+    return callback(new Error("Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP."));
+  },
 });
 
+const uploadImagesToR2 = async (req, res, next) => {
+  try {
+    req.files = await Promise.all(
+      (req.files || []).map(async (file) => {
+        const uploaded = await uploadMenuImage(file);
 
-const menuController = require("../controllers/menuController");
-// =======================
-// Routes
-// =======================
+        // Giữ cấu trúc cũ để menuController không cần thay đổi luồng tạo ảnh.
+        return {
+          ...file,
+          path: uploaded.image,
+          filename: uploaded.imagePublicId,
+        };
+      }),
+    );
 
-// Tạo menu
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
 router.post(
-    "/",
-    auth,
-    admin("admin_eocmn"),
-    upload.any(),
-    menuController.createMenu
+  "/",
+  auth,
+  admin("admin_eocmn"),
+  upload.any(),
+  uploadImagesToR2,
+  menuController.createMenu,
 );
 
-// Danh sách menu
-router.get(
-    "/",
-    auth,
-    admin("admin_eocmn"),
-    menuController.getMenus
-);
+router.get("/", auth, admin("admin_eocmn"), menuController.getMenus);
 
-// Menu tuần cho User
-router.get(
-    "/week",
-    auth,
-    menuController.getWeekMenu
-);
+router.get("/week", auth, menuController.getWeekMenu);
 
-// Cập nhật menu
 router.put(
-    "/:id",
-    auth,
-    admin("admin_eocmn"),
-    upload.any(),
-    menuController.updateMenu
+  "/:id",
+  auth,
+  admin("admin_eocmn"),
+  upload.any(),
+  uploadImagesToR2,
+  menuController.updateMenu,
 );
 
-// Xóa menu
-router.delete(
-    "/:id",
-    auth,
-    admin("admin_eocmn"),
-    menuController.deleteMenu
-);
+router.delete("/:id", auth, admin("admin_eocmn"), menuController.deleteMenu);
 
-// Publish menu
 router.put(
-    "/publish/:id",
-    auth,
-    admin("admin_eocmn"),
-    menuController.publishMenu
+  "/publish/:id",
+  auth,
+  admin("admin_eocmn"),
+  menuController.publishMenu,
 );
 
-router.get(
-
-    "/:id",
-
-    auth,
-
-    admin("admin_eocmn"),
-
-    menuController.getMenuById
-
-);
+router.get("/:id", auth, admin("admin_eocmn"), menuController.getMenuById);
 
 module.exports = router;
