@@ -5,7 +5,7 @@ const sendMail = async ({ to, subject, html }) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data: result, error } = await resend.emails.send({
-      from: `Food Order System <${process.env.MAIL_FROM}>`,
+      from: `EOC <${process.env.MAIL_FROM}>`,
       to: [to],
       subject,
       html,
