@@ -14,14 +14,28 @@ const sendMail = require("../utils/mail");
 
 const resetPasswordMail = require("../utils/resetPasswordMail");
 
+const findUserByEmail = (email) => {
+  const normalizedEmail = typeof email === "string" ? email.trim() : "";
+
+  if (!normalizedEmail) {
+    return null;
+  }
+
+  const escapedEmail = normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  return User.findOne({
+    email: {
+      $regex: `^${escapedEmail}$`,
+      $options: "i",
+    },
+  });
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const normalizedEmail =
-      typeof email === "string" ? email.trim().toLowerCase() : "";
-
-    const user = await User.findOne({ email: normalizedEmail });
+    const user = await findUserByEmail(email);
 
     if (!user) {
       return res.status(400).json({
@@ -158,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: normalizedEmail });
+    const user = await findUserByEmail(email);
 
     if (!user) {
       return res.status(400).json({
