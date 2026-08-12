@@ -195,10 +195,14 @@ const confirmPublish = async () => {
 };
 
     const handleResend = (menu) => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(9, 10, 0, 0);
-        const localDateTime = new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000)
+        const defaultResendAt = new Date();
+        defaultResendAt.setHours(21, 10, 0, 0);
+
+        if (defaultResendAt <= new Date()) {
+            defaultResendAt.setDate(defaultResendAt.getDate() + 1);
+        }
+
+        const localDateTime = new Date(defaultResendAt.getTime() - defaultResendAt.getTimezoneOffset() * 60000)
             .toISOString()
             .slice(0, 16);
         setResendAt(localDateTime);
