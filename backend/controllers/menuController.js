@@ -671,6 +671,65 @@ exports.publishMenu = async (req, res) => {
     });
   }
 };
+
+/**
+ * Gửi lại menu của tuần ISO kế tiếp cho nhân viên chưa đặt món tuần đó.
+ * Tuần được xác định tại server theo múi giờ Việt Nam để không phụ thuộc menu
+ * nào người quản trị đang chọn trên giao diện.
+ */
+exports.resendNextWeekMenu = async (req, res) => {
+  try {
+    const nextWeek = moment().tz("Asia/Ho_Chi_Minh").add(1, "week");
+    const week = `${nextWeek.isoWeekYear()}-W${String(nextWeek.isoWeek()).padStart(2, "0")}`;
+
+    const menu = await Menu.findOne({ week, status: "published" });
+
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: `Không tìm thấy menu đã Publish của tuần sau (${week}).`,
+      });
+    }
+
+    const users = await User.find({ role: "guest", status: "active" });
+    const orderedUserIds = await Order.find({ week: menu.week, status: "ordered" }).distinct("user");
+    const orderedIds = new Set(orderedUserIds.map((id) => id.toString()));
+    const recipients = users.filter((user) => !orderedIds.has(user._id.toString()));
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const user of recipients) {
+      try {
+        const language = (user.language || "vi").toLowerCase();
+
+        await sendMail({
+          to: user.email,
+          subject: language === "ko" ? `${menu.week} 주간 식단` : `Thực đơn tuần ${menu.week}`,
+          html: orderMailTemplate(user, menu, process.env.FRONTEND_URL, language),
+        });
+
+        sent += 1;
+      } catch (mailError) {
+        failed += 1;
+        console.error(`Resend next-week menu failed: ${user.email}`, mailError.message);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `Đã gửi lại menu tuần sau ${menu.week}.`,
+      week: menu.week,
+      total: recipients.length,
+      sent,
+      failed,
+    });
+  } catch (err) {
+    console.error("Resend next-week menu error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.getMenuById = async (req, res) => {
   try {
     const menu = await Menu.findById(req.params.id);

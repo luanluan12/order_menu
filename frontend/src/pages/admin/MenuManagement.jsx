@@ -17,7 +17,8 @@ import {
     createMenu,
     updateMenu,
     deleteMenu,
-    publishMenu as publishMenuApi
+    publishMenu as publishMenuApi,
+    resendNextWeekMenu
 } from "../../api/menuApi";
 
 function MenuManagement() {
@@ -28,6 +29,7 @@ function MenuManagement() {
     const [publishingId, setPublishingId] = useState(null);
     const [publishMenu, setPublishMenu] = useState(null);
     const [publishing, setPublishing] = useState(false);
+    const [resendingNextWeek, setResendingNextWeek] = useState(false);
 
     const loadMenus = async () => {
 
@@ -190,6 +192,24 @@ const confirmPublish = async () => {
 
 };
 
+    const handleResendNextWeek = async () => {
+        const confirmed = window.confirm(
+            "Gửi lại menu của TUẦN SAU cho tất cả nhân viên chưa đặt món?\n\nHệ thống tự xác định tuần sau theo giờ Việt Nam; không gửi theo menu đang chọn."
+        );
+
+        if (!confirmed) return;
+
+        try {
+            setResendingNextWeek(true);
+            const res = await resendNextWeekMenu();
+            toast.success(`${res.data.message} (${res.data.sent}/${res.data.total} email)`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Không thể gửi lại menu tuần sau");
+        } finally {
+            setResendingNextWeek(false);
+        }
+    };
+
     useEffect(() => {
         loadMenus();
     }, []);
@@ -240,14 +260,24 @@ const confirmPublish = async () => {
             {/* Title */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                <button
-    onClick={() => navigate("/admin/menu/create")}
-    className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-orange-700 sm:w-auto"
->
-    <span className="text-lg">+</span>
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                    <button
+                        onClick={handleResendNextWeek}
+                        disabled={resendingNextWeek}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 font-semibold text-white shadow transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                        <FaPaperPlane />
+                        <span>{resendingNextWeek ? "Đang gửi..." : "Gửi lại menu tuần sau"}</span>
+                    </button>
 
-    <span>Tạo Menu Tuần</span>
-</button>
+                    <button
+                        onClick={() => navigate("/admin/menu/create")}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-orange-700"
+                    >
+                        <span className="text-lg">+</span>
+                        <span>Tạo Menu Tuần</span>
+                    </button>
+                </div>
 
             </div>
 

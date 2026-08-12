@@ -102,6 +102,13 @@ export const publishMenu = (id) => {
 
 };
 
+/** Gửi lại menu tuần sau cho người chưa đặt món */
+export const resendNextWeekMenu = () => {
+
+    return axios.put("/menu/resend-next-week");
+
+};
+
 /**
  * Xóa Menu tuần
  */

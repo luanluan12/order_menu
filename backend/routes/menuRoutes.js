@@ -73,6 +73,13 @@ router.put(
   menuController.publishMenu,
 );
 
+router.put(
+  "/resend-next-week",
+  auth,
+  admin("admin_eocmn"),
+  menuController.resendNextWeekMenu,
+);
+
 router.get("/:id", auth, admin("admin_eocmn"), menuController.getMenuById);
 
 module.exports = router;
