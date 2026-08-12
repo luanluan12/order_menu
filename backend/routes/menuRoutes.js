@@ -55,6 +55,15 @@ router.get("/", auth, admin("admin_eocmn"), menuController.getMenus);
 
 router.get("/week", auth, menuController.getWeekMenu);
 
+// Các route cố định phải đứng trước "/:id"; nếu không Express sẽ coi
+// "resend-next-week" là id và Mongoose ném CastError ObjectId.
+router.put(
+  "/resend-next-week",
+  auth,
+  admin("admin_eocmn"),
+  menuController.resendNextWeekMenu,
+);
+
 router.put(
   "/:id",
   auth,
@@ -71,13 +80,6 @@ router.put(
   auth,
   admin("admin_eocmn"),
   menuController.publishMenu,
-);
-
-router.put(
-  "/resend-next-week",
-  auth,
-  admin("admin_eocmn"),
-  menuController.resendNextWeekMenu,
 );
 
 router.get("/:id", auth, admin("admin_eocmn"), menuController.getMenuById);
