@@ -671,58 +671,6 @@ exports.publishMenu = async (req, res) => {
     });
   }
 };
-
-/**
- * Đặt lịch gửi lại menu cho nhân viên chưa có đơn đặt món.
- */
-exports.scheduleResendMenu = async (req, res) => {
-  try {
-    const { scheduledAt } = req.body;
-    const resendAt = new Date(scheduledAt);
-
-    if (!scheduledAt || Number.isNaN(resendAt.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời điểm gửi lại không hợp lệ.",
-      });
-    }
-
-    if (resendAt <= new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Thời điểm gửi lại phải ở tương lai.",
-      });
-    }
-
-    const menu = await Menu.findById(req.params.id);
-
-    if (!menu) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy Menu." });
-    }
-
-    if (menu.status !== "published") {
-      return res.status(400).json({
-        success: false,
-        message: "Chỉ có thể gửi lại menu đã Publish.",
-      });
-    }
-
-    menu.resendAt = resendAt;
-    menu.resendStatus = "scheduled";
-    menu.resendResult = { total: 0, sent: 0, failed: 0, completedAt: null };
-    await menu.save();
-
-    return res.json({
-      success: true,
-      message: `Đã lên lịch gửi lại menu tuần ${menu.week}.`,
-      data: menu,
-    });
-  } catch (err) {
-    console.error("Schedule resend menu error:", err);
-    return res.status(500).json({ success: false, message: err.message });
-  }
-};
-
 exports.getMenuById = async (req, res) => {
   try {
     const menu = await Menu.findById(req.params.id);

@@ -213,23 +213,6 @@ const menuSchema = new mongoose.Schema({
 
 },
 
-    // Lịch gửi lại mail cho những nhân viên chưa đặt món.
-    resendAt: {
-        type: Date,
-        default: null
-    },
-    resendStatus: {
-        type: String,
-        enum: ["scheduled", "processing", "completed", "failed", null],
-        default: null
-    },
-    resendResult: {
-        total: { type: Number, default: 0 },
-        sent: { type: Number, default: 0 },
-        failed: { type: Number, default: 0 },
-        completedAt: { type: Date, default: null }
-    },
-
 
 }, {
 

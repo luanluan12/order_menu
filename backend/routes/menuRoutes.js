@@ -73,13 +73,6 @@ router.put(
   menuController.publishMenu,
 );
 
-router.put(
-  "/resend/:id",
-  auth,
-  admin("admin_eocmn"),
-  menuController.scheduleResendMenu,
-);
-
 router.get("/:id", auth, admin("admin_eocmn"), menuController.getMenuById);
 
 module.exports = router;

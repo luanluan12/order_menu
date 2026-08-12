@@ -20,7 +20,6 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const checkinRoutes = require("./routes/checkinRoutes");
 const startReminderCron = require("./cron/reminderCron");
 const startResignCron = require("./cron/resignCron");
-const startMenuResendCron = require("./cron/menuResendCron");
 
 const app = express();
 
@@ -28,7 +27,6 @@ connectDB();
 
 startReminderCron();
 startResignCron();
-startMenuResendCron();
 
 app.use(cors());
 

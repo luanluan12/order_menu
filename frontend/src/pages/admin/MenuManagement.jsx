@@ -17,8 +17,7 @@ import {
     createMenu,
     updateMenu,
     deleteMenu,
-    publishMenu as publishMenuApi,
-    scheduleResendMenu
+    publishMenu as publishMenuApi
 } from "../../api/menuApi";
 
 function MenuManagement() {
@@ -29,9 +28,6 @@ function MenuManagement() {
     const [publishingId, setPublishingId] = useState(null);
     const [publishMenu, setPublishMenu] = useState(null);
     const [publishing, setPublishing] = useState(false);
-    const [resendMenu, setResendMenu] = useState(null);
-    const [resendAt, setResendAt] = useState("");
-    const [resending, setResending] = useState(false);
 
     const loadMenus = async () => {
 
@@ -193,33 +189,6 @@ const confirmPublish = async () => {
     }
 
 };
-
-    const handleResend = (menu) => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(9, 10, 0, 0);
-        const localDateTime = new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16);
-        setResendAt(localDateTime);
-        setResendMenu(menu);
-    };
-
-    const confirmResend = async () => {
-        if (!resendMenu || !resendAt) return;
-
-        try {
-            setResending(true);
-            await scheduleResendMenu(resendMenu._id, new Date(resendAt).toISOString());
-            toast.success(`Đã lên lịch gửi lại menu tuần ${resendMenu.week}.`);
-            setResendMenu(null);
-            await loadMenus();
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Không thể lên lịch gửi lại menu");
-        } finally {
-            setResending(false);
-        }
-    };
 
     useEffect(() => {
         loadMenus();
@@ -441,16 +410,6 @@ const confirmPublish = async () => {
                                                     <FaPaperPlane />
                                                 </button>
 
-                                                {menu.status === "published" && (
-                                                    <button
-                                                        onClick={() => handleResend(menu)}
-                                                        className="rounded bg-amber-500 p-2 text-white hover:bg-amber-600"
-                                                        title="Gửi lại cho người chưa đặt món"
-                                                    >
-                                                        <FaPaperPlane />
-                                                    </button>
-                                                )}
-
                                             </div>
 
                                         </td>
@@ -612,16 +571,6 @@ const confirmPublish = async () => {
 
                         </button>
 
-                        {menu.status === "published" && (
-                            <button
-                                onClick={() => handleResend(menu)}
-                                className="flex-1 rounded-lg bg-amber-500 py-2 text-white"
-                                title="Gửi lại cho người chưa đặt món"
-                            >
-                                <FaPaperPlane className="mx-auto" />
-                            </button>
-                        )}
-
                     </div>
 
                 </div>
@@ -676,30 +625,6 @@ const confirmPublish = async () => {
 
             </div>
 
-        </div>
-    </div>
-)}
-        {resendMenu && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-[460px] rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="text-xl font-bold">Gửi lại menu</h2>
-            <p className="mt-3 text-gray-700">
-                Hệ thống chỉ gửi lại menu <strong>{resendMenu.week}</strong> cho nhân viên đang hoạt động chưa đặt món tại thời điểm gửi.
-            </p>
-            <label className="mt-5 block text-sm font-medium text-gray-700">Thời điểm bắt đầu gửi</label>
-            <input
-                type="datetime-local"
-                value={resendAt}
-                onChange={(event) => setResendAt(event.target.value)}
-                className="mt-2 w-full rounded-lg border px-3 py-2"
-                required
-            />
-            <div className="mt-6 flex justify-end gap-3">
-                <button disabled={resending} onClick={() => setResendMenu(null)} className="rounded-lg border px-5 py-2 hover:bg-gray-50">Hủy</button>
-                <button disabled={resending || !resendAt} onClick={confirmResend} className="flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2 text-white hover:bg-amber-600 disabled:opacity-70">
-                    <FaPaperPlane /> {resending ? "Đang lên lịch..." : "Xác nhận lịch gửi"}
-                </button>
-            </div>
         </div>
     </div>
 )}
