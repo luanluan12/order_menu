@@ -695,6 +695,7 @@ exports.resendNextWeekMenu = async (req, res) => {
     const orderedUserIds = await Order.find({ week: menu.week, status: "ordered" }).distinct("user");
     const orderedIds = new Set(orderedUserIds.map((id) => id.toString()));
     const recipients = users.filter((user) => !orderedIds.has(user._id.toString()));
+    const orderedRecipients = users.length - recipients.length;
 
     let sent = 0;
     let failed = 0;
@@ -720,6 +721,9 @@ exports.resendNextWeekMenu = async (req, res) => {
       success: true,
       message: `Đã gửi lại menu tuần sau ${menu.week}.`,
       week: menu.week,
+      activeGuests: users.length,
+      orderedRecipients,
+      notOrderedRecipients: recipients.length,
       total: recipients.length,
       sent,
       failed,
