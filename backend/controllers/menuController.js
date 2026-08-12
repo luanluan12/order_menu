@@ -1,13 +1,12 @@
 const Menu = require("../models/Menu");
 const User = require("../models/User");
 
-const moment = require("moment-timezone");
-
 const sendMail = require("../utils/mail");
 const orderMailTemplate = require("../utils/orderMailTemplate");
 const { deleteMenuImage } = require("../services/r2Storage");
 const Order = require("../models/Order");
 const { createOrderToken } = require("../utils/orderToken");
+const sendReminder = require("../services/reminderService");
 
 exports.createMenu = async (req, res) => {
   try {
@@ -673,73 +672,26 @@ exports.publishMenu = async (req, res) => {
 };
 
 /**
- * Gửi lại menu của tuần ISO kế tiếp cho nhân viên chưa đặt món tuần đó.
- * Tuần được xác định tại server theo múi giờ Việt Nam để không phụ thuộc menu
- * nào người quản trị đang chọn trên giao diện.
+ * Gửi lại đúng email nhắc nhở tự động cho danh sách nhân viên chưa đặt món.
+ * Dùng chung service với cron Thứ Năm/Thứ Sáu để menu, người nhận và nội dung
+ * email luôn nhất quán.
  */
 exports.resendNextWeekMenu = async (req, res) => {
   try {
-    const nextWeek = moment().tz("Asia/Ho_Chi_Minh").add(1, "week");
-    const week = `${nextWeek.isoWeekYear()}-W${String(nextWeek.isoWeek()).padStart(2, "0")}`;
+    const result = await sendReminder();
 
-    const menu = await Menu.findOne({ week, status: "published" });
-
-    if (!menu) {
+    if (!result) {
       return res.status(404).json({
         success: false,
-        message: `Không tìm thấy menu đã Publish của tuần sau (${week}).`,
+        message: "Không tìm thấy menu đã Publish còn trong thời gian đặt món.",
       });
-    }
-
-    const users = await User.find({ role: "guest", status: "active" });
-    const weeklyOrders = await Order.find({ week: menu.week, status: "ordered" })
-      .select("user days")
-      .lean();
-
-    // Một Order có thể được tạo với cả 5 ngày đều "nghỉ ăn". Chỉ xem người
-    // dùng đã đặt khi họ chọn ít nhất một món, nước hoặc canh trong tuần.
-    const orderedIds = new Set(
-      weeklyOrders
-        .filter((order) =>
-          order.days.some(
-            (day) => day.mains?.length > 0 || Boolean(day.drink) || Boolean(day.soup),
-          ),
-        )
-        .map((order) => order.user.toString()),
-    );
-    const recipients = users.filter((user) => !orderedIds.has(user._id.toString()));
-    const orderedRecipients = users.length - recipients.length;
-
-    let sent = 0;
-    let failed = 0;
-
-    for (const user of recipients) {
-      try {
-        const language = (user.language || "vi").toLowerCase();
-
-        await sendMail({
-          to: user.email,
-          subject: language === "ko" ? `${menu.week} 주간 식단` : `Thực đơn tuần ${menu.week}`,
-          html: orderMailTemplate(user, menu, process.env.FRONTEND_URL, language),
-        });
-
-        sent += 1;
-      } catch (mailError) {
-        failed += 1;
-        console.error(`Resend next-week menu failed: ${user.email}`, mailError.message);
-      }
     }
 
     return res.json({
       success: true,
-      message: `Đã gửi lại menu tuần sau ${menu.week}.`,
-      week: menu.week,
-      activeGuests: users.length,
-      orderedRecipients,
-      notOrderedRecipients: recipients.length,
-      total: recipients.length,
-      sent,
-      failed,
+      message: `Đã gửi email nhắc đặt món tuần ${result.menu.week}.`,
+      week: result.menu.week,
+      ...result,
     });
   } catch (err) {
     console.error("Resend next-week menu error:", err);

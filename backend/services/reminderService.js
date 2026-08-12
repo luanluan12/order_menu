@@ -21,11 +21,11 @@ module.exports = async () => {
 
   if (!menu) {
     console.log("Không có thực đơn đã phát hành.");
-    return;
+    return null;
   }
 
   if (new Date() > menu.deadline) {
-    return;
+    return null;
   }
 
   const users = await User.find({
@@ -45,6 +45,9 @@ module.exports = async () => {
   console.log("Tổng nhân viên:", users.length);
   console.log("Đã đặt:", orderedIds.length);
   console.log("Cần nhắc:", needReminder.length);
+
+  let sent = 0;
+  let failed = 0;
 
   for (const user of needReminder) {
     try {
@@ -136,9 +139,20 @@ module.exports = async () => {
         html,
       });
 
+      sent += 1;
       console.log("✔ Đã gửi:", user.email);
     } catch (err) {
+      failed += 1;
       console.log("✘ Gửi thất bại:", user.email);
     }
   }
+
+  return {
+    menu,
+    totalGuests: users.length,
+    orderedGuests: users.length - needReminder.length,
+    total: needReminder.length,
+    sent,
+    failed,
+  };
 };

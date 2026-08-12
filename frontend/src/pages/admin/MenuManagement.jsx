@@ -203,8 +203,8 @@ const confirmPublish = async () => {
             setResendingNextWeek(true);
             const res = await resendNextWeekMenu();
             toast.success(
-                `${res.data.message} Đã đặt: ${res.data.orderedRecipients}/${res.data.activeGuests}; ` +
-                `chưa đặt: ${res.data.notOrderedRecipients}; đã gửi: ${res.data.sent}/${res.data.total} email.`
+                `${res.data.message} Đã đặt: ${res.data.orderedGuests}/${res.data.totalGuests}; ` +
+                `chưa đặt: ${res.data.total}; đã gửi: ${res.data.sent}/${res.data.total} email.`
             );
         } catch (err) {
             toast.error(err.response?.data?.message || "Không thể gửi lại menu tuần sau");
