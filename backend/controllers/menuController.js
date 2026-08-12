@@ -692,8 +692,21 @@ exports.resendNextWeekMenu = async (req, res) => {
     }
 
     const users = await User.find({ role: "guest", status: "active" });
-    const orderedUserIds = await Order.find({ week: menu.week, status: "ordered" }).distinct("user");
-    const orderedIds = new Set(orderedUserIds.map((id) => id.toString()));
+    const weeklyOrders = await Order.find({ week: menu.week, status: "ordered" })
+      .select("user days")
+      .lean();
+
+    // Một Order có thể được tạo với cả 5 ngày đều "nghỉ ăn". Chỉ xem người
+    // dùng đã đặt khi họ chọn ít nhất một món, nước hoặc canh trong tuần.
+    const orderedIds = new Set(
+      weeklyOrders
+        .filter((order) =>
+          order.days.some(
+            (day) => day.mains?.length > 0 || Boolean(day.drink) || Boolean(day.soup),
+          ),
+        )
+        .map((order) => order.user.toString()),
+    );
     const recipients = users.filter((user) => !orderedIds.has(user._id.toString()));
     const orderedRecipients = users.length - recipients.length;
 
