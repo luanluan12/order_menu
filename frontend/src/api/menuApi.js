@@ -102,6 +102,13 @@ export const publishMenu = (id) => {
 
 };
 
+/** Lên lịch gửi lại cho nhân viên chưa đặt món */
+export const scheduleResendMenu = (id, scheduledAt) => {
+
+    return axios.put(`/menu/resend/${id}`, { scheduledAt });
+
+};
+
 /**
  * Xóa Menu tuần
  */
