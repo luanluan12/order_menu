@@ -7,6 +7,7 @@ const { deleteMenuImage } = require("../services/r2Storage");
 const Order = require("../models/Order");
 const { createOrderToken } = require("../utils/orderToken");
 const sendReminder = require("../services/reminderService");
+const getFrontendUrl = require("../utils/frontendUrl");
 
 exports.createMenu = async (req, res) => {
   try {
@@ -638,7 +639,7 @@ exports.publishMenu = async (req, res) => {
           html: orderMailTemplate(
             user,
             menu,
-            process.env.FRONTEND_URL,
+            getFrontendUrl(),
             language,
           ),
         });

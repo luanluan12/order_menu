@@ -2,10 +2,9 @@ const Menu = require("../models/Menu");
 const Order = require("../models/Order");
 const User = require("../models/User");
 const sendMail = require("../utils/mail");
+const getFrontendUrl = require("../utils/frontendUrl");
 
-const frontendUrl = (
-  process.env.FRONTEND_URL || "https://eocmenu.food"
-).replace(/\/$/, "");
+const frontendUrl = getFrontendUrl();
 
 module.exports = async () => {
   console.log("========== Nhắc nhở đặt cơm ==========");

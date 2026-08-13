@@ -14,6 +14,8 @@ const sendMail = require("../utils/mail");
 
 const resetPasswordMail = require("../utils/resetPasswordMail");
 
+const getFrontendUrl = require("../utils/frontendUrl");
+
 const findUserByEmail = (email) => {
   const normalizedEmail = typeof email === "string" ? email.trim() : "";
 
@@ -195,7 +197,7 @@ exports.forgotPassword = async (req, res) => {
       expiresAt,
     });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `${getFrontendUrl()}/reset-password?token=${token}`;
 
     await sendMail({
       to: user.email,
