@@ -28,6 +28,7 @@ function OrderManagement() {
   const [openWeekSummary, setOpenWeekSummary] = useState(false);
   const [weekSummary, setWeekSummary] = useState(null);
   const [weekSummaryLoading, setWeekSummaryLoading] = useState(false);
+  const [weekSummaryKeyword, setWeekSummaryKeyword] = useState("");
   const getTodayOrder = (order) => {
     let today = new Date();
 
@@ -150,9 +151,20 @@ function OrderManagement() {
   };
 
   const openWeekOrders = () => {
+    setWeekSummaryKeyword("");
     setOpenWeekSummary(true);
     loadWeekSummary();
   };
+
+  const weekSummaryOrders = (weekSummary?.orders || []).filter((order) => {
+    const search = weekSummaryKeyword.trim().toLowerCase();
+
+    if (!search) return true;
+
+    return [order.user?.name, order.user?.email, order.user?.employeeId].some(
+      (value) => value?.toLowerCase().includes(search),
+    );
+  });
 
   const handleDeleteOrder = async (order) => {
     const name = order.user?.name || "nhân viên này";
@@ -461,6 +473,22 @@ function OrderManagement() {
                 <p className="py-10 text-center text-gray-500">Đang tải...</p>
               ) : weekSummary?.orders?.length ? (
                 <div className="overflow-x-auto">
+                  <div className="mb-4 flex min-w-[620px] gap-2">
+                    <input
+                      type="search"
+                      value={weekSummaryKeyword}
+                      onChange={(event) => setWeekSummaryKeyword(event.target.value)}
+                      placeholder="Tìm tên, email hoặc mã nhân viên..."
+                      className="w-full rounded-lg border px-3 py-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setWeekSummaryKeyword(weekSummaryKeyword.trim())}
+                      className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+                    >
+                      Tìm kiếm
+                    </button>
+                  </div>
                   <table className="w-full min-w-[620px]">
                     <thead className="border-b bg-gray-50 text-left text-sm text-gray-600">
                       <tr>
@@ -472,7 +500,7 @@ function OrderManagement() {
                       </tr>
                     </thead>
                     <tbody>
-                      {weekSummary.orders.map((order) => (
+                      {weekSummaryOrders.map((order) => (
                         <tr key={order._id} className="border-b last:border-0">
                           <td className="p-3 font-medium">{order.user?.name || "Đã xóa user"}</td>
                           <td className="p-3 text-gray-600">{order.user?.email || "-"}</td>
@@ -490,6 +518,11 @@ function OrderManagement() {
                       ))}
                     </tbody>
                   </table>
+                  {weekSummaryOrders.length === 0 && (
+                    <p className="py-8 text-center text-gray-500">
+                      Không tìm thấy người phù hợp.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <p className="py-10 text-center text-gray-500">Chưa có ai đặt món trong tuần này.</p>
