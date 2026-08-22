@@ -137,10 +137,19 @@ function OrderManagement() {
     }
   };
 
-  const loadWeekSummary = async () => {
+  const getNextWeekStart = () => {
+    const date = new Date(`${selectedDate}T12:00:00`);
+    const day = date.getDay();
+    const daysUntilNextMonday = day === 0 ? 1 : 8 - day;
+
+    date.setDate(date.getDate() + daysUntilNextMonday);
+    return date.toISOString().split("T")[0];
+  };
+
+  const loadWeekSummary = async (date) => {
     try {
       setWeekSummaryLoading(true);
-      const res = await getWeekSummary(selectedDate);
+      const res = await getWeekSummary(date);
       setWeekSummary(res.data.data);
     } catch (err) {
       alert(err.response?.data?.message || "Không tải được danh sách đặt món.");
@@ -153,7 +162,7 @@ function OrderManagement() {
   const openWeekOrders = () => {
     setWeekSummaryKeyword("");
     setOpenWeekSummary(true);
-    loadWeekSummary();
+    loadWeekSummary(getNextWeekStart());
   };
 
   const weekSummaryOrders = (weekSummary?.orders || []).filter((order) => {
@@ -222,7 +231,7 @@ function OrderManagement() {
               onClick={openWeekOrders}
               className="rounded-xl bg-slate-700 px-5 py-3 font-semibold text-white transition hover:bg-slate-800"
             >
-              Người đặt cả tuần
+              Người đặt tuần sau
             </button>
           </div>
         )}
@@ -454,7 +463,7 @@ function OrderManagement() {
           <div className="max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div>
-                <h2 className="text-xl font-bold">Người đã đặt món cả tuần</h2>
+                <h2 className="text-xl font-bold">Người đã đặt món tuần sau</h2>
                 {weekSummary && (
                   <p className="mt-1 text-sm text-gray-500">
                     {new Date(`${weekSummary.weekStart}T00:00:00`).toLocaleDateString("vi-VN")} - {new Date(`${weekSummary.weekEnd}T00:00:00`).toLocaleDateString("vi-VN")}
