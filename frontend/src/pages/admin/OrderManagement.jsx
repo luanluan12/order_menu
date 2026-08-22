@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { getOrders, manualCheckin } from "../../api/orderApi";
+import {
+  deleteOrder,
+  getOrders,
+  getWeekSummary,
+  manualCheckin,
+} from "../../api/orderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import OrderDetailModal from "./OrderDetailModal";
@@ -20,6 +25,9 @@ function OrderManagement() {
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [keyword, setKeyword] = useState("");
   const [openManualOrder, setOpenManualOrder] = useState(false);
+  const [openWeekSummary, setOpenWeekSummary] = useState(false);
+  const [weekSummary, setWeekSummary] = useState(null);
+  const [weekSummaryLoading, setWeekSummaryLoading] = useState(false);
   const getTodayOrder = (order) => {
     let today = new Date();
 
@@ -128,6 +136,50 @@ function OrderManagement() {
     }
   };
 
+  const loadWeekSummary = async () => {
+    try {
+      setWeekSummaryLoading(true);
+      const res = await getWeekSummary(selectedDate);
+      setWeekSummary(res.data.data);
+    } catch (err) {
+      alert(err.response?.data?.message || "Không tải được danh sách đặt món.");
+      setOpenWeekSummary(false);
+    } finally {
+      setWeekSummaryLoading(false);
+    }
+  };
+
+  const openWeekOrders = () => {
+    setOpenWeekSummary(true);
+    loadWeekSummary();
+  };
+
+  const handleDeleteOrder = async (order) => {
+    const name = order.user?.name || "nhân viên này";
+    const email = order.user?.email || "";
+    const confirmed = window.confirm(
+      `Xóa vĩnh viễn order của ${name}${email ? ` (${email})` : ""}?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteOrder(order._id);
+      setWeekSummary((current) =>
+        current
+          ? {
+              ...current,
+              orders: current.orders.filter((item) => item._id !== order._id),
+            }
+          : current,
+      );
+      await loadOrders();
+      alert("Đã xóa order.");
+    } catch (err) {
+      alert(err.response?.data?.message || "Xóa order thất bại.");
+    }
+  };
+
   useEffect(() => {
     loadOrders();
   }, [selectedDate]);
@@ -153,6 +205,12 @@ function OrderManagement() {
               className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
             >
               QR Check-in
+            </button>
+            <button
+              onClick={openWeekOrders}
+              className="rounded-xl bg-slate-700 px-5 py-3 font-semibold text-white transition hover:bg-slate-800"
+            >
+              Người đặt cả tuần
             </button>
           </div>
         )}
@@ -379,6 +437,67 @@ function OrderManagement() {
           loadOrders();
         }}
       />
+      {openWeekSummary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div>
+                <h2 className="text-xl font-bold">Người đã đặt món cả tuần</h2>
+                {weekSummary && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    {new Date(`${weekSummary.weekStart}T00:00:00`).toLocaleDateString("vi-VN")} - {new Date(`${weekSummary.weekEnd}T00:00:00`).toLocaleDateString("vi-VN")}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setOpenWeekSummary(false)}
+                className="rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100"
+              >
+                Đóng
+              </button>
+            </div>
+            <div className="max-h-[calc(85vh-80px)] overflow-y-auto p-5">
+              {weekSummaryLoading ? (
+                <p className="py-10 text-center text-gray-500">Đang tải...</p>
+              ) : weekSummary?.orders?.length ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[620px]">
+                    <thead className="border-b bg-gray-50 text-left text-sm text-gray-600">
+                      <tr>
+                        <th className="p-3">Nhân viên</th>
+                        <th className="p-3">Email</th>
+                        <th className="p-3 text-center">Tầng</th>
+                        <th className="p-3 text-center">Tuần</th>
+                        <th className="p-3 text-center">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {weekSummary.orders.map((order) => (
+                        <tr key={order._id} className="border-b last:border-0">
+                          <td className="p-3 font-medium">{order.user?.name || "Đã xóa user"}</td>
+                          <td className="p-3 text-gray-600">{order.user?.email || "-"}</td>
+                          <td className="p-3 text-center">{order.user?.floor ?? "-"}</td>
+                          <td className="p-3 text-center">{order.week}</td>
+                          <td className="p-3 text-center">
+                            <button
+                              onClick={() => handleDeleteOrder(order)}
+                              className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                            >
+                              Xóa order
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="py-10 text-center text-gray-500">Chưa có ai đặt món trong tuần này.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

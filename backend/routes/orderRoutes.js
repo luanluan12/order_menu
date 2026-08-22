@@ -4,6 +4,8 @@ const router = express.Router();
 
 const auth = require("../middleware/auth");
 
+const admin = require("../middleware/admin");
+
 const orderController = require("../controllers/orderController");
 
 // ==========================
@@ -17,6 +19,21 @@ router.post("/", auth, orderController.createOrder);
 // ==========================
 
 router.get("/", auth, orderController.getAllOrders);
+
+// Danh sách đơn của cả tuần, dùng cho quản trị viên rà soát/xóa đơn.
+router.get(
+  "/week-summary",
+  auth,
+  admin("admin_eocmn", "admin_floor"),
+  orderController.getWeekSummary,
+);
+
+router.delete(
+  "/:id",
+  auth,
+  admin("admin_eocmn", "admin_floor"),
+  orderController.deleteOrder,
+);
 
 // ==========================
 // Update Order

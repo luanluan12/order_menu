@@ -90,6 +90,12 @@ export const getOrders = (params = {}) => {
   });
 };
 
+export const getWeekSummary = (date) => {
+  return axios.get("/order/week-summary", { params: { date } });
+};
+
+export const deleteOrder = (id) => axios.delete(`/order/${id}`);
+
 /**
  * Danh sách đánh giá
  */

@@ -1011,6 +1011,109 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
+// ===========================================
+// Danh sách người đã đặt món trong tuần chứa ngày được chọn
+// ===========================================
+
+exports.getWeekSummary = async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date || !moment(date, "YYYY-MM-DD", true).isValid()) {
+      return res.status(400).json({
+        success: false,
+        message: "Ngày cần xem không hợp lệ.",
+      });
+    }
+
+    const startOfWeek = moment
+      .tz(date, "YYYY-MM-DD", "Asia/Ho_Chi_Minh")
+      .startOf("isoWeek");
+    const startOfNextWeek = startOfWeek.clone().add(1, "week");
+
+    const filter = {
+      status: "ordered",
+      days: {
+        $elemMatch: {
+          date: {
+            $gte: startOfWeek.toDate(),
+            $lt: startOfNextWeek.toDate(),
+          },
+        },
+      },
+    };
+
+    if (req.user.role === "admin_floor") {
+      const users = await User.find({ floor: req.user.floor }).select("_id");
+      filter.user = { $in: users.map((user) => user._id) };
+    }
+
+    const orders = await Order.find(filter)
+      .populate("user", "employeeId name email floor")
+      .sort({ createdAt: -1 });
+
+    return res.json({
+      success: true,
+      data: {
+        weekStart: startOfWeek.format("YYYY-MM-DD"),
+        weekEnd: startOfWeek.clone().add(4, "days").format("YYYY-MM-DD"),
+        orders,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// ===========================================
+// Xóa vĩnh viễn một order (chỉ admin)
+// ===========================================
+
+exports.deleteOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email floor",
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn.",
+      });
+    }
+
+    if (
+      req.user.role === "admin_floor" &&
+      order.user?.floor !== req.user.floor
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền xóa đơn của nhân viên tầng khác.",
+      });
+    }
+
+    await order.deleteOne();
+
+    return res.json({
+      success: true,
+      message: "Đã xóa order của nhân viên.",
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 exports.getAvailableUsers = async (req, res) => {
   try {
     const menu = await Menu.findOne({
