@@ -3,6 +3,7 @@ const path = require("path");
 
 const {
   bucket,
+  CopyObjectCommand,
   DeleteObjectCommand,
   getPublicUrl,
   PutObjectCommand,
@@ -70,7 +71,30 @@ async function deleteMenuImage(key) {
   );
 }
 
+async function copyMenuImage(sourceKey) {
+  if (!sourceKey || !sourceKey.startsWith("food-menu/")) return null;
+
+  ensureConfigured();
+
+  const extension = path.extname(sourceKey) || ".jpg";
+  const key = `food-menu/${Date.now()}-${crypto.randomUUID()}${extension}`;
+
+  await r2.send(
+    new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: `${bucket}/${sourceKey}`,
+      Key: key,
+    }),
+  );
+
+  return {
+    image: getPublicUrl(key),
+    imagePublicId: key,
+  };
+}
+
 module.exports = {
+  copyMenuImage,
   deleteMenuImage,
   uploadMenuImage,
 };

@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 const sendMail = require("../utils/mail");
 const orderMailTemplate = require("../utils/orderMailTemplate");
-const { deleteMenuImage } = require("../services/r2Storage");
+const { copyMenuImage, deleteMenuImage } = require("../services/r2Storage");
 const Order = require("../models/Order");
 const { createOrderToken } = require("../utils/orderToken");
 const sendReminder = require("../services/reminderService");
@@ -57,27 +57,26 @@ exports.createMenu = async (req, res) => {
       return req.files.find((file) => file.fieldname === fieldName);
     };
 
-    const getImage = (fieldName) => {
+    const getImage = async (fieldName, dish = {}) => {
       const file = findFile(fieldName);
 
-      if (!file) {
+      if (file) {
         return {
-          image: "",
-
-          imagePublicId: "",
+          image: file.path,
+          imagePublicId: file.filename,
         };
       }
 
-      return {
-        image: file.path,
+      const copiedImage = await copyMenuImage(dish.imagePublicId);
+      if (copiedImage) return copiedImage;
 
-        imagePublicId: file.filename,
-      };
+      // Ảnh cũ ngoài R2 không thể copy bằng key; giữ URL nhưng không nhận quyền xoá.
+      return { image: dish.image || "", imagePublicId: "" };
     };
 
-    const resultDays = days.map((day, dayIndex) => {
-      const mains = (day.mains || []).map((dish, index) => {
-        const imageInfo = getImage(`main_${dayIndex}_${index}_image`);
+    const resultDays = await Promise.all(days.map(async (day, dayIndex) => {
+      const mains = await Promise.all((day.mains || []).map(async (dish, index) => {
+        const imageInfo = await getImage(`main_${dayIndex}_${index}_image`, dish);
 
         return {
           name: dish.name,
@@ -96,10 +95,10 @@ exports.createMenu = async (req, res) => {
 
           imagePublicId: imageInfo.imagePublicId,
         };
-      });
+      }));
 
-      const drinks = (day.drinks || []).map((dish, index) => {
-        const imageInfo = getImage(`drink_${dayIndex}_${index}_image`);
+      const drinks = await Promise.all((day.drinks || []).map(async (dish, index) => {
+        const imageInfo = await getImage(`drink_${dayIndex}_${index}_image`, dish);
 
         return {
           name: dish.name,
@@ -116,10 +115,10 @@ exports.createMenu = async (req, res) => {
 
           imagePublicId: imageInfo.imagePublicId,
         };
-      });
+      }));
 
-      const soups = (day.soups || []).map((dish, index) => {
-        const imageInfo = getImage(`soup_${dayIndex}_${index}_image`);
+      const soups = await Promise.all((day.soups || []).map(async (dish, index) => {
+        const imageInfo = await getImage(`soup_${dayIndex}_${index}_image`, dish);
 
         return {
           name: dish.name,
@@ -136,10 +135,10 @@ exports.createMenu = async (req, res) => {
 
           imagePublicId: imageInfo.imagePublicId,
         };
-      });
+      }));
 
-      const desserts = (day.desserts || []).map((dish, index) => {
-        const imageInfo = getImage(`dessert_${dayIndex}_${index}_image`);
+      const desserts = await Promise.all((day.desserts || []).map(async (dish, index) => {
+        const imageInfo = await getImage(`dessert_${dayIndex}_${index}_image`, dish);
 
         return {
           name: dish.name,
@@ -156,7 +155,7 @@ exports.createMenu = async (req, res) => {
 
           imagePublicId: imageInfo.imagePublicId,
         };
-      });
+      }));
 
       return {
         date: day.date,
@@ -169,7 +168,7 @@ exports.createMenu = async (req, res) => {
 
         desserts,
       };
-    });
+    }));
 
     const menu = await Menu.create({
       week,

@@ -1,4 +1,5 @@
 const {
+  CopyObjectCommand,
   DeleteObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -31,6 +32,7 @@ module.exports = {
   bucket,
   getPublicUrl,
   r2,
+  CopyObjectCommand,
   DeleteObjectCommand,
   PutObjectCommand,
 };

@@ -8,6 +8,8 @@ function WeekMenuEditor({
   onSave,
 
   loading = false,
+  historyMenus = [],
+  historyLoading = false,
 }) {
   const [week, setWeek] = useState("");
 
@@ -20,6 +22,8 @@ function WeekMenuEditor({
   const [deadline, setDeadline] = useState("");
 
   const [allowedWeek, setAllowedWeek] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [importedWeek, setImportedWeek] = useState("");
   useEffect(() => {
     if (!initialData) return;
 
@@ -53,6 +57,8 @@ function WeekMenuEditor({
   }, [initialData]);
 
   useEffect(() => {
+    if (initialData) return;
+
     const now = new Date();
 
     // Luôn tạo menu cho tuần sau
@@ -81,7 +87,7 @@ function WeekMenuEditor({
     const value = `${year}-W${String(week).padStart(2, "0")}`;
     setAllowedWeek(value);
     setWeek(value);
-  }, []);
+  }, [initialData]);
   // useEffect(() => {
 
   //     const now = new Date();
@@ -252,6 +258,38 @@ function WeekMenuEditor({
     setDays(clone);
   };
 
+  const importMenu = (menu) => {
+    setDays((currentDays) =>
+      currentDays.map((day, index) => {
+        const sourceDay = menu.days?.[index] || {};
+        const cloneDish = (dish) => ({
+          name: dish?.name || "",
+          nameKo: dish?.nameKo || "",
+          subtitle: dish?.subtitle || "",
+          subtitleKo: dish?.subtitleKo || "",
+          vegetarian: dish?.vegetarian || false,
+          type: dish?.type || "normal",
+          image: dish?.image || null,
+          imagePublicId: dish?.imagePublicId || "",
+        });
+
+        return {
+          ...day,
+          mains: (sourceDay.mains || []).map(cloneDish),
+          drink: sourceDay.drinks?.[0]
+            ? cloneDish(sourceDay.drinks[0])
+            : { name: "", image: null },
+          soup: sourceDay.soups?.[0]
+            ? cloneDish(sourceDay.soups[0])
+            : { name: "", image: null },
+        };
+      }),
+    );
+    setCurrentDay(0);
+    setImportedWeek(menu.week);
+    setHistoryOpen(false);
+  };
+
   // ===============================
   // Submit
   // ===============================
@@ -334,6 +372,7 @@ function WeekMenuEditor({
         type: dish.type || "normal",
 
         image: dish.image instanceof File ? "" : dish.image || "",
+        imagePublicId: dish.imagePublicId || "",
       })),
 
       drinks: day.drink?.name
@@ -351,6 +390,7 @@ function WeekMenuEditor({
 
               image:
                 day.drink.image instanceof File ? "" : day.drink.image || "",
+              imagePublicId: day.drink.imagePublicId || "",
             },
           ]
         : [],
@@ -369,6 +409,7 @@ function WeekMenuEditor({
               type: "soup",
 
               image: day.soup.image instanceof File ? "" : day.soup.image || "",
+              imagePublicId: day.soup.imagePublicId || "",
             },
           ]
         : [],
@@ -432,15 +473,57 @@ function WeekMenuEditor({
       {/* Header */}
 
       <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
-        <input
-          type="week"
-          value={week}
-          min={allowedWeek}
-          max={allowedWeek}
-          disabled={!!initialData}
-          onChange={(e) => setWeek(e.target.value)}
-          className="w-full rounded-xl border p-3 sm:w-auto"
-        />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input
+            type="week"
+            value={week}
+            min={allowedWeek}
+            max={allowedWeek}
+            disabled={!!initialData}
+            onChange={(e) => setWeek(e.target.value)}
+            className="w-full rounded-xl border p-3 sm:w-auto"
+          />
+
+          {!initialData && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((open) => !open)}
+                disabled={historyLoading || historyMenus.length === 0}
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 font-semibold text-orange-700 transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                <span>{historyLoading ? "Đang tải menu cũ..." : "Menu của các tuần trước"}</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+
+              {historyOpen && (
+                <div className="absolute right-0 z-20 mt-2 max-h-72 w-full min-w-72 overflow-y-auto rounded-xl border bg-white p-2 shadow-xl sm:w-80">
+                  {historyMenus
+                    .filter((menu) => !week || menu.week < week)
+                    .map((menu) => (
+                    <button
+                      key={menu._id}
+                      type="button"
+                      onClick={() => importMenu(menu)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left hover:bg-orange-50"
+                    >
+                      <span className="font-semibold">Tuần {menu.week}</span>
+                      <span className="text-sm text-gray-500">
+                        {menu.status === "published" ? "Đã gửi" : "Bản nháp"}
+                      </span>
+                    </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {importedWeek && (
+          <p className="mt-3 text-sm text-green-700">
+            Đã lấy món từ tuần {importedWeek}. Ngày và thời gian gửi vẫn thuộc tuần {week}.
+          </p>
+        )}
       </div>
 
       <div className="mt-5">

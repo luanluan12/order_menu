@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +8,8 @@ import WeekMenuEditor from "../../components/WeekMenuEditor";
 
 import {
 
-    createMenu
+    createMenu,
+    getMenus
 
 } from "../../api/menuApi";
 
@@ -17,6 +18,23 @@ function MenuWeekCreate() {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
+    const [historyMenus, setHistoryMenus] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
+
+    useEffect(() => {
+        const loadHistoryMenus = async () => {
+            try {
+                const res = await getMenus();
+                setHistoryMenus(res.data.data ?? res.data ?? []);
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Không tải được menu các tuần trước.");
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        loadHistoryMenus();
+    }, []);
 
     const handleSave = async (formData) => {
 
@@ -72,6 +90,8 @@ function MenuWeekCreate() {
 
             <WeekMenuEditor
                 loading={loading}
+                historyMenus={historyMenus}
+                historyLoading={historyLoading}
                 onSave={handleSave}
 
             />

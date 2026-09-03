@@ -45,7 +45,7 @@ const preview =
     image instanceof File
         ? URL.createObjectURL(image)
         : image
-            ? `${API_URL}${image}`
+            ? /^https?:\/\//i.test(image) ? image : `${API_URL}${image}`
             : null;
 
     const submit = () => {
