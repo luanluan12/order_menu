@@ -8,7 +8,7 @@ import WeekMenuContent from "./WeekMenuContent";
 function AdminOrderEditModal({ open, order, onClose, onSuccess }) {
   const [saving, setSaving] = useState(false);
 
-  if (!open || !order?.menu) return null;
+  if (!open || !Array.isArray(order?.menu?.days)) return null;
 
   const submit = async (days) => {
     try {

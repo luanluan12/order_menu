@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   deleteOrder,
+  getOrderById,
   getOrders,
   getWeekSummary,
   manualCheckin,
@@ -18,6 +19,7 @@ function OrderManagement() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
+  const [loadingEditOrder, setLoadingEditOrder] = useState(false);
   const [openScanner, setOpenScanner] = useState(false);
   const getLocalDate = () => {
     const today = new Date();
@@ -203,6 +205,20 @@ function OrderManagement() {
     }
   };
 
+  const openOrderEditor = async (order) => {
+    if (user?.role !== "admin_eocmn" || loadingEditOrder) return;
+
+    try {
+      setLoadingEditOrder(true);
+      const response = await getOrderById(order._id);
+      setEditingOrder(response.data.data);
+    } catch (err) {
+      alert(err.response?.data?.message || "Không tải được chi tiết order.");
+    } finally {
+      setLoadingEditOrder(false);
+    }
+  };
+
   useEffect(() => {
     loadOrders();
   }, [selectedDate]);
@@ -367,7 +383,8 @@ function OrderManagement() {
                         </button>
                         {user?.role === "admin_eocmn" && (
                           <button
-                            onClick={() => setEditingOrder(order)}
+                            onClick={() => openOrderEditor(order)}
+                            disabled={loadingEditOrder}
                             className="rounded-lg bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
                           >
                             Sửa
@@ -451,7 +468,8 @@ function OrderManagement() {
                 </button>
                 {user?.role === "admin_eocmn" && (
                   <button
-                    onClick={() => setEditingOrder(order)}
+                    onClick={() => openOrderEditor(order)}
+                    disabled={loadingEditOrder}
                     className="mt-2 w-full rounded-lg bg-orange-500 py-2 font-semibold text-white hover:bg-orange-600"
                   >
                     Sửa order
@@ -550,7 +568,8 @@ function OrderManagement() {
                             <div className="flex justify-center gap-2">
                               {user?.role === "admin_eocmn" && (
                                 <button
-                                  onClick={() => setEditingOrder(order)}
+                                  onClick={() => openOrderEditor(order)}
+                                  disabled={loadingEditOrder}
                                   className="rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                                 >
                                   Sửa order
