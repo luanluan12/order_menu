@@ -568,6 +568,74 @@ exports.updateOrder = async (req, res) => {
 };
 
 // ===========================================
+// Admin EOC Update Order
+// ===========================================
+
+exports.adminUpdateOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { days } = req.body;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn đặt món.",
+      });
+    }
+
+    const menu = await Menu.findById(order.menu);
+
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy Menu.",
+      });
+    }
+
+    const updatedDays = buildOrderDays(menu, days);
+
+    // Việc sửa món không được làm mất trạng thái nhận món hoặc đánh giá đã có.
+    order.days = updatedDays.map((updatedDay) => {
+      const existingDay = order.days.find(
+        (day) =>
+          moment(day.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD") ===
+          moment(updatedDay.date)
+            .tz("Asia/Ho_Chi_Minh")
+            .format("YYYY-MM-DD"),
+      );
+
+      return {
+        ...updatedDay,
+        received: existingDay?.received || false,
+        receivedAt: existingDay?.receivedAt || null,
+        review: existingDay?.review || null,
+      };
+    });
+
+    await order.save();
+
+    const result = await Order.findById(order._id)
+      .populate("user", "employeeId name email floor")
+      .populate("menu", "week year status days deadline openTime");
+
+    return res.json({
+      success: true,
+      message: "Cập nhật đơn đặt món thành công.",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// ===========================================
 // Cancel Order
 // ===========================================
 
@@ -1050,6 +1118,7 @@ exports.getWeekSummary = async (req, res) => {
 
     const orders = await Order.find(filter)
       .populate("user", "employeeId name email floor")
+      .populate("menu", "week year status days deadline openTime")
       .sort({ createdAt: -1 });
 
     return res.json({

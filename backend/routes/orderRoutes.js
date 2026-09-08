@@ -35,6 +35,14 @@ router.delete(
   orderController.deleteOrder,
 );
 
+// Admin EOC được phép chỉnh sửa đơn thay cho nhân viên, kể cả sau deadline.
+router.put(
+  "/admin/:id",
+  auth,
+  admin("admin_eocmn"),
+  orderController.adminUpdateOrder,
+);
+
 // ==========================
 // Update Order
 // ==========================
@@ -79,9 +87,19 @@ router.put("/checkin/manual", auth, orderController.manualCheckin);
 // Manual Order (Admin)
 // ==========================
 
-router.get("/manual/users", auth, orderController.getAvailableUsers);
+router.get(
+  "/manual/users",
+  auth,
+  admin("admin_eocmn"),
+  orderController.getAvailableUsers,
+);
 
-router.post("/manual", auth, orderController.createManualOrder);
+router.post(
+  "/manual",
+  auth,
+  admin("admin_eocmn"),
+  orderController.createManualOrder,
+);
 
 router.get("/:id", auth, orderController.getOrderById);
 

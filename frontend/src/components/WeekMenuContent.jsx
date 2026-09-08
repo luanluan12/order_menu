@@ -17,6 +17,7 @@ function WeekMenuContent({
   editable = true,
   isReadonly = false,
   isManualOrder = false,
+  isAdminEdit = false,
 }) {
   const [currentDay, setCurrentDay] = useState(0);
   const [orders, setOrders] = useState([]);
@@ -332,6 +333,10 @@ function WeekMenuContent({
       if (!success) return;
 
       setLoading(false);
+
+      if (isAdminEdit) {
+        return;
+      }
 
       if (isManualOrder) {
         await Swal.fire({

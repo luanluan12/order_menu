@@ -11,11 +11,13 @@ import OrderDetailModal from "./OrderDetailModal";
 import CheckinQrModal from "./CheckinQrModal";
 import { Check } from "lucide-react";
 import ManualOrderModal from "../../components/ManualOrderModal";
+import AdminOrderEditModal from "../../components/AdminOrderEditModal";
 
 function OrderManagement() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [editingOrder, setEditingOrder] = useState(null);
   const [openScanner, setOpenScanner] = useState(false);
   const getLocalDate = () => {
     const today = new Date();
@@ -356,12 +358,22 @@ function OrderManagement() {
                     </td>
 
                     <td className="p-4 text-center">
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                      >
-                        Xem
-                      </button>
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        >
+                          Xem
+                        </button>
+                        {user?.role === "admin_eocmn" && (
+                          <button
+                            onClick={() => setEditingOrder(order)}
+                            className="rounded-lg bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+                          >
+                            Sửa
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -437,6 +449,14 @@ function OrderManagement() {
                 >
                   Xem chi tiết
                 </button>
+                {user?.role === "admin_eocmn" && (
+                  <button
+                    onClick={() => setEditingOrder(order)}
+                    className="mt-2 w-full rounded-lg bg-orange-500 py-2 font-semibold text-white hover:bg-orange-600"
+                  >
+                    Sửa order
+                  </button>
+                )}
               </div>
             );
           })
@@ -456,6 +476,17 @@ function OrderManagement() {
         onClose={() => setOpenManualOrder(false)}
         onSuccess={() => {
           loadOrders();
+        }}
+      />
+      <AdminOrderEditModal
+        open={!!editingOrder}
+        order={editingOrder}
+        onClose={() => setEditingOrder(null)}
+        onSuccess={() => {
+          loadOrders();
+          if (openWeekSummary) {
+            loadWeekSummary(getNextWeekStart());
+          }
         }}
       />
       {openWeekSummary && (
@@ -516,12 +547,22 @@ function OrderManagement() {
                           <td className="p-3 text-center">{order.user?.floor ?? "-"}</td>
                           <td className="p-3 text-center">{order.week}</td>
                           <td className="p-3 text-center">
-                            <button
-                              onClick={() => handleDeleteOrder(order)}
-                              className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                            >
-                              Xóa order
-                            </button>
+                            <div className="flex justify-center gap-2">
+                              {user?.role === "admin_eocmn" && (
+                                <button
+                                  onClick={() => setEditingOrder(order)}
+                                  className="rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+                                >
+                                  Sửa order
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteOrder(order)}
+                                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                              >
+                                Xóa order
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

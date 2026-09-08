@@ -22,6 +22,11 @@ export const updateOrder = (id, data) => {
   );
 };
 
+/** Admin EOC cập nhật đơn thay cho nhân viên. */
+export const adminUpdateOrder = (id, data) => {
+  return axios.put(`/order/admin/${id}`, data);
+};
+
 /**
  * Hủy đặt món cả tuần
  */
