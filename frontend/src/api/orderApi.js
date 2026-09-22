@@ -105,6 +105,10 @@ export const getBulkCancelOptions = () => {
   return axios.get("/order/bulk-cancel/options");
 };
 
+export const searchBulkCancelUsers = (search) => {
+  return axios.get("/order/bulk-cancel/users", { params: { search } });
+};
+
 export const previewBulkCancel = (data) => {
   return axios.post("/order/bulk-cancel/preview", data);
 };

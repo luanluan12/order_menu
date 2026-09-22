@@ -4,16 +4,8 @@ import {
   bulkCancelOrderDays,
   getBulkCancelOptions,
   previewBulkCancel,
+  searchBulkCancelUsers,
 } from "../api/orderApi";
-
-const parseEmployeeIds = (value) => [
-  ...new Set(
-    value
-      .split(/[\s,;]+/)
-      .map((item) => item.trim().toUpperCase())
-      .filter(Boolean),
-  ),
-];
 
 const formatDate = (value) =>
   new Date(`${value}T12:00:00`).toLocaleDateString("vi-VN", {
@@ -26,7 +18,10 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
   const [menus, setMenus] = useState([]);
   const [menuId, setMenuId] = useState("");
   const [dates, setDates] = useState([]);
-  const [employeeText, setEmployeeText] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -36,8 +31,8 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
     [menuId, menus],
   );
   const employeeIds = useMemo(
-    () => parseEmployeeIds(employeeText),
-    [employeeText],
+    () => selectedUsers.map((user) => user.employeeId),
+    [selectedUsers],
   );
 
   useEffect(() => {
@@ -47,7 +42,9 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
       try {
         setLoading(true);
         setDates([]);
-        setEmployeeText("");
+        setUserSearch("");
+        setSuggestions([]);
+        setSelectedUsers([]);
         setPreview(null);
         const response = await getBulkCancelOptions();
         const items = response.data.data || [];
@@ -63,6 +60,43 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
     loadOptions();
   }, [open]);
 
+  useEffect(() => {
+    const search = userSearch.trim();
+
+    if (!open || search.length < 2) {
+      setSuggestions([]);
+      setSearchingUsers(false);
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setSearchingUsers(true);
+        const response = await searchBulkCancelUsers(search);
+
+        if (active) {
+          const selectedIds = new Set(selectedUsers.map((user) => user._id));
+          setSuggestions(
+            (response.data.data || []).filter((user) => !selectedIds.has(user._id)),
+          );
+        }
+      } catch (err) {
+        if (active) {
+          setSuggestions([]);
+          toast.error(err.response?.data?.message || "Không tìm được nhân viên.");
+        }
+      } finally {
+        if (active) setSearchingUsers(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [open, selectedUsers, userSearch]);
+
   const menuDates = (selectedMenu?.days || []).map((day) =>
     new Date(day.date).toLocaleDateString("en-CA", {
       timeZone: "Asia/Ho_Chi_Minh",
@@ -76,6 +110,18 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
         ? current.filter((item) => item !== date)
         : [...current, date],
     );
+  };
+
+  const selectUser = (user) => {
+    setSelectedUsers((current) => [...current, user]);
+    setUserSearch("");
+    setSuggestions([]);
+    setPreview(null);
+  };
+
+  const removeUser = (userId) => {
+    setSelectedUsers((current) => current.filter((user) => user._id !== userId));
+    setPreview(null);
   };
 
   const payload = { menuId, dates, employeeIds };
@@ -181,20 +227,64 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="mb-2 block font-semibold">Mã nhân viên</label>
-            <textarea
-              value={employeeText}
+            <label className="mb-2 block font-semibold">Nhân viên cần huỷ món</label>
+            <div className="relative">
+              <input
+              type="search"
+              value={userSearch}
               onChange={(event) => {
-                setEmployeeText(event.target.value);
+                setUserSearch(event.target.value);
                 setPreview(null);
               }}
-              rows={7}
-              placeholder={"Dán danh sách mã nhân viên, mỗi mã một dòng\nNV001\nNV002\nNV003"}
-              className="w-full rounded-xl border p-4 font-mono outline-none focus:border-red-500"
-            />
-            <p className="mt-2 text-sm text-gray-500">
-              Đã nhập {employeeIds.length} mã; hỗ trợ phân cách bằng xuống dòng, dấu phẩy hoặc dấu chấm phẩy.
-            </p>
+              placeholder="Nhập ít nhất 2 ký tự trong tên nhân viên..."
+              className="w-full rounded-xl border p-4 outline-none focus:border-red-500"
+              />
+
+              {(searchingUsers || suggestions.length > 0) && (
+                <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border bg-white shadow-xl">
+                  {searchingUsers ? (
+                    <p className="p-4 text-center text-gray-500">Đang tìm...</p>
+                  ) : (
+                    suggestions.map((user) => (
+                      <button
+                        key={user._id}
+                        type="button"
+                        onClick={() => selectUser(user)}
+                        className="flex w-full items-center justify-between border-b px-4 py-3 text-left last:border-0 hover:bg-red-50"
+                      >
+                        <span>
+                          <span className="block font-semibold">{user.name}</span>
+                          <span className="text-sm text-gray-500">
+                            {user.employeeId} · {user.email}
+                          </span>
+                        </span>
+                        <span className="text-sm text-gray-500">Tầng {user.floor}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {selectedUsers.map((user) => (
+                <span
+                  key={user._id}
+                  className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-2 text-sm text-red-700"
+                >
+                  {user.name} ({user.employeeId})
+                  <button
+                    type="button"
+                    onClick={() => removeUser(user._id)}
+                    className="font-bold hover:text-red-900"
+                    aria-label={`Bỏ chọn ${user.name}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <p className="mt-2 text-sm text-gray-500">Đã chọn {selectedUsers.length} nhân viên.</p>
           </div>
 
           <button

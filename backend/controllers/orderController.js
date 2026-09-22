@@ -1291,6 +1291,31 @@ exports.getBulkCancelOptions = async (req, res) => {
   }
 };
 
+exports.searchBulkCancelUsers = async (req, res) => {
+  try {
+    const search = String(req.query.search || "").trim();
+
+    if (search.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = new RegExp(escapedSearch, "i");
+    const users = await User.find({
+      role: "guest",
+      $or: [{ name: pattern }, { employeeId: pattern }],
+    })
+      .select("employeeId name email floor")
+      .sort({ name: 1 })
+      .limit(20);
+
+    return res.json({ success: true, data: users });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.previewBulkCancel = async (req, res) => {
   try {
     const context = await prepareBulkCancel(req.body);

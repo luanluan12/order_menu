@@ -51,6 +51,13 @@ router.get(
   orderController.getBulkCancelOptions,
 );
 
+router.get(
+  "/bulk-cancel/users",
+  auth,
+  admin("admin_eocmn"),
+  orderController.searchBulkCancelUsers,
+);
+
 router.post(
   "/bulk-cancel/preview",
   auth,
