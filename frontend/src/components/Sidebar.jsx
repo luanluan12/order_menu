@@ -10,7 +10,7 @@ import {
 
 import { NavLink, useNavigate } from "react-router-dom";
 
-import logo from "../assets/logo.png";
+import logo from "../assets/logo-optimized.png";
 
 import { useAuth } from "../context/AuthContext";
 

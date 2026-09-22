@@ -83,6 +83,10 @@ function DrinkCard({
 
                 alt={displayName}
 
+                loading="lazy"
+
+                decoding="async"
+
                 className="
                     h-44
                     w-full

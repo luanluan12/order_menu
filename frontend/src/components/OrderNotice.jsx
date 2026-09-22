@@ -1,7 +1,7 @@
 import { Lightbulb } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import bepImage from "../assets/anh.png";
+import bepImage from "../assets/anh-optimized.png";
 
 function OrderNotice() {
 
@@ -106,6 +106,10 @@ function OrderNotice() {
                     src={bepImage}
 
                     alt="Kitchen"
+
+                    loading="lazy"
+
+                    decoding="async"
 
                     className="
                         h-20

@@ -1,33 +1,37 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
-import Login from "../pages/auth/Login";
-
-import Home from "../pages/user/Home";
-import ChangePassword from "../pages/user/ChangePassword";
-
-import Dashboard from "../pages/admin/Dashboard";
-import MenuManagement from "../pages/admin/MenuManagement";
-import UserManagement from "../pages/admin/UserManagement";
-import OrderManagement from "../pages/admin/OrderManagement";
-import Report from "../pages/admin/Report";
-import History from "../pages/user/History";
-import OrderEdit from "../pages/user/OrderEdit";
-import Checkin from "../pages/user/Checkin";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import ResetPassword from "../pages/auth/ResetPassword";
-import AdminLayout from "../layouts/AdminLayout";
-import ReviewManagement from "../pages/admin/ReviewManagement";
 import PrivateRoute from "../components/PrivateRoute";
-
-import MenuWeekCreate from "../pages/admin/MenuWeekCreate";
-
-import MenuWeekEdit from "../pages/admin/MenuWeekEdit";
 import { useAuth } from "../context/AuthContext";
+
+const Login = lazy(() => import("../pages/auth/Login"));
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
+const Home = lazy(() => import("../pages/user/Home"));
+const ChangePassword = lazy(() => import("../pages/user/ChangePassword"));
+const History = lazy(() => import("../pages/user/History"));
+const OrderEdit = lazy(() => import("../pages/user/OrderEdit"));
+const Checkin = lazy(() => import("../pages/user/Checkin"));
+const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
+const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
+const MenuManagement = lazy(() => import("../pages/admin/MenuManagement"));
+const UserManagement = lazy(() => import("../pages/admin/UserManagement"));
+const OrderManagement = lazy(() => import("../pages/admin/OrderManagement"));
+const Report = lazy(() => import("../pages/admin/Report"));
+const ReviewManagement = lazy(() => import("../pages/admin/ReviewManagement"));
+const MenuWeekCreate = lazy(() => import("../pages/admin/MenuWeekCreate"));
+const MenuWeekEdit = lazy(() => import("../pages/admin/MenuWeekEdit"));
+
+const PageLoading = () => (
+  <div className="flex min-h-screen items-center justify-center text-slate-500">
+    Đang tải...
+  </div>
+);
 
 function AppRoutes() {
   const { user } = useAuth();
   return (
-    <Routes>
+    <Suspense fallback={<PageLoading />}>
+      <Routes>
       {/* Login */}
       <Route
         path="/"
@@ -107,7 +111,8 @@ function AppRoutes() {
 
         <Route path="/admin/menu/create" element={<MenuWeekCreate />} />
       </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

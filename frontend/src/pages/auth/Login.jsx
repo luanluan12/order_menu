@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { login as loginApi } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo-optimized.png";
 
 function Login() {
   const navigate = useNavigate();

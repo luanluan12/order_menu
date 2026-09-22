@@ -72,6 +72,8 @@ function OrderDetailModal({
                   <div key={i} className="mb-3 flex items-center gap-3">
                     <img
                       src={image(dish.image)}
+                      loading="lazy"
+                      decoding="async"
                       className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
                     />
 
@@ -91,6 +93,8 @@ function OrderDetailModal({
               <div className="mb-4 flex items-center gap-3">
                 <img
                   src={image(day.drink.image)}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
                 />
 
@@ -104,6 +108,8 @@ function OrderDetailModal({
               <div className="flex items-center gap-3">
                 <img
                   src={image(day.soup.image)}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 w-12 rounded-full object-cover sm:h-14 sm:w-14"
                 />
 

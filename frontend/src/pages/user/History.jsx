@@ -95,6 +95,8 @@ function History() {
         <img
           src={getImageUrl(dish.image)}
           alt={dish.name}
+          loading="lazy"
+          decoding="async"
           className="h-[125px] w-full rounded-[16px] object-cover"
         />
       </div>

@@ -1,7 +1,7 @@
 import WeekMenu from "./WeekMenu";
 import Header from "./components/Header";
 
-import bgFood from "../../assets/bgfood.png";
+import bgFood from "../../assets/bgfood-optimized.jpg";
 
 function Home() {
 

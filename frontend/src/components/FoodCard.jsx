@@ -124,6 +124,10 @@ const displaySubtitle =
 
                     alt={displayName}
 
+                    loading="lazy"
+
+                    decoding="async"
+
                     className="
                         h-28
                         w-full

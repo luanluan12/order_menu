@@ -44,6 +44,8 @@ function DishCard({
                         <img
                             src={imageUrl}
                             alt={dish?.name}
+                            loading="lazy"
+                            decoding="async"
                             className="
                                 h-28
                                 w-full

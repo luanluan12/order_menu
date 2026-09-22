@@ -7,7 +7,6 @@ import OrderNotice from "./OrderNotice";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
-import bgFood from "../assets/bgfood.png";
 
 function WeekMenuContent({
   menu,
