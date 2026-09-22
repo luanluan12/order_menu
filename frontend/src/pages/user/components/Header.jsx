@@ -10,7 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../../context/AuthContext";
-import logo from "../../../assets/logo-optimized.png";
+const logo = "/logo.png";
 
 function Header() {
 
