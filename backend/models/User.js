@@ -64,4 +64,7 @@ const userSchema = new mongoose.Schema(
   },
 );
 
+// Phục vụ thống kê Dashboard theo loại tài khoản và tầng.
+userSchema.index({ role: 1, floor: 1 });
+
 module.exports = mongoose.model("User", userSchema);
