@@ -285,8 +285,9 @@ orderSchema.index(
 
 );
 
-// Phục vụ Dashboard và các báo cáo lọc order theo ngày.
-orderSchema.index({ status: 1, "days.date": 1 });
+// Phục vụ Dashboard và danh sách order; đặt ngày trước để cả truy vấn chỉ có
+// ngày lẫn truy vấn ngày + trạng thái đều dùng được index.
+orderSchema.index({ "days.date": 1, status: 1 });
 
 module.exports = mongoose.model(
 

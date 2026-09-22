@@ -948,14 +948,7 @@ exports.getOrderById = async (req, res) => {
 exports.getAllOrders = async (req, res) => {
   try {
     const { week, status, date } = req.query;
-
     const filter = {};
-
-    const userFilter = {};
-
-    if (req.user.role === "admin_floor") {
-      userFilter.floor = req.user.floor;
-    }
 
     if (week) {
       filter.week = week;
@@ -965,40 +958,52 @@ exports.getAllOrders = async (req, res) => {
       filter.status = status;
     }
 
-    const users = await User.find(userFilter).select("_id");
+    if (date) {
+      if (!moment(date, "YYYY-MM-DD", true).isValid()) {
+        return res.json({ success: true, data: [] });
+      }
 
-    const userIds = users.map((u) => u._id);
+      const startOfDay = moment.tz(date, "YYYY-MM-DD", "Asia/Ho_Chi_Minh");
+      const endOfDay = startOfDay.clone().add(1, "day");
+
+      // Lọc ngay tại MongoDB nhưng vẫn trả đủ 5 ngày để cửa sổ xem chi tiết
+      // và các thao tác hiện tại tiếp tục hoạt động như trước.
+      filter.days = {
+        $elemMatch: {
+          date: {
+            $gte: startOfDay.toDate(),
+            $lt: endOfDay.toDate(),
+          },
+          $or: [
+            { "mains.0": { $exists: true } },
+            { drink: { $ne: null } },
+            { soup: { $ne: null } },
+          ],
+        },
+      };
+    }
 
     if (req.user.role === "admin_floor") {
+      const users = await User.find({ floor: req.user.floor })
+        .select("_id")
+        .lean();
+      const userIds = users.map((user) => user._id);
       filter.user = { $in: userIds };
     }
 
     const orders = await Order.find(filter)
-
-      .populate(
-        "user",
-
-        "employeeId name email floor",
-      )
-
-      .populate(
-        "menu",
-
-        "week year",
-      )
-
-      .sort({
-        createdAt: -1,
-      });
+      .populate("user", "employeeId name email floor")
+      .populate("menu", "week year")
+      .select("-qrToken")
+      .sort({ createdAt: -1 })
+      .lean();
 
     const result = orders
       .map((order) => {
-        const obj = order.toObject();
-
         let selectedDay = null;
 
         if (date) {
-          selectedDay = obj.days.find(
+          selectedDay = order.days.find(
             (day) =>
               moment(day.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD") ===
               date,
@@ -1022,7 +1027,7 @@ exports.getAllOrders = async (req, res) => {
         }
 
         return {
-          ...obj,
+          ...order,
           selectedDay,
         };
       })
@@ -1034,7 +1039,6 @@ exports.getAllOrders = async (req, res) => {
 
     return res.json({
       success: true,
-
       data: result,
     });
   } catch (err) {
@@ -1042,7 +1046,6 @@ exports.getAllOrders = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-
       message: err.message,
     });
   }
@@ -1088,7 +1091,8 @@ exports.getWeekSummary = async (req, res) => {
     const orders = await Order.find(filter)
       .populate("user", "employeeId name email floor")
       .populate("menu", "week year status days deadline openTime")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.json({
       success: true,
