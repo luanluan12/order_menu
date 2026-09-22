@@ -101,6 +101,18 @@ export const getWeekSummary = (date) => {
 
 export const deleteOrder = (id) => axios.delete(`/order/${id}`);
 
+export const getBulkCancelOptions = () => {
+  return axios.get("/order/bulk-cancel/options");
+};
+
+export const previewBulkCancel = (data) => {
+  return axios.post("/order/bulk-cancel/preview", data);
+};
+
+export const bulkCancelOrderDays = (data) => {
+  return axios.post("/order/bulk-cancel", data);
+};
+
 /**
  * Danh sách đánh giá
  */

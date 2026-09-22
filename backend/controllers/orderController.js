@@ -1152,6 +1152,204 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+const normalizeEmployeeIds = (value) => [
+  ...new Set(
+    (Array.isArray(value) ? value : [])
+      .map((item) => String(item).trim().toUpperCase())
+      .filter(Boolean),
+  ),
+];
+
+const prepareBulkCancel = async ({ menuId, dates, employeeIds }) => {
+  const requestedIds = normalizeEmployeeIds(employeeIds);
+
+  if (!menuId || requestedIds.length === 0 || !Array.isArray(dates) || dates.length === 0) {
+    const error = new Error("Vui lòng chọn menu, ngày và nhập mã nhân viên.");
+    error.status = 400;
+    throw error;
+  }
+
+  const menu = await Menu.findById(menuId);
+
+  if (!menu || menu.status !== "published") {
+    const error = new Error("Không tìm thấy menu đã Publish.");
+    error.status = 404;
+    throw error;
+  }
+
+  const menuDates = new Set(
+    menu.days.map((day) =>
+      moment(day.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD"),
+    ),
+  );
+  const selectedDates = [...new Set(dates.map((date) => String(date)))];
+
+  if (selectedDates.some((date) => !menuDates.has(date))) {
+    const error = new Error("Ngày được chọn không thuộc menu này.");
+    error.status = 400;
+    throw error;
+  }
+
+  const allGuests = await User.find({ role: "guest" }).select(
+    "employeeId name email floor",
+  );
+  const usersByEmployeeId = new Map(
+    allGuests.map((user) => [String(user.employeeId).trim().toUpperCase(), user]),
+  );
+  const matchedUsers = requestedIds
+    .map((employeeId) => usersByEmployeeId.get(employeeId))
+    .filter(Boolean);
+  const missingEmployeeIds = requestedIds.filter(
+    (employeeId) => !usersByEmployeeId.has(employeeId),
+  );
+
+  const orders = await Order.find({
+    menu: menu._id,
+    user: { $in: matchedUsers.map((user) => user._id) },
+    status: "ordered",
+  }).populate("user", "employeeId name email floor");
+  const orderUserIds = new Set(orders.map((order) => String(order.user?._id)));
+  const noOrderEmployeeIds = matchedUsers
+    .filter((user) => !orderUserIds.has(String(user._id)))
+    .map((user) => user.employeeId);
+  const selectedDateSet = new Set(selectedDates);
+  const affectedOrders = [];
+  const receivedDays = [];
+
+  for (const order of orders) {
+    const affectedDates = [];
+
+    for (const day of order.days) {
+      const date = moment(day.date)
+        .tz("Asia/Ho_Chi_Minh")
+        .format("YYYY-MM-DD");
+
+      if (!selectedDateSet.has(date)) continue;
+
+      if (day.received) {
+        receivedDays.push({
+          employeeId: order.user?.employeeId,
+          name: order.user?.name,
+          date,
+        });
+        continue;
+      }
+
+      if (day.mains.length > 0 || day.drink || day.soup) {
+        affectedDates.push(date);
+      }
+    }
+
+    if (affectedDates.length > 0) {
+      affectedOrders.push({ order, affectedDates });
+    }
+  }
+
+  return {
+    menu,
+    selectedDates,
+    requestedIds,
+    missingEmployeeIds,
+    noOrderEmployeeIds,
+    receivedDays,
+    affectedOrders,
+  };
+};
+
+const bulkCancelResponse = (context) => ({
+  menu: {
+    _id: context.menu._id,
+    week: context.menu.week,
+    year: context.menu.year,
+  },
+  dates: context.selectedDates,
+  requestedCount: context.requestedIds.length,
+  affectedCount: context.affectedOrders.length,
+  affectedUsers: context.affectedOrders.map(({ order, affectedDates }) => ({
+    employeeId: order.user?.employeeId,
+    name: order.user?.name,
+    email: order.user?.email,
+    floor: order.user?.floor,
+    dates: affectedDates,
+  })),
+  missingEmployeeIds: context.missingEmployeeIds,
+  noOrderEmployeeIds: context.noOrderEmployeeIds,
+  receivedDays: context.receivedDays,
+});
+
+exports.getBulkCancelOptions = async (req, res) => {
+  try {
+    const menus = await Menu.find({ status: "published" })
+      .sort({ createdAt: -1 })
+      .limit(2)
+      .select("week year days.date");
+
+    return res.json({ success: true, data: menus });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.previewBulkCancel = async (req, res) => {
+  try {
+    const context = await prepareBulkCancel(req.body);
+    return res.json({ success: true, data: bulkCancelResponse(context) });
+  } catch (err) {
+    console.error(err);
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.bulkCancelOrderDays = async (req, res) => {
+  try {
+    const context = await prepareBulkCancel(req.body);
+    const selectedDateSet = new Set(context.selectedDates);
+    const operations = context.affectedOrders.map(({ order }) => {
+      const days = order.days.map((day) => {
+        const value = day.toObject();
+        const date = moment(day.date)
+          .tz("Asia/Ho_Chi_Minh")
+          .format("YYYY-MM-DD");
+
+        if (selectedDateSet.has(date) && !day.received) {
+          value.mains = [];
+          value.drink = null;
+          value.soup = null;
+        }
+
+        return value;
+      });
+
+      return {
+        updateOne: {
+          filter: { _id: order._id },
+          update: { $set: { days } },
+        },
+      };
+    });
+
+    if (operations.length > 0) {
+      await Order.bulkWrite(operations);
+    }
+
+    return res.json({
+      success: true,
+      message: `Đã hủy món theo ngày cho ${operations.length} nhân viên.`,
+      data: bulkCancelResponse(context),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 exports.getAvailableUsers = async (req, res) => {
   try {
     const menus = await Menu.find({

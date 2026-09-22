@@ -43,6 +43,28 @@ router.put(
   orderController.adminUpdateOrder,
 );
 
+// Admin EOC hủy món hàng loạt theo nhân viên và ngày, không xóa toàn bộ order.
+router.get(
+  "/bulk-cancel/options",
+  auth,
+  admin("admin_eocmn"),
+  orderController.getBulkCancelOptions,
+);
+
+router.post(
+  "/bulk-cancel/preview",
+  auth,
+  admin("admin_eocmn"),
+  orderController.previewBulkCancel,
+);
+
+router.post(
+  "/bulk-cancel",
+  auth,
+  admin("admin_eocmn"),
+  orderController.bulkCancelOrderDays,
+);
+
 // ==========================
 // Update Order
 // ==========================

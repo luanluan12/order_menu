@@ -13,6 +13,7 @@ import CheckinQrModal from "./CheckinQrModal";
 import { Check } from "lucide-react";
 import ManualOrderModal from "../../components/ManualOrderModal";
 import AdminOrderEditModal from "../../components/AdminOrderEditModal";
+import BulkCancelOrderModal from "../../components/BulkCancelOrderModal";
 
 function OrderManagement() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -29,6 +30,7 @@ function OrderManagement() {
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [keyword, setKeyword] = useState("");
   const [openManualOrder, setOpenManualOrder] = useState(false);
+  const [openBulkCancel, setOpenBulkCancel] = useState(false);
   const [openWeekSummary, setOpenWeekSummary] = useState(false);
   const [weekSummary, setWeekSummary] = useState(null);
   const [weekSummaryLoading, setWeekSummaryLoading] = useState(false);
@@ -231,12 +233,20 @@ function OrderManagement() {
         {(user?.role === "admin_eocmn" || user?.role === "admin_floor") && (
           <div className="flex flex-wrap gap-3">
             {user?.role === "admin_eocmn" && (
-              <button
-                onClick={() => setOpenManualOrder(true)}
-                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-              >
-                + Đặt hộ
-              </button>
+              <>
+                <button
+                  onClick={() => setOpenManualOrder(true)}
+                  className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+                >
+                  + Đặt hộ
+                </button>
+                <button
+                  onClick={() => setOpenBulkCancel(true)}
+                  className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700"
+                >
+                  Huỷ món hàng loạt
+                </button>
+              </>
             )}
 
             <button
@@ -494,6 +504,16 @@ function OrderManagement() {
         onClose={() => setOpenManualOrder(false)}
         onSuccess={() => {
           loadOrders();
+        }}
+      />
+      <BulkCancelOrderModal
+        open={openBulkCancel}
+        onClose={() => setOpenBulkCancel(false)}
+        onSuccess={() => {
+          loadOrders();
+          if (openWeekSummary) {
+            loadWeekSummary(getNextWeekStart());
+          }
         }}
       />
       <AdminOrderEditModal
