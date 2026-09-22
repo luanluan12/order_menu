@@ -63,9 +63,9 @@ ${isKo ? "식단 보기" : "XEM THỰC ĐƠN"}
 <p>
 ⏰
 ${isKo ? "주문 마감:" : "Hạn đặt món:"}
-<strong>
-${isKo ? "금요일 오후 5:00" : "17:00 Thứ Sáu"}
-</strong>
+<strong>${new Date(menu.deadline).toLocaleString(isKo ? "ko-KR" : "vi-VN", {
+  timeZone: "Asia/Ho_Chi_Minh",
+})}</strong>
 </p>
 
 <p>

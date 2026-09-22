@@ -614,6 +614,8 @@ exports.publishMenu = async (req, res) => {
 
     // Publish Menu
     menu.status = "published";
+    // Thời gian mở đặt món là thời điểm admin gửi/publish menu.
+    menu.openTime = new Date();
 
     await menu.save();
 

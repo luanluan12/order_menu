@@ -13,34 +13,11 @@ const { verifyOrderToken } = require("../utils/orderToken");
 // Có được phép đặt món?
 // ===========================================
 
-const canOrder = () => {
+const canOrder = (menu) => {
   const now = moment().tz("Asia/Ho_Chi_Minh");
-
-  const day = now.isoWeekday();
-
-  const hour = now.hour();
-
-  // Trước Thứ 4
-  if (day < 3) {
-    return false;
-  }
-
-  // Thứ 4 trước 09:00
-  if (day === 3 && hour < 9) {
-    return false;
-  }
-
-  // Sau 17:00 Thứ 6
-  if (day === 5 && hour >= 17) {
-    return false;
-  }
-
-  // Thứ 7 & Chủ nhật
-  if (day > 5) {
-    return false;
-  }
-
-  return true;
+  return menu?.status === "published"
+    && now.isSameOrAfter(moment(menu.openTime))
+    && now.isSameOrBefore(moment(menu.deadline));
 };
 
 // ===========================================
@@ -262,14 +239,6 @@ exports.verifyInvite = async (
 
 exports.createOrder = async (req, res) => {
   try {
-    if (!canOrder()) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Hiện không nằm trong thời gian đặt món.",
-      });
-    }
-
     const {
       menuId,
 
@@ -280,19 +249,18 @@ exports.createOrder = async (req, res) => {
 
     const menu = await Menu.findById(menuId);
 
-    if (new Date() > new Date(menu.deadline)) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Đã hết thời gian đặt món.",
-      });
-    }
-
     if (!menu) {
       return res.status(404).json({
         success: false,
-
         message: "Không tìm thấy Menu.",
+      });
+    }
+
+    if (!canOrder(menu)) {
+      return res.status(400).json({
+        success: false,
+
+        message: "Hiện không nằm trong thời gian đặt món.",
       });
     }
 
@@ -376,14 +344,6 @@ exports.createOrderFromInvite = async (
   res,
 ) => {
   try {
-    if (!canOrder()) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Hiện không nằm trong thời gian đặt món.",
-      });
-    }
-
     const {
       token,
 
@@ -417,6 +377,13 @@ exports.createOrderFromInvite = async (
         success: false,
 
         message: "Menu chưa Publish.",
+      });
+    }
+
+    if (!canOrder(menu)) {
+      return res.status(400).json({
+        success: false,
+        message: "Hiện không nằm trong thời gian đặt món.",
       });
     }
 
@@ -641,14 +608,6 @@ exports.adminUpdateOrder = async (req, res) => {
 
 exports.cancelOrder = async (req, res) => {
   try {
-    if (!canOrder()) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Hiện không nằm trong thời gian hủy.",
-      });
-    }
-
     const { id } = req.params;
 
     const order = await Order.findById(id);
@@ -668,6 +627,15 @@ exports.cancelOrder = async (req, res) => {
         success: false,
 
         message: "Không có quyền.",
+      });
+    }
+
+    const menu = await Menu.findById(order.menu);
+
+    if (!canOrder(menu)) {
+      return res.status(400).json({
+        success: false,
+        message: "Hiện không nằm trong thời gian hủy.",
       });
     }
 

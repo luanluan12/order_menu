@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-function DeadlineBanner() {
+function DeadlineBanner({ deadline: deadlineValue }) {
 
     const [text, setText] = useState("");
 
@@ -15,19 +15,7 @@ function DeadlineBanner() {
 
             const now = new Date();
 
-            const deadline = new Date();
-
-            // Tìm thứ 6 tuần hiện tại
-            const day = now.getDay(); // CN=0 ... T7=6
-
-            const diff =
-                day === 0
-                    ? 5
-                    : 5 - day;
-
-            deadline.setDate(now.getDate() + diff);
-
-            deadline.setHours(17, 0, 0, 0);
+            const deadline = new Date(deadlineValue);
 
             const remain = deadline - now;
 
@@ -71,7 +59,7 @@ value += `${hours} ${t("hour")} ${minutes} ${t("minute")}`;
 
         return () => clearInterval(timer);
 
-    }, [i18n.language]);
+    }, [deadlineValue, i18n.language, t]);
 
     return (
 

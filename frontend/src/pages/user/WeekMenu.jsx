@@ -129,7 +129,7 @@ function WeekMenu() {
 
   return (
     <>
-      <DeadlineBanner />
+      <DeadlineBanner deadline={menu.deadline} />
 
       <WeekMenuContent
         menu={menu}
