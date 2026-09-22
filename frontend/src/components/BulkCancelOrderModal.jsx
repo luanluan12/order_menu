@@ -236,7 +236,7 @@ function BulkCancelOrderModal({ open, onClose, onSuccess }) {
                 setUserSearch(event.target.value);
                 setPreview(null);
               }}
-              placeholder="Nhập ít nhất 2 ký tự trong tên nhân viên..."
+              placeholder="Nhập tên, email hoặc mã nhân viên..."
               className="w-full rounded-xl border p-4 outline-none focus:border-red-500"
               />
 

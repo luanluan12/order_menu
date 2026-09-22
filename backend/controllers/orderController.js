@@ -1303,7 +1303,7 @@ exports.searchBulkCancelUsers = async (req, res) => {
     const pattern = new RegExp(escapedSearch, "i");
     const users = await User.find({
       role: "guest",
-      $or: [{ name: pattern }, { employeeId: pattern }],
+      $or: [{ name: pattern }, { email: pattern }, { employeeId: pattern }],
     })
       .select("employeeId name email floor")
       .sort({ name: 1 })
