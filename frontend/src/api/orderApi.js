@@ -148,8 +148,10 @@ export const confirmReceive = (data) => {
 // Manual Order
 // ===============================
 
-export const getAvailableUsers = () => {
-  return axios.get("/order/manual/users");
+export const getAvailableUsers = (menuId) => {
+  return axios.get("/order/manual/users", {
+    params: menuId ? { menuId } : undefined,
+  });
 };
 
 export const createManualOrder = (data) => {

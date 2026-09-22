@@ -1154,16 +1154,27 @@ exports.deleteOrder = async (req, res) => {
 
 exports.getAvailableUsers = async (req, res) => {
   try {
-    const menu = await Menu.findOne({
+    const menus = await Menu.find({
       status: "published",
-    }).sort({
-      createdAt: -1,
-    });
+    })
+      .sort({ createdAt: -1 })
+      .limit(2);
+
+    if (menus.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Chưa có Menu Publish.",
+      });
+    }
+
+    const menu = req.query.menuId
+      ? menus.find((item) => String(item._id) === String(req.query.menuId))
+      : menus[0];
 
     if (!menu) {
       return res.status(404).json({
         success: false,
-        message: "Chưa có Menu Publish.",
+        message: "Menu không thuộc 2 menu đã Publish gần nhất.",
       });
     }
 
@@ -1191,10 +1202,17 @@ exports.getAvailableUsers = async (req, res) => {
 
     const result = users.filter((user) => !orderedIds.has(String(user._id)));
 
+    const menuOptions = menus.map((item) => ({
+      _id: item._id,
+      week: item.week,
+      year: item.year,
+    }));
+
     return res.json({
       success: true,
       data: {
         menu,
+        menus: menuOptions,
         users: result,
       },
     });

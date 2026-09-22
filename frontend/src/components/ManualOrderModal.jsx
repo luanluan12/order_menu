@@ -7,6 +7,7 @@ import { getAvailableUsers, createManualOrder } from "../api/orderApi";
 function ManualOrderModal({ open, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [menu, setMenu] = useState(null);
+  const [menus, setMenus] = useState([]);
   const [users, setUsers] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -19,15 +20,15 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
     loadUsers();
   }, [open]);
 
-  const loadUsers = async () => {
+  const loadUsers = async (menuId) => {
     try {
       setLoading(true);
 
-      // Backend tự lấy menu Publish mới nhất
-      const res = await getAvailableUsers();
+      const res = await getAvailableUsers(menuId);
 
       setUsers(res.data.data.users);
       setMenu(res.data.data.menu);
+      setMenus(res.data.data.menus);
     } catch (err) {
       toast.error(
         err.response?.data?.message || "Không tải được danh sách nhân viên.",
@@ -35,6 +36,12 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMenuChange = (event) => {
+    setSelectedUser(null);
+    setKeyword("");
+    loadUsers(event.target.value);
   };
 
   const filteredUsers = useMemo(() => {
@@ -91,7 +98,20 @@ function ManualOrderModal({ open, onClose, onSuccess }) {
 
         {!selectedUser ? (
           <div className="flex-1 overflow-hidden">
-            <div className="border-b p-6">
+            <div className="grid gap-4 border-b p-6 md:grid-cols-[minmax(220px,320px)_1fr]">
+              <select
+                value={menu?._id || ""}
+                onChange={handleMenuChange}
+                disabled={loading}
+                className="w-full rounded-2xl border bg-white px-4 py-3 outline-none focus:border-orange-500 disabled:opacity-60"
+              >
+                {menus.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.week}{item.year ? ` - ${item.year}` : ""}
+                  </option>
+                ))}
+              </select>
+
               <div className="relative">
                 <Search
                   size={18}
