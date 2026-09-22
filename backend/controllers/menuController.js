@@ -6,7 +6,6 @@ const orderMailTemplate = require("../utils/orderMailTemplate");
 const { copyMenuImage, deleteMenuImage } = require("../services/r2Storage");
 const Order = require("../models/Order");
 const { createOrderToken } = require("../utils/orderToken");
-const sendReminder = require("../services/reminderService");
 const getFrontendUrl = require("../utils/frontendUrl");
 
 exports.createMenu = async (req, res) => {
@@ -670,34 +669,6 @@ exports.publishMenu = async (req, res) => {
 
       message: err.message,
     });
-  }
-};
-
-/**
- * Gửi lại đúng email nhắc nhở tự động cho danh sách nhân viên chưa đặt món.
- * Dùng chung service với cron Thứ Năm/Thứ Sáu để menu, người nhận và nội dung
- * email luôn nhất quán.
- */
-exports.resendNextWeekMenu = async (req, res) => {
-  try {
-    const result = await sendReminder();
-
-    if (!result) {
-      return res.status(404).json({
-        success: false,
-        message: "Không tìm thấy menu đã Publish còn trong thời gian đặt món.",
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: `Đã gửi email nhắc đặt món tuần ${result.menu.week}.`,
-      week: result.menu.week,
-      ...result,
-    });
-  } catch (err) {
-    console.error("Resend next-week menu error:", err);
-    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
