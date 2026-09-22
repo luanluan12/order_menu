@@ -15,8 +15,9 @@ const { verifyOrderToken } = require("../utils/orderToken");
 
 const canOrder = (menu) => {
   const now = moment().tz("Asia/Ho_Chi_Minh");
+  // `published` là dấu hiệu menu đã được admin gửi. Không dùng openTime để
+  // chặn vì các menu đã publish trước khi áp dụng logic mới vẫn giữ openTime cũ.
   return menu?.status === "published"
-    && now.isSameOrAfter(moment(menu.openTime))
     && now.isSameOrBefore(moment(menu.deadline));
 };
 
