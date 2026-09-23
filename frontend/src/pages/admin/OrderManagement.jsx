@@ -305,8 +305,9 @@ function OrderManagement() {
       </div>
 
       <div className="hidden overflow-hidden rounded-2xl border bg-white shadow lg:block">
-        <table className="w-full">
-          <thead className="bg-gray-50">
+        <div className="max-h-[65vh] overflow-auto">
+        <table className="w-full min-w-[1100px]">
+          <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
             <tr>
               <th className="p-4 text-left">STT</th>
 
@@ -408,6 +409,7 @@ function OrderManagement() {
             )}
           </tbody>
         </table>
+        </div>
 
         <OrderDetailModal
           open={!!selectedOrder}
@@ -415,7 +417,7 @@ function OrderManagement() {
           onClose={() => setSelectedOrder(null)}
         />
       </div>
-      <div className="space-y-4 lg:hidden">
+      <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1 lg:hidden">
         {filteredOrders.length === 0 ? (
           <div className="rounded-xl bg-white p-6 text-center shadow">
             Chưa có đơn đặt món.
