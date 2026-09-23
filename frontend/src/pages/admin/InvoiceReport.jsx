@@ -139,9 +139,9 @@ function InvoiceReport() {
       {/* Desktop Table */}
 
       <div className="hidden overflow-hidden rounded-2xl bg-white shadow lg:block">
-        <div className="overflow-x-auto">
+        <div className="max-h-[65vh] overflow-auto">
           <table className="min-w-full">
-            <thead className="bg-orange-500 text-white">
+            <thead className="sticky top-0 z-10 bg-orange-500 text-white shadow-sm">
               <tr>
                 <th className="px-4 py-3 text-center">Ngày</th>
 
@@ -196,7 +196,7 @@ function InvoiceReport() {
 
       {/* Mobile Card */}
 
-      <div className="space-y-4 lg:hidden">
+      <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1 lg:hidden">
         {rows.length === 0 ? (
           <div className="rounded-2xl bg-white p-10 text-center shadow">
             Không có dữ liệu
