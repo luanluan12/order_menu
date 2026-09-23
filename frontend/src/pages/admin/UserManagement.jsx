@@ -33,10 +33,6 @@ function UserManagement() {
 
   const [keyword, setKeyword] = useState("");
 
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const pageSize = 10;
-
   const [openModal, setOpenModal] = useState(false);
 
   const [editingUser, setEditingUser] = useState(null);
@@ -199,14 +195,6 @@ function UserManagement() {
     });
   }, [users, keyword]);
 
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
-
-  const displayUsers = filteredUsers.slice(
-    (currentPage - 1) * pageSize,
-
-    currentPage * pageSize,
-  );
-
   const getStatus = (user) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -286,17 +274,14 @@ function UserManagement() {
           className="w-full outline-none"
           placeholder="Search..."
           value={keyword}
-          onChange={(e) => {
-            setKeyword(e.target.value);
-
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setKeyword(e.target.value)}
         />
       </div>
 
       <div className="hidden overflow-hidden rounded-xl bg-white shadow lg:block">
-        <table className="min-w-full">
-          <thead className="bg-gray-100">
+        <div className="max-h-[65vh] overflow-auto">
+          <table className="w-full min-w-[1100px]">
+            <thead className="sticky top-0 z-10 bg-gray-100">
             <tr>
               <th className="px-4 py-3 text-left">Employee ID</th>
 
@@ -321,14 +306,14 @@ function UserManagement() {
                   Loading...
                 </td>
               </tr>
-            ) : displayUsers.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <tr>
                 <td colSpan={7} className="text-center py-10">
                   Không có dữ liệu
                 </td>
               </tr>
             ) : (
-              displayUsers.map((user) => (
+              filteredUsers.map((user) => (
                 <tr key={user._id} className="border-t hover:bg-gray-50">
                   <td className="px-4 py-3">{user.employeeId}</td>
 
@@ -387,20 +372,21 @@ function UserManagement() {
                 </tr>
               ))
             )}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="space-y-4 lg:hidden">
+      <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1 lg:hidden">
         {loading ? (
           <div className="rounded-xl bg-white p-6 text-center shadow">
             Loading...
           </div>
-        ) : displayUsers.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <div className="rounded-xl bg-white p-6 text-center shadow">
             Không có dữ liệu
           </div>
         ) : (
-          displayUsers.map((user) => (
+          filteredUsers.map((user) => (
             <div key={user._id} className="rounded-2xl bg-white p-5 shadow">
               <div className="flex items-start justify-between">
                 <div>
@@ -470,31 +456,6 @@ function UserManagement() {
           ))
         )}
       </div>
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-3">
-          {[...Array(totalPages)].map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`
-
-                                    px-3 py-2 text-sm lg:px-4
-
-                                    rounded
-
-                                    ${
-                                      currentPage === index + 1
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-gray-200"
-                                    }
-
-                                `}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-      )}
       <UserModal
         open={openModal}
         editingUser={editingUser}
