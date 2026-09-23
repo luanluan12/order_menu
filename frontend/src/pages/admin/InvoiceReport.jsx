@@ -27,6 +27,11 @@ function InvoiceReport() {
 
   const [summary, setSummary] = useState({});
 
+  const totalMeals = Object.values(summary).reduce(
+    (total, value) => total + Number(value || 0),
+    0,
+  );
+
   // =====================================
   // Load Report
   // =====================================
@@ -268,6 +273,15 @@ function InvoiceReport() {
             ))
           )}
         </div>
+
+        {Object.keys(summary).length > 0 && (
+          <div className="mt-5 flex items-center justify-between rounded-2xl bg-orange-600 px-5 py-4 text-white">
+            <span className="text-base font-bold sm:text-lg">
+              Tổng cộng các công ty
+            </span>
+            <span className="text-3xl font-bold">{totalMeals}</span>
+          </div>
+        )}
       </div>
     </div>
   );
