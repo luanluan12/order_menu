@@ -82,7 +82,7 @@ router.put("/:id", auth, orderController.updateOrder);
 // Cancel Order
 // ==========================
 
-router.put("/cancel", auth, orderController.cancelOrder);
+router.put("/:id/cancel", auth, orderController.cancelOrder);
 
 // ==========================
 // History

@@ -30,13 +30,9 @@ export const adminUpdateOrder = (id, data) => {
 /**
  * Hủy đặt món cả tuần
  */
-export const cancelOrder = (menuId) => {
+export const cancelOrder = (id) => {
   return axios.put(
-    "/order/cancel",
-
-    {
-      menuId,
-    },
+    `/order/${id}/cancel`,
   );
 };
 

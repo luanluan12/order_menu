@@ -21,6 +21,34 @@ const canOrder = (menu) => {
     && now.isSameOrBefore(moment(menu.deadline));
 };
 
+const hasSelectedMeal = (days = []) =>
+  days.some(
+    (day) =>
+      (Array.isArray(day.mains) && day.mains.length > 0) ||
+      Boolean(day.drink) ||
+      Boolean(day.soup),
+  );
+
+const saveNewOrCancelledOrder = async ({ existingOrder, userId, menu, days }) => {
+  if (
+    existingOrder &&
+    existingOrder.status === "ordered" &&
+    hasSelectedMeal(existingOrder.days)
+  ) {
+    return null;
+  }
+
+  const order = existingOrder || new Order({ user: userId });
+  order.menu = menu._id;
+  order.week = menu.week;
+  order.days = days;
+  order.status = "ordered";
+  order.qrToken = "";
+  await order.save();
+
+  return order;
+};
+
 // ===========================================
 // Build Order Days
 // Dùng chung cho Create / Update / Invite
@@ -279,31 +307,26 @@ exports.createOrder = async (req, res) => {
       week: menu.week,
     });
 
-    if (existed) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Bạn đã đặt món tuần này.",
-      });
-    }
-
     const orderDays = buildOrderDays(
       menu,
 
       days,
     );
 
-    const order = await Order.create({
-      user: userId,
-
-      menu: menu._id,
-
-      week: menu.week,
-
+    const order = await saveNewOrCancelledOrder({
+      existingOrder: existed,
+      userId,
+      menu,
       days: orderDays,
-
-      status: "ordered",
     });
+
+    if (!order) {
+      return res.status(400).json({
+        success: false,
+
+        message: "Bạn đã đặt món tuần này.",
+      });
+    }
     const user = await User.findById(userId);
 
     const language = (user.language || "vi").toLowerCase();
@@ -394,31 +417,26 @@ exports.createOrderFromInvite = async (
       week: menu.week,
     });
 
-    if (existed) {
-      return res.status(400).json({
-        success: false,
-
-        message: "Bạn đã đặt món tuần này.",
-      });
-    }
-
     const orderDays = buildOrderDays(
       menu,
 
       days,
     );
 
-    const order = await Order.create({
-      user: user._id,
-
-      menu: menu._id,
-
-      week: menu.week,
-
+    const order = await saveNewOrCancelledOrder({
+      existingOrder: existed,
+      userId: user._id,
+      menu,
       days: orderDays,
-
-      status: "ordered",
     });
+
+    if (!order) {
+      return res.status(400).json({
+        success: false,
+
+        message: "Bạn đã đặt món tuần này.",
+      });
+    }
 
     const language = (user.language || "vi").toLowerCase();
 
@@ -1356,7 +1374,12 @@ exports.bulkCancelOrderDays = async (req, res) => {
       return {
         updateOne: {
           filter: { _id: order._id },
-          update: { $set: { days } },
+          update: {
+            $set: {
+              days,
+              status: hasSelectedMeal(days) ? "ordered" : "cancelled",
+            },
+          },
         },
       };
     });
@@ -1423,6 +1446,15 @@ exports.getAvailableUsers = async (req, res) => {
     const orderedUsers = await Order.find({
       week: menu.week,
       status: "ordered",
+      days: {
+        $elemMatch: {
+          $or: [
+            { "mains.0": { $exists: true } },
+            { drink: { $ne: null } },
+            { soup: { $ne: null } },
+          ],
+        },
+      },
     }).select("user");
 
     const orderedIds = new Set(orderedUsers.map((item) => String(item.user)));
@@ -1501,22 +1533,21 @@ exports.createManualOrder = async (req, res) => {
       week: menu.week,
     });
 
-    if (existed) {
+    const orderDays = buildOrderDays(menu, days);
+
+    const order = await saveNewOrCancelledOrder({
+      existingOrder: existed,
+      userId: user._id,
+      menu,
+      days: orderDays,
+    });
+
+    if (!order) {
       return res.status(400).json({
         success: false,
         message: "Nhân viên đã đặt món.",
       });
     }
-
-    const orderDays = buildOrderDays(menu, days);
-
-    const order = await Order.create({
-      user: user._id,
-      menu: menu._id,
-      week: menu.week,
-      days: orderDays,
-      status: "ordered",
-    });
 
     return res.status(201).json({
       success: true,
