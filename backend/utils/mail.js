@@ -1,6 +1,6 @@
 const { Resend } = require("resend");
 
-const sendMail = async ({ to, subject, html }) => {
+const sendMail = async ({ to, subject, html }, options = {}) => {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -9,7 +9,7 @@ const sendMail = async ({ to, subject, html }) => {
       to: [to],
       subject,
       html,
-    });
+    }, options);
 
     if (error) {
       throw new Error(error.message);

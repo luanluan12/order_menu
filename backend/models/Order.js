@@ -195,6 +195,20 @@ receivedAt: {
 
 const orderSchema = new mongoose.Schema({
 
+    confirmationEmail: {
+        type: new mongoose.Schema({
+            id: String,
+            to: String,
+            subject: String,
+            html: String,
+            nextAttemptAt: Date,
+            attempts: { type: Number, default: 0 },
+            lease: String,
+            failedAt: Date,
+        }, { _id: false }),
+        select: false,
+    },
+
     user: {
 
         type: mongoose.Schema.Types.ObjectId,
@@ -263,7 +277,13 @@ const orderSchema = new mongoose.Schema({
 
 }, {
 
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+        transform(_doc, result) {
+            delete result.confirmationEmail;
+            return result;
+        }
+    }
 
 });
 
@@ -288,6 +308,11 @@ orderSchema.index(
 // Phục vụ Dashboard và danh sách order; đặt ngày trước để cả truy vấn chỉ có
 // ngày lẫn truy vấn ngày + trạng thái đều dùng được index.
 orderSchema.index({ "days.date": 1, status: 1 });
+
+orderSchema.index({ week: 1, status: 1 });
+orderSchema.index({ "confirmationEmail.nextAttemptAt": 1 }, {
+    partialFilterExpression: { "confirmationEmail.nextAttemptAt": { $exists: true } }
+});
 
 module.exports = mongoose.model(
 

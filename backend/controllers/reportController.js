@@ -69,7 +69,10 @@ exports.exportDailyExcel = async (req, res) => {
     // Tìm menu chứa ngày này
     // ==================================================
 
-    const menus = await Menu.find();
+    const dayStart = moment.tz(targetDate, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf("day");
+    const menus = await Menu.find({
+      days: { $elemMatch: { date: { $gte: dayStart.toDate(), $lt: dayStart.clone().add(1, "day").toDate() } } },
+    }).select("week days").lean();
 
     let selectedMenu = null;
 
@@ -153,7 +156,7 @@ exports.exportDailyExcel = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter)
+    const orders = await Order.find(orderFilter).select("user week days").lean()
       .populate({
         path: "user",
         select: "employeeId name email floor",
@@ -534,7 +537,10 @@ exports.getDailyReport = async (req, res) => {
     // Tìm menu
     // =====================================
 
-    const menus = await Menu.find();
+    const dayStart = moment.tz(targetDate, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf("day");
+    const menus = await Menu.find({
+      days: { $elemMatch: { date: { $gte: dayStart.toDate(), $lt: dayStart.clone().add(1, "day").toDate() } } },
+    }).select("week days").lean();
 
     let selectedMenu = null;
 
@@ -619,7 +625,7 @@ exports.getDailyReport = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter).populate({
+    const orders = await Order.find(orderFilter).select("user week days").lean().populate({
       path: "user",
       select: "employeeId name email floor",
     });
@@ -797,7 +803,10 @@ exports.getLeftoverReport = async (req, res) => {
     // Tìm menu
     // =====================================
 
-    const menus = await Menu.find();
+    const dayStart = moment.tz(targetDate, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf("day");
+    const menus = await Menu.find({
+      days: { $elemMatch: { date: { $gte: dayStart.toDate(), $lt: dayStart.clone().add(1, "day").toDate() } } },
+    }).select("week days").lean();
 
     let selectedMenu = null;
     let selectedDay = null;
@@ -872,7 +881,7 @@ exports.getLeftoverReport = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter).populate({
+    const orders = await Order.find(orderFilter).select("user week days").lean().populate({
       path: "user",
       select: "employeeId name email floor",
     });
@@ -1122,6 +1131,7 @@ exports.getInvoiceReport = async (req, res) => {
 
     let orderFilter = {
       status: "ordered",
+      days: { $elemMatch: { date: { $gte: fromDate.toDate(), $lte: toDate.toDate() } } },
     };
 
     if (req.user.role === "admin_floor") {
@@ -1135,7 +1145,7 @@ exports.getInvoiceReport = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter)
+    const orders = await Order.find(orderFilter).select("user week days").lean()
       .populate({
         path: "user",
         select: "employeeId name email floor",
@@ -1262,6 +1272,7 @@ exports.exportInvoiceExcel = async (req, res) => {
 
     let orderFilter = {
       status: "ordered",
+      days: { $elemMatch: { date: { $gte: fromDate.toDate(), $lte: toDate.toDate() } } },
     };
 
     if (req.user.role === "admin_floor") {
@@ -1275,7 +1286,7 @@ exports.exportInvoiceExcel = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter)
+    const orders = await Order.find(orderFilter).select("user week days").lean()
       .populate({
         path: "user",
         select: "employeeId name email floor",
@@ -1706,7 +1717,10 @@ exports.exportLeftoverExcel = async (req, res) => {
     // Tìm menu
     // =====================================
 
-    const menus = await Menu.find();
+    const dayStart = moment.tz(targetDate, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf("day");
+    const menus = await Menu.find({
+      days: { $elemMatch: { date: { $gte: dayStart.toDate(), $lt: dayStart.clone().add(1, "day").toDate() } } },
+    }).select("week days").lean();
 
     let selectedMenu = null;
     let selectedDay = null;
@@ -1781,7 +1795,7 @@ exports.exportLeftoverExcel = async (req, res) => {
       };
     }
 
-    const orders = await Order.find(orderFilter).populate({
+    const orders = await Order.find(orderFilter).select("user week days").lean().populate({
       path: "user",
       select: "employeeId name email floor",
     });
