@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { applyConfirmedCheckin } from "../../utils/orderState";
 import {
   deleteOrder,
   getOrderById,
@@ -28,6 +29,11 @@ function OrderManagement() {
     return today.toISOString().split("T")[0];
   };
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
+  const selectedDateRef = useRef(selectedDate);
+  selectedDateRef.current = selectedDate;
+  const checkinInFlight = useRef(new Set());
+  const [checkingIn, setCheckingIn] = useState(new Set());
+  const ordersRequest = useRef(0);
   const [keyword, setKeyword] = useState("");
   const [openManualOrder, setOpenManualOrder] = useState(false);
   const [openBulkCancel, setOpenBulkCancel] = useState(false);
@@ -57,21 +63,36 @@ function OrderManagement() {
   };
 
   const handleManualCheckin = async (order) => {
+    if (checkinInFlight.current.has(order._id)) return;
     const ok = window.confirm(`Xác nhận ${order.user.name} đã nhận suất ăn?`);
 
     if (!ok) return;
 
+    const checkedDate = selectedDate;
+    checkinInFlight.current.add(order._id);
+    setCheckingIn(new Set(checkinInFlight.current));
     try {
-      await manualCheckin({
+      const response = await manualCheckin({
         orderId: order._id,
         date: selectedDate,
       });
 
-      await loadOrders();
+      if (selectedDateRef.current === checkedDate) {
+        // Ignore older list requests that could overwrite the confirmed check-in.
+        ordersRequest.current += 1;
+        const receivedAt = response.data.data.receivedAt;
+        setOrders((current) => applyConfirmedCheckin(
+          current, order._id, order.selectedDay.date, receivedAt,
+        ));
+      }
 
       alert("Check-in thành công.");
     } catch (err) {
       alert(err.response?.data?.message || "Check-in thất bại.");
+      if (err.response?.status === 409 && selectedDateRef.current === checkedDate) loadOrders();
+    } finally {
+      checkinInFlight.current.delete(order._id);
+      setCheckingIn(new Set(checkinInFlight.current));
     }
   };
 
@@ -124,6 +145,8 @@ function OrderManagement() {
   };
 
   const loadOrders = async () => {
+    const requestId = ++ordersRequest.current;
+    const requestedDate = selectedDate;
     try {
       const res = await getOrders({
         date: selectedDate,
@@ -137,7 +160,9 @@ function OrderManagement() {
         return day.mains?.length > 0 || !!day.drink || !!day.soup;
       });
 
-      setOrders(filteredOrders);
+      if (requestId === ordersRequest.current && requestedDate === selectedDateRef.current) {
+        setOrders(filteredOrders);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -222,6 +247,7 @@ function OrderManagement() {
   };
 
   useEffect(() => {
+    setOrders([]);
     loadOrders();
   }, [selectedDate]);
 
@@ -377,6 +403,7 @@ function OrderManagement() {
                       ) : (
                         <button
                           onClick={() => handleManualCheckin(order)}
+                          disabled={checkingIn.has(order._id)}
                           className="rounded-lg bg-orange-500 px-4 py-2 text-white transition hover:bg-orange-600"
                         >
                           Check-in
@@ -466,6 +493,7 @@ function OrderManagement() {
                 {!day?.received && (
                   <button
                     onClick={() => handleManualCheckin(order)}
+                          disabled={checkingIn.has(order._id)}
                     className="mt-4 w-full rounded-lg bg-orange-500 py-2 font-semibold text-white hover:bg-orange-600"
                   >
                     Check-in

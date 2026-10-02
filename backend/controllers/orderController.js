@@ -5,7 +5,7 @@ const QRCode = require("qrcode");
 const moment = require("moment-timezone");
 const XLSX = require("xlsx");
 const fs = require("fs");
-const sendMail = require("../utils/mail");
+const { randomUUID } = require("crypto");
 const orderSuccessTemplate = require("../utils/orderSuccessTemplate");
 const { verifyOrderToken } = require("../utils/orderToken");
 
@@ -29,7 +29,7 @@ const hasSelectedMeal = (days = []) =>
       Boolean(day.soup),
   );
 
-const saveNewOrCancelledOrder = async ({ existingOrder, userId, menu, days }) => {
+const saveNewOrCancelledOrder = async ({ existingOrder, userId, menu, days, notificationUser }) => {
   if (
     existingOrder &&
     existingOrder.status === "ordered" &&
@@ -44,6 +44,20 @@ const saveNewOrCancelledOrder = async ({ existingOrder, userId, menu, days }) =>
   order.days = days;
   order.status = "ordered";
   order.qrToken = "";
+  // Store the email with the order in the same atomic document write.
+  if (notificationUser) {
+    const language = (notificationUser.language || "vi").toLowerCase();
+    order.confirmationEmail = {
+      id: randomUUID(),
+      to: notificationUser.email,
+      subject: language === "ko"
+        ? `${menu.week} 식사 주문 완료`
+        : `Xác nhận đặt món ${menu.week}`,
+      html: orderSuccessTemplate(notificationUser, order, language),
+      nextAttemptAt: new Date(),
+      attempts: 0,
+    };
+  }
   await order.save();
 
   return order;
@@ -313,11 +327,15 @@ exports.createOrder = async (req, res) => {
       days,
     );
 
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy User." });
+
     const order = await saveNewOrCancelledOrder({
       existingOrder: existed,
       userId,
       menu,
       days: orderDays,
+      notificationUser: user,
     });
 
     if (!order) {
@@ -327,18 +345,6 @@ exports.createOrder = async (req, res) => {
         message: "Bạn đã đặt món tuần này.",
       });
     }
-    const user = await User.findById(userId);
-
-    const language = (user.language || "vi").toLowerCase();
-
-    await sendMail({
-      to: user.email,
-      subject:
-        language === "ko"
-          ? `${menu.week} 식사 주문 완료`
-          : `Xác nhận đặt món ${menu.week}`,
-      html: orderSuccessTemplate(user, order, language),
-    });
 
     return res.status(201).json({
       success: true,
@@ -428,6 +434,7 @@ exports.createOrderFromInvite = async (
       userId: user._id,
       menu,
       days: orderDays,
+      notificationUser: user,
     });
 
     if (!order) {
@@ -438,16 +445,6 @@ exports.createOrderFromInvite = async (
       });
     }
 
-    const language = (user.language || "vi").toLowerCase();
-
-    await sendMail({
-      to: user.email,
-      subject:
-        language === "ko"
-          ? `${menu.week} 식사 주문 완료`
-          : `Xác nhận đặt món ${menu.week}`,
-      html: orderSuccessTemplate(user, order, language),
-    });
 
     return res.status(201).json({
       success: true,
