@@ -13,6 +13,7 @@ function ReviewManagement() {
   const [week, setWeek] = useState("");
   const [loading, setLoading] = useState(false);
   const [reviews, setReviews] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const loadReviews = async () => {
     try {
@@ -130,7 +131,8 @@ function ReviewManagement() {
                   <th className="px-4 py-3 text-left">Họ tên</th>
                   <th className="px-4 py-3 text-center">Tầng</th>
                   <th className="px-4 py-3 text-center">Điểm</th>
-                  <th className="px-4 py-3 text-left">Nhận xét / ảnh</th>
+                  <th className="px-4 py-3 text-left">Nhận xét</th>
+                  <th className="px-4 py-3 text-center">Ảnh</th>
                 </tr>
               </thead>
 
@@ -138,7 +140,7 @@ function ReviewManagement() {
                 {reviews.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="py-10 text-center text-slate-400"
                     >
                       Chưa có đánh giá.
@@ -163,10 +165,16 @@ function ReviewManagement() {
                       </td>
                       <td className="max-w-md break-words px-4 py-3">
                         {item.comment || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-center">
                         {item.image && (
-                          <a href={item.image} target="_blank" rel="noreferrer">
-                            <img src={item.image} alt="Ảnh đánh giá" className="mt-2 max-h-32 rounded-lg object-cover" />
-                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImage(item.image)}
+                            className="font-semibold text-blue-600 underline hover:text-blue-800"
+                          >
+                            Ảnh
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -222,18 +230,45 @@ function ReviewManagement() {
                     <div className="break-words rounded-xl bg-slate-50 p-3">
                       {item.comment || "-"}
                     </div>
-                    {item.image && (
-                      <a href={item.image} target="_blank" rel="noreferrer">
-                        <img src={item.image} alt="Ảnh đánh giá" className="mt-2 max-h-60 rounded-xl object-cover" />
-                      </a>
-                    )}
                   </div>
+                  {item.image && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImage(item.image)}
+                        className="font-semibold text-blue-600 underline"
+                      >
+                        Ảnh
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setSelectedImage(null)}
+            className="absolute right-5 top-5 rounded-full bg-white px-3 py-1 text-xl font-bold text-slate-800"
+            aria-label="Đóng ảnh"
+          >
+            ×
+          </button>
+          <img
+            src={selectedImage}
+            alt="Ảnh đánh giá"
+            onClick={(event) => event.stopPropagation()}
+            className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }
