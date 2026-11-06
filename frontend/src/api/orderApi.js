@@ -47,11 +47,7 @@ export const getHistory = () => {
  * Đánh giá bữa ăn
  */
 export const submitReview = (data) => {
-  return axios.post(
-    "/order/review",
-
-    data,
-  );
+  return axios.post("/order/review", data);
 };
 
 /**

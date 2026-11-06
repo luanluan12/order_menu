@@ -130,7 +130,7 @@ function ReviewManagement() {
                   <th className="px-4 py-3 text-left">Họ tên</th>
                   <th className="px-4 py-3 text-center">Tầng</th>
                   <th className="px-4 py-3 text-center">Điểm</th>
-                  <th className="px-4 py-3 text-left">Nhận xét</th>
+                  <th className="px-4 py-3 text-left">Nhận xét / ảnh</th>
                 </tr>
               </thead>
 
@@ -163,6 +163,11 @@ function ReviewManagement() {
                       </td>
                       <td className="max-w-md break-words px-4 py-3">
                         {item.comment || "-"}
+                        {item.image && (
+                          <a href={item.image} target="_blank" rel="noreferrer">
+                            <img src={item.image} alt="Ảnh đánh giá" className="mt-2 max-h-32 rounded-lg object-cover" />
+                          </a>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -217,6 +222,11 @@ function ReviewManagement() {
                     <div className="break-words rounded-xl bg-slate-50 p-3">
                       {item.comment || "-"}
                     </div>
+                    {item.image && (
+                      <a href={item.image} target="_blank" rel="noreferrer">
+                        <img src={item.image} alt="Ảnh đánh giá" className="mt-2 max-h-60 rounded-xl object-cover" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

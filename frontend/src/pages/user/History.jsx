@@ -17,6 +17,7 @@ function History() {
   const [rating, setRating] = useState(10);
 
   const [comment, setComment] = useState("");
+  const [reviewImage, setReviewImage] = useState(null);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const API_URL = import.meta.env.VITE_API_URL;
@@ -63,21 +64,20 @@ function History() {
     setRating(10);
 
     setComment("");
+    setReviewImage(null);
 
     setOpenReview(true);
   };
 
   const saveReview = async () => {
     try {
-      await submitReview({
-        orderId: selectedOrder,
-
-        date: selectedDay.date.substring(0, 10),
-
-        rating,
-
-        comment,
-      });
+      const formData = new FormData();
+      formData.append("orderId", selectedOrder);
+      formData.append("date", selectedDay.date.substring(0, 10));
+      formData.append("rating", rating);
+      formData.append("comment", comment);
+      if (reviewImage) formData.append("image", reviewImage);
+      await submitReview(formData);
 
       toast.success(t("review_success"));
 
@@ -258,6 +258,13 @@ function History() {
                             {day.review.comment}
                           </p>
                         )}
+                        {day.review.image && (
+                          <img
+                            src={day.review.image}
+                            alt={t("review_photo")}
+                            className="mt-4 max-h-72 w-auto max-w-full rounded-xl object-cover"
+                          />
+                        )}
                       </div>
                     )}
                   </div>
@@ -311,6 +318,35 @@ function History() {
                 placeholder={t("review_placeholder")}
                 className="mt-5 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
               />
+
+              <label className="mt-4 block text-sm font-semibold text-slate-700">
+                {t("review_photo")}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => setReviewImage(event.target.files?.[0] || null)}
+                  className="mt-2 block w-full rounded-xl border border-gray-300 p-2 text-sm font-normal"
+                />
+                <span className="mt-1 block text-xs font-normal text-slate-500">
+                  {t("review_photo_hint")}
+                </span>
+              </label>
+              {reviewImage && (
+                <div className="mt-3 flex items-center gap-3">
+                  <img
+                    src={URL.createObjectURL(reviewImage)}
+                    alt={t("review_photo_preview")}
+                    className="h-20 w-20 rounded-lg object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setReviewImage(null)}
+                    className="text-sm font-semibold text-red-600"
+                  >
+                    {t("remove_review_photo")}
+                  </button>
+                </div>
+              )}
 
               <button
                 onClick={saveReview}

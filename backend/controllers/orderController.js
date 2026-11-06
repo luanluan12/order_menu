@@ -8,6 +8,7 @@ const fs = require("fs");
 const sendMail = require("../utils/mail");
 const orderSuccessTemplate = require("../utils/orderSuccessTemplate");
 const { verifyOrderToken } = require("../utils/orderToken");
+const { uploadReviewImage } = require("../services/r2Storage");
 
 // ===========================================
 // Có được phép đặt món?
@@ -780,10 +781,16 @@ exports.submitReview = async (req, res) => {
       });
     }
 
+    const uploadedImage = req.file ? await uploadReviewImage(req.file) : null;
+
     day.review = {
       rating,
 
       comment,
+
+      image: uploadedImage?.image || "",
+
+      imagePublicId: uploadedImage?.imagePublicId || "",
 
       createdAt: new Date(),
     };
@@ -881,6 +888,8 @@ exports.getReviews = async (req, res) => {
           rating: day.review.rating,
 
           comment: day.review.comment,
+
+          image: day.review.image || "",
 
           createdAt: day.review.createdAt,
         });

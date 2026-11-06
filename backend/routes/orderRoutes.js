@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 
 const router = express.Router();
 
@@ -7,6 +8,31 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 
 const orderController = require("../controllers/orderController");
+
+const reviewImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, callback) => {
+    if (["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP."));
+  },
+});
+
+const parseReviewImage = (req, res, next) => {
+  reviewImageUpload.single("image")(req, res, (error) => {
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.code === "LIMIT_FILE_SIZE"
+          ? "Ảnh đánh giá không được vượt quá 5 MB."
+          : error.message,
+      });
+    }
+    return next();
+  });
+};
 
 // ==========================
 // Create Order
@@ -90,7 +116,7 @@ router.put("/:id/cancel", auth, orderController.cancelOrder);
 
 router.get("/history", auth, orderController.getHistory);
 
-router.post("/review", auth, orderController.submitReview);
+router.post("/review", auth, parseReviewImage, orderController.submitReview);
 
 // ==========================
 // Verify Invite

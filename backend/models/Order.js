@@ -114,6 +114,22 @@ const reviewSchema = new mongoose.Schema({
 
     },
 
+    image: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+    imagePublicId: {
+
+        type: String,
+
+        default: ""
+
+    },
+
     createdAt: {
 
         type: Date,

@@ -57,6 +57,26 @@ async function uploadMenuImage(file) {
   };
 }
 
+async function uploadReviewImage(file) {
+  ensureConfigured();
+
+  const key = `reviews/${Date.now()}-${crypto.randomUUID()}.${getExtension(file)}`;
+
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    }),
+  );
+
+  return {
+    image: getPublicUrl(key),
+    imagePublicId: key,
+  };
+}
+
 async function deleteMenuImage(key) {
   // Không xoá nhầm ảnh Cloudinary cũ.
   if (!key || !key.startsWith("food-menu/")) return;
@@ -97,4 +117,5 @@ module.exports = {
   copyMenuImage,
   deleteMenuImage,
   uploadMenuImage,
+  uploadReviewImage,
 };
