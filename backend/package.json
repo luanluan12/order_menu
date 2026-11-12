@@ -7,7 +7,9 @@
     "dev": "NODE_ENV=development nodemon server.js",
     "prod": "NODE_ENV=production node server.js",
     "start": "node server.js",
-    "migrate:cloudinary-to-r2": "node scripts/migrateCloudinaryToR2.js"
+    "migrate:cloudinary-to-r2": "node scripts/migrateCloudinaryToR2.js",
+    "test": "node --test test/*.test.js",
+    "db:indexes": "node scripts/createPerformanceIndexes.js"
   },
   "keywords": [],
   "author": "",

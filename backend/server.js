@@ -23,7 +23,9 @@ const startResignCron = require("./cron/resignCron");
 
 const app = express();
 
-connectDB();
+connectDB().then(() => {
+  require("./services/orderEmailWorker").startOrderEmailWorker();
+});
 
 startReminderCron();
 startResignCron();
