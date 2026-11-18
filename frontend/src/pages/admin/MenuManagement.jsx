@@ -20,6 +20,7 @@ import {
     publishMenu as publishMenuApi,
     setDayOrderingClosed,
 } from "../../api/menuApi";
+import { cancelMenuDayOrders } from "../../api/orderApi";
 
 function MenuManagement() {
     const [menus, setMenus] = useState([]);
@@ -204,6 +205,18 @@ const confirmPublish = async () => {
             toast.error(err.response?.data?.message || "Không thể cập nhật trạng thái ngày.");
         } finally {
             setUpdatingDayId(null);
+        }
+    };
+
+    const cancelLockedDayOrders = async (menu, day) => {
+        const date = new Date(day.date).toLocaleDateString("vi-VN");
+        if (!window.confirm(`Xóa các suất chưa nhận đã đặt cho ngày ${date}? Các ngày khác được giữ nguyên.`)) return;
+        try {
+            const response = await cancelMenuDayOrders(menu._id, day._id);
+            const { cancelledCount, receivedCount } = response.data.data;
+            toast.success(`Đã hủy ${cancelledCount} suất.${receivedCount ? ` Giữ nguyên ${receivedCount} suất đã nhận.` : ""}`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Không thể hủy suất đã đặt.");
         }
     };
 
@@ -417,6 +430,26 @@ const confirmPublish = async () => {
                                                         </option>
                                                     ))}
                                                 </select>
+
+                                                {menu.days?.some((day) => day.orderingClosed) && (
+                                                    <select
+                                                        aria-label={`Hủy suất ngày đã khóa tuần ${menu.week}`}
+                                                        className="max-w-52 rounded border px-2 py-1 text-sm text-red-700"
+                                                        value=""
+                                                        onChange={(event) => {
+                                                            const day = menu.days?.[Number(event.target.value)];
+                                                            if (day?.orderingClosed) cancelLockedDayOrders(menu, day);
+                                                            event.target.value = "";
+                                                        }}
+                                                    >
+                                                        <option value="" disabled>Hủy suất ngày khóa</option>
+                                                        {menu.days?.map((day, index) => day.orderingClosed && (
+                                                            <option key={day._id} value={index}>
+                                                                {new Date(day.date).toLocaleDateString("vi-VN")}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
 
                                                 <button
                                                     onClick={() => handleEdit(menu)}

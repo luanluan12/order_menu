@@ -98,6 +98,13 @@ router.post(
   orderController.bulkCancelOrderDays,
 );
 
+router.delete(
+  "/menus/:menuId/days/:dayId/orders",
+  auth,
+  admin("admin_eocmn"),
+  orderController.cancelMenuDayOrders,
+);
+
 // ==========================
 // Update Order
 // ==========================
