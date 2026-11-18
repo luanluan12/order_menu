@@ -79,6 +79,10 @@ const buildOrderDays = (menu, days) => {
 
     const hasSoup = !!soup;
 
+    if (menuDay.orderingClosed && (hasMain || hasDrink || hasSoup)) {
+      throw new Error(`Ngày ${i + 1} đã đóng đặt món.`);
+    }
+
     const totalGroup = Number(hasMain) + Number(hasDrink) + Number(hasSoup);
 
     // Không chọn gì => nghỉ ăn

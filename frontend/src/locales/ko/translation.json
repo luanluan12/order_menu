@@ -8,6 +8,8 @@
   "report": "보고서",
   "change_password": "비밀번호 변경",
   "select_day": "주문할 날짜 선택",
+  "day_off": "휴무일",
+  "day_off_message": "휴무일에는 주문을 받지 않습니다.",
   "notice_prefix": "최대",
   "notice_main": "밥 메뉴 2인분",
   "notice_or": "또는",

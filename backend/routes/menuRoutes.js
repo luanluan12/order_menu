@@ -73,6 +73,13 @@ router.put(
   menuController.publishMenu,
 );
 
+router.put(
+  "/:id/days/:dayId/ordering",
+  auth,
+  admin("admin_eocmn"),
+  menuController.setDayOrderingClosed,
+);
+
 router.get("/:id", auth, admin("admin_eocmn"), menuController.getMenuById);
 
 module.exports = router;

@@ -32,6 +32,8 @@ function WeekMenuContent({
     return order.mains.length > 0 || !!order.drink || !!order.soup;
   };
 
+  const isDayClosed = Boolean(menu?.days?.[currentDay]?.orderingClosed);
+
   // =========================
   // Init Order
   // =========================
@@ -206,13 +208,13 @@ function WeekMenuContent({
     String(orders[currentDay]?.soup?.dishId || "") === String(dishId);
 
   const disableMain = () =>
-    !!orders[currentDay]?.drink || !!orders[currentDay]?.soup;
+    isDayClosed || !!orders[currentDay]?.drink || !!orders[currentDay]?.soup;
 
   const disableDrink = () =>
-    orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.soup;
+    isDayClosed || orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.soup;
 
   const disableSoup = () =>
-    orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.drink;
+    isDayClosed || orders[currentDay]?.mains.length > 0 || !!orders[currentDay]?.drink;
   // =========================
 
   const getUnselectedDays = () => {
@@ -413,6 +415,11 @@ function WeekMenuContent({
           completed={isDayCompleted}
         />
       </div>
+      {isDayClosed && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center font-semibold text-red-700">
+          🔒 {t("day_off_message")}
+        </div>
+      )}
       {!isReadonly && (
         <div className="mb-10">
           <OrderNotice />
@@ -475,9 +482,9 @@ function WeekMenuContent({
 
       {!isReadonly && (
         <div className="mt-14 flex justify-center">
-          <button
+        <button
             onClick={handleSubmit}
-            disabled={expired}
+            disabled={expired || isDayClosed}
             className={`
                 rounded-2xl
                 px-14
@@ -489,13 +496,13 @@ function WeekMenuContent({
                 transition-all
                 duration-300
                 ${
-                  expired
+                  expired || isDayClosed
                     ? "cursor-not-allowed bg-gray-400"
                     : "bg-orange-500 hover:bg-orange-600 hover:shadow-xl active:scale-95"
                 }
             `}
           >
-            {expired ? t("expired") : t(submitText)}
+            {isDayClosed ? t("day_off") : expired ? t("expired") : t(submitText)}
           </button>
         </div>
       )}

@@ -102,6 +102,9 @@ export const publishMenu = (id) => {
 
 };
 
+export const setDayOrderingClosed = (menuId, dayId, closed) =>
+    axios.put(`/menu/${menuId}/days/${dayId}/ordering`, { closed });
+
 /**
  * Xóa Menu tuần
  */

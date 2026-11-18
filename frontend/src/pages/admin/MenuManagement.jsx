@@ -18,6 +18,7 @@ import {
     updateMenu,
     deleteMenu,
     publishMenu as publishMenuApi,
+    setDayOrderingClosed,
 } from "../../api/menuApi";
 
 function MenuManagement() {
@@ -28,6 +29,7 @@ function MenuManagement() {
     const [publishingId, setPublishingId] = useState(null);
     const [publishMenu, setPublishMenu] = useState(null);
     const [publishing, setPublishing] = useState(false);
+    const [updatingDayId, setUpdatingDayId] = useState(null);
 
     const loadMenus = async () => {
 
@@ -189,6 +191,21 @@ const confirmPublish = async () => {
     }
 
 };
+
+    const toggleDayOrdering = async (menu, day) => {
+        const closed = !day.orderingClosed;
+        setUpdatingDayId(day._id);
+        try {
+            const response = await setDayOrderingClosed(menu._id, day._id, closed);
+            const updatedMenu = response.data.data;
+            setMenus((current) => current.map((item) => item._id === updatedMenu._id ? updatedMenu : item));
+            toast.success(closed ? "Đã khóa ngày đặt món." : "Đã mở lại ngày đặt món.");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Không thể cập nhật trạng thái ngày.");
+        } finally {
+            setUpdatingDayId(null);
+        }
+    };
 
     useEffect(() => {
         loadMenus();
@@ -382,6 +399,24 @@ const confirmPublish = async () => {
                                         <td className="px-4 py-3">
 
                                             <div className="flex justify-center gap-3">
+
+                                                <select
+                                                    aria-label={`Trạng thái đặt món tuần ${menu.week}`}
+                                                    className="max-w-44 rounded border px-2 py-1 text-sm"
+                                                    value=""
+                                                    onChange={(event) => {
+                                                        const day = menu.days?.[Number(event.target.value)];
+                                                        if (day) toggleDayOrdering(menu, day);
+                                                        event.target.value = "";
+                                                    }}
+                                                >
+                                                    <option value="" disabled>Khóa / mở ngày</option>
+                                                    {menu.days?.map((day, index) => (
+                                                        <option key={day._id} value={index}>
+                                                            {new Date(day.date).toLocaleDateString("vi-VN")} · {day.orderingClosed ? "Đang khóa" : "Đang mở"}
+                                                        </option>
+                                                    ))}
+                                                </select>
 
                                                 <button
                                                     onClick={() => handleEdit(menu)}

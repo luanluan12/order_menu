@@ -8,6 +8,8 @@
   "report": "Báo cáo",
   "change_password": "Đổi mật khẩu",
   "select_day": "Chọn ngày đặt món",
+  "day_off": "Ngày nghỉ",
+  "day_off_message": "Ngày nghỉ, không nhận đặt món.",
   "notice_prefix": "Bạn chỉ được chọn tối đa",
   "notice_main": "2 phần món cơm",
   "notice_or": "hoặc",

@@ -102,6 +102,14 @@ const dayMenuSchema = new mongoose.Schema({
 
     },
 
+    orderingClosed: {
+
+        type: Boolean,
+
+        default: false
+
+    },
+
     mains: {
 
         type: [dishSchema],

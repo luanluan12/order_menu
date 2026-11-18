@@ -1,4 +1,4 @@
-import { CalendarDays, Check } from "lucide-react";
+import { CalendarDays, Check, LockKeyhole } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 function DayTabs({ days, currentDay, onChange, completed }) {
@@ -138,6 +138,12 @@ function DayTabs({ days, currentDay, onChange, completed }) {
                                     <CalendarDays size={16} />
 
                                 </div>
+
+                                {day.orderingClosed && (
+                                    <div className="absolute bottom-1 flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                                        <LockKeyhole size={11} /> {t("day_off")}
+                                    </div>
+                                )}
 
                                 {/* Weekday */}
 

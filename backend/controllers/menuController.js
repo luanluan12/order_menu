@@ -159,6 +159,8 @@ exports.createMenu = async (req, res) => {
       return {
         date: day.date,
 
+        orderingClosed: Boolean(day.orderingClosed),
+
         mains,
 
         drinks,
@@ -489,6 +491,8 @@ exports.updateMenu = async (req, res) => {
         return {
           date: day.date,
 
+          orderingClosed: Boolean(day.orderingClosed ?? oldDay.orderingClosed),
+
           mains,
 
           drinks,
@@ -669,6 +673,32 @@ exports.publishMenu = async (req, res) => {
 
       message: err.message,
     });
+  }
+};
+
+exports.setDayOrderingClosed = async (req, res) => {
+  try {
+    const { closed } = req.body;
+    if (typeof closed !== "boolean") {
+      return res.status(400).json({ success: false, message: "Trạng thái khóa không hợp lệ." });
+    }
+
+    const menu = await Menu.findById(req.params.id);
+    if (!menu) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy Menu." });
+    }
+
+    const day = menu.days.id(req.params.dayId);
+    if (!day) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy ngày trong menu." });
+    }
+
+    day.orderingClosed = closed;
+    await menu.save();
+    return res.json({ success: true, data: menu });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
