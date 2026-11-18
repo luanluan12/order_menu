@@ -1415,55 +1415,6 @@ exports.bulkCancelOrderDays = async (req, res) => {
   }
 };
 
-exports.cancelMenuDayOrders = async (req, res) => {
-  try {
-    const menu = await Menu.findById(req.params.menuId);
-    if (!menu) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy Menu." });
-    }
-
-    const menuDay = menu.days.id(req.params.dayId);
-    if (!menuDay) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy ngày trong menu." });
-    }
-    if (!menuDay.orderingClosed) {
-      return res.status(400).json({ success: false, message: "Chỉ có thể hủy suất của ngày đã khóa." });
-    }
-
-    const date = moment(menuDay.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
-    const orders = await Order.find({ menu: menu._id, status: "ordered" });
-    let cancelledCount = 0;
-    let receivedCount = 0;
-
-    for (const order of orders) {
-      const orderDay = order.days.find((day) =>
-        moment(day.date).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD") === date,
-      );
-      if (!orderDay || (!orderDay.mains?.length && !orderDay.drink && !orderDay.soup)) continue;
-      if (orderDay.received) {
-        receivedCount++;
-        continue;
-      }
-
-      orderDay.mains = [];
-      orderDay.drink = null;
-      orderDay.soup = null;
-      if (!hasSelectedMeal(order.days)) order.status = "cancelled";
-      await order.save();
-      cancelledCount++;
-    }
-
-    return res.json({
-      success: true,
-      message: `Đã hủy ${cancelledCount} suất của ngày ${date}.`,
-      data: { date, cancelledCount, receivedCount },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: err.message });
-  }
-};
-
 exports.getAvailableUsers = async (req, res) => {
   try {
     const menus = await Menu.find({

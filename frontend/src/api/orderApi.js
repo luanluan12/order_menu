@@ -109,9 +109,6 @@ export const bulkCancelOrderDays = (data) => {
   return axios.post("/order/bulk-cancel", data);
 };
 
-export const cancelMenuDayOrders = (menuId, dayId) =>
-  axios.delete(`/order/menus/${menuId}/days/${dayId}/orders`);
-
 /**
  * Danh sách đánh giá
  */
