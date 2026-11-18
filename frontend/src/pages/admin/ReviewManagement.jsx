@@ -130,6 +130,7 @@ function ReviewManagement() {
                   <th className="px-4 py-3 text-left">Mã NV</th>
                   <th className="px-4 py-3 text-left">Họ tên</th>
                   <th className="px-4 py-3 text-center">Tầng</th>
+                  <th className="px-4 py-3 text-left">Món đã ăn</th>
                   <th className="px-4 py-3 text-center">Điểm</th>
                   <th className="px-4 py-3 text-left">Nhận xét</th>
                   <th className="px-4 py-3 text-center">Ảnh</th>
@@ -140,7 +141,7 @@ function ReviewManagement() {
                 {reviews.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="py-10 text-center text-slate-400"
                     >
                       Chưa có đánh giá.
@@ -156,6 +157,11 @@ function ReviewManagement() {
                       <td className="px-4 py-3">{item.employeeId}</td>
                       <td className="px-4 py-3">{item.name}</td>
                       <td className="px-4 py-3 text-center">{item.floor}</td>
+                      <td className="min-w-48 px-4 py-3">
+                        {item.meals?.length
+                          ? item.meals.map((meal) => `${meal.name}${meal.quantity > 1 ? ` ×${meal.quantity}` : ""}`).join(", ")
+                          : "-"}
+                      </td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`rounded-full px-3 py-1 text-sm font-bold ${getColor(item.rating)}`}
@@ -223,6 +229,15 @@ function ReviewManagement() {
                     >
                       {item.rating}/10
                     </span>
+                  </div>
+
+                  <div>
+                    <div className="mb-1 text-gray-500">Món đã ăn</div>
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      {item.meals?.length
+                        ? item.meals.map((meal) => `${meal.name}${meal.quantity > 1 ? ` ×${meal.quantity}` : ""}`).join(", ")
+                        : "-"}
+                    </div>
                   </div>
 
                   <div>

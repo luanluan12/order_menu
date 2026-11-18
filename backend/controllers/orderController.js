@@ -891,6 +891,15 @@ exports.getReviews = async (req, res) => {
 
           rating: day.review.rating,
 
+          meals: [
+            ...(day.mains || []).map((item) => ({
+              name: item.name,
+              quantity: item.quantity || 1,
+            })),
+            ...(day.drink ? [{ name: day.drink.name, quantity: 1 }] : []),
+            ...(day.soup ? [{ name: day.soup.name, quantity: 1 }] : []),
+          ],
+
           comment: day.review.comment,
 
           image: day.review.image || "",
