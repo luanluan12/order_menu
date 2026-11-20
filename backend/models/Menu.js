@@ -228,6 +228,8 @@ const menuSchema = new mongoose.Schema({
 
 });
 
+menuSchema.index({ "days.date": 1 });
+
 module.exports = mongoose.model(
 
     "Menu",
